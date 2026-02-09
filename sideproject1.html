@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Profile | Subscribed Streaming</title>
+  <style>
+    :root{
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --ink:#111;
+      --muted:#666;
+      --line:#e7e7e7;
+      --shadow: 0 10px 30px rgba(0,0,0,0.10);
+      --radius:16px;
+      --radius2:12px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Arial, sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+    }
+    a{ color:inherit; }
+    .wrap{
+      width:min(1200px, 100%);
+      margin:0 auto;
+      padding:18px;
+    }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:28px;
+      letter-spacing:.2px;
+    }
+    .brand p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 300px 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(0,0,0,0.03);
+    }
+
+    /* Sidebar */
+    .side h2{ margin:0 0 10px; font-size:16px; }
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:10px;
+    }
+    .nav a{
+      text-decoration:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:#111;
+      transition:.15s ease;
+      font-size:14px;
+    }
+    .nav a:hover{ transform:translateY(-1px); background:#fafafa; }
+    .small{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+      margin-top:12px;
+    }
+    .kv .row{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      background:#fff;
+    }
+    .kv .k{ font-size:12px; color:var(--muted); margin-bottom:3px; }
+    .kv .v{ font-size:14px; }
+
+    /* Back to Home */
+    .backhome{
+      text-decoration:none;
+      background:#fff;
+      border:1px solid var(--line);
+      padding:10px 14px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      transition:.2s ease;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+    .backhome:hover{ transform:translateY(-1px); background:#fafafa; }
+
+    /* Main content */
+    .section-title{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+    .section-title h2{
+      margin:0;
+      font-size:18px;
+    }
+
+    /* Subscribed services UI */
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .input{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      outline:none;
+      background:#fff;
+      font-size:14px;
+      min-width: 240px;
+    }
+    .pill-lite{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      font-size:13px;
+      background:#fff;
+      color:#111;
+      white-space:nowrap;
+    }
+    .hint{ color:var(--muted); font-size:13px; margin-top:6px; }
+
+    .list{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 900px){ .list{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 520px){ .list{ grid-template-columns: 1fr; } }
+
+    .item{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      background:#fff;
+      transition:.15s ease;
+    }
+    .item:hover{ transform:translateY(-1px); background:#fafafa; }
+    .item h3{ margin:0 0 6px; font-size:15px; }
+    .item p{ margin:0; color:var(--muted); font-size:13px; line-height:1.35; }
+
+    .two-col{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      margin-top:12px;
+    }
+    @media (max-width: 920px){
+      .two-col{ grid-template-columns: 1fr; }
+    }
+    .list-bullets{
+      margin:8px 0 0;
+      padding-left:18px;
+      color:#111;
+      line-height:1.55;
+    }
+    .footer{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+      text-align:center;
+    }
+
+    /* ✅ RED HIGHLIGHT */
+    .red-highlight{
+      color:#d10000;
+      font-weight:700;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Personal Profile</h1>
+        <p>
+          Personal notes, preferences, and subscriptions — simple, clean, and easy to update.
+        </p>
+      </div>
+
+      <!-- ✅ Only Back to Home now (Streaming button removed) -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+        <a class="backhome" href="index.html" title="Back to Home (index.html)">← Back to Home</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT SIDEBAR -->
+      <aside class="card side">
+        <h2>Quick Navigation</h2>
+        <div class="nav">
+          <a href="#services">📺 Subscribed Streaming</a>
+          <a href="#notes">📝 Notes (Plex, VPN, etc.)</a>
+          <a href="#prefs">🛒 Food & Shopping</a>
+          <a href="#tech">🧾 Devices & Accounts</a>
+          <a href="#profile">👤 Profile Snapshot</a>
+        </div>
+
+        <div class="kv">
+          <div class="row">
+            <div class="k">Rule</div>
+            <div class="v">PLEX helps decide what to subscribe to</div>
+          </div>
+          <div class="row">
+            <div class="k">Tip</div>
+            <div class="v">Use search to filter your “usual” services</div>
+          </div>
+        </div>
+
+        <p class="small" style="margin-top:12px;">
+          You can add more services anytime by editing the JavaScript array at the bottom.
+        </p>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main>
+        <!-- SUBSCRIBED STREAMING -->
+        <section class="card" id="services">
+          <div class="section-title">
+            <h2>📺 Streaming Services I am subscribed to</h2>
+            <div class="controls">
+              <span class="pill-lite">Search to filter</span>
+              <input id="searchBox" class="input" type="text" placeholder="Search (e.g., Netflix, Crave, Peacock)..." />
+            </div>
+          </div>
+
+          <p class="small" style="margin:0; line-height:1.55;">
+            I check <strong>PLEX</strong> to see what I want to watch — and if PLEX tells me to go to that streaming service to watch it,
+            I most likely would subscribe to that streaming service to watch it.
+            <br/><br/>
+            My usual streaming services are: <strong>Paramount Plus</strong>, <strong>Netflix</strong>, <strong>Prime Video</strong>, <strong>Disney Plus</strong>,
+            <strong>Crave</strong>, <strong>Apple TV</strong>, <strong>Peacock</strong>… really,
+            <span class="red-highlight">any streaming service that has something that I want to watch</span>,
+            but these are my usual.
+          </p>
+
+          <div class="hint" id="resultHint">Showing all usual services.</div>
+
+          <div class="list" id="serviceList" aria-label="Subscribed streaming services list">
+            <!-- JS renders cards here -->
+          </div>
+        </section>
+
+        <!-- NOTES -->
+        <section class="card" id="notes" style="margin-top:14px;">
+          <div class="section-title">
+            <h2>📝 Notes</h2>
+          </div>
+          <div class="two-col">
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Plex</h3>
+              <p class="small" style="margin:0;">
+                <strong>PLEX</strong>: Directs you to the streaming service that has a specific movie and/or TV show.
+              </p>
+            </div>
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Availability</h3>
+              <p class="small" style="margin:0;">
+                Some services vary by region; availability can change often — always double-check on the service itself.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- PREFERENCES -->
+        <section class="card" id="prefs" style="margin-top:14px;">
+          <div class="section-title">
+            <h2>🛒 Food & Shopping Preferences</h2>
+          </div>
+
+          <div class="two-col">
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Where I like to shop</h3>
+              <ul class="list-bullets">
+                <li>Best Buy</li>
+                <li>Amazon</li>
+                <li>Walmart</li>
+                <li>Costco</li>
+                <li>Rewarble</li>
+                <li>MyGiftCardSupply</li>
+                <li>Apple TV USA</li>
+                <li>Apple TV Canada</li>
+                <li><span class="red-highlight">Any place that has great deals on cool stuff</span></li>
+                <li>
+                  <span class="red-highlight">
+                    Any place that sells products from TV shows, videogames, sports, music and movies such as FUNKO, Youtooz, Fangamer, etc.
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Where I like to eat out</h3>
+              <ul class="list-bullets">
+                <li>Popeyes</li>
+                <li>McDonald’s</li>
+                <li>Pizza Pizza</li>
+                <li><span class="red-highlight">Anywhere currently doing TV show, movie, sport, music and/or videogame promotions</span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- DEVICES & ACCOUNTS -->
+        <section class="card" id="tech" style="margin-top:14px;">
+          <div class="section-title">
+            <h2>🧾 Devices, Memberships & Accounts</h2>
+          </div>
+
+          <div class="two-col">
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Subscribed to (streaming excluded)</h3>
+              <ul class="list-bullets">
+                <li>PlayStation Plus</li>
+                <li>ChatGPT Plus</li>
+                <li>Roblox Premium</li>
+                <li>Fortnite Crew</li>
+                <li>HP+</li>
+                <!-- ✅ ADDED ABOVE Surfshark -->
+                <li>Windigo VPN</li>
+                <li>Surfshark VPN</li>
+              </ul>
+            </div>
+
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Membership cards owned</h3>
+              <ul class="list-bullets">
+                <li>Scene+</li>
+                <li>Costco</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Services</h3>
+              <ul class="list-bullets">
+                <li>Banking: CIBC</li>
+                <li>Insurance: TD</li>
+                <li>Internet: Bell</li>
+                <li>Phone plan: Freedom</li>
+              </ul>
+            </div>
+
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Devices owned</h3>
+              <ul class="list-bullets">
+                <li>Gaming consoles: Sony, Nintendo</li>
+                <li>TV brand: Samsung</li>
+                <li>Phone brand: Samsung</li>
+                <li>Computer brand: ASUS</li>
+                <li>Printer brand: HP</li>
+                <li>Washer & Dryer brand: Samsung</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card" style="box-shadow:none; border:1px solid var(--line); margin-top:14px;">
+            <h3 style="margin:0 0 8px; font-size:16px;">Gaming accounts</h3>
+            <p class="small" style="margin:0;">
+              Roblox ×4, Steam ×3, PlayStation ×3, Nintendo ×2, Epic Games ×1
+            </p>
+          </div>
+        </section>
+
+        <!-- PROFILE -->
+        <section class="card" id="profile" style="margin-top:14px;">
+          <div class="section-title">
+            <h2>👤 Profile Snapshot</h2>
+          </div>
+          <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+            <p class="small" style="margin:0;">
+              <strong>Citizen of:</strong> Canada, Guyana, British Virgin Islands, United Kingdom
+            </p>
+          </div>
+        </section>
+
+        <div class="footer">
+          <p style="margin:14px 0 0;">
+            Single-file HTML. Links (Back to Home) point to <strong>index.html</strong>.
+          </p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Your usual streaming services list (edit anytime)
+    const myUsualServices = [
+      { name: "Paramount Plus", note: "Nickelodeon/CBS/MTV/Parmount content." },
+      { name: "Netflix", note: "Usual pick for series + originals." },
+      { name: "Prime Video", note: "Amazon originals + rentals." },
+      { name: "Disney Plus", note: "Disney / Marvel / Star Wars." },
+      { name: "Crave", note: "Canada-friendly lineup." },
+      { name: "Apple TV", note: "Apple originals." },
+      { name: "Peacock", note: "NBC / Universal content." }
+      
+    ];
+
+    const $list = document.getElementById("serviceList");
+    const $search = document.getElementById("searchBox");
+    const $hint = document.getElementById("resultHint");
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function render(){
+      const q = ($search.value || "").trim().toLowerCase();
+      const filtered = myUsualServices.filter(s =>
+        !q ||
+        s.name.toLowerCase().includes(q) ||
+        (s.note || "").toLowerCase().includes(q)
+      );
+
+      $hint.innerHTML = `Showing <strong>${filtered.length}</strong> of <strong>${myUsualServices.length}</strong> usual services.`;
+
+      $list.innerHTML = "";
+      for (const s of filtered){
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <h3>${escapeHtml(s.name)}</h3>
+          <p>${escapeHtml(s.note || "")}</p>
+        `;
+        $list.appendChild(div);
+      }
+
+      if (filtered.length === 0){
+        $list.innerHTML = `
+          <div class="item" style="grid-column: 1 / -1;">
+            <h3>No matches</h3>
+            <p>Try a different search term.</p>
+          </div>
+        `;
+      }
+    }
+
+    render();
+    $search.addEventListener("input", render);
+  </script>
+</body>
+</html>

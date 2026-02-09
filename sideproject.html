@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Streaming Services USA (2026) | Dave’s Tracker</title>
+  <style>
+    :root{
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --ink:#111;
+      --muted:#666;
+      --line:#e7e7e7;
+      --shadow: 0 10px 30px rgba(0,0,0,0.10);
+      --radius:16px;
+      --radius2:12px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Arial, sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+    }
+    a{ color:inherit; }
+    .wrap{
+      width:min(1200px, 100%);
+      margin:0 auto;
+      padding:18px;
+    }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:28px;
+      letter-spacing:.2px;
+    }
+    .brand p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+    }
+    .pill{
+      background:#111;
+      color:#fff;
+      padding:10px 14px;
+      border-radius:999px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      transition:.2s ease;
+    }
+    .pill:hover{ background:#333; transform:translateY(-1px); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 300px 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(0,0,0,0.03);
+    }
+
+    /* Sidebar */
+    .side h2{ margin:0 0 10px; font-size:16px; }
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:10px;
+    }
+    .nav a{
+      text-decoration:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:#111;
+      transition:.15s ease;
+      font-size:14px;
+    }
+    .nav a:hover{ transform:translateY(-1px); background:#fafafa; }
+    .small{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+      margin-top:12px;
+    }
+    .kv .row{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      background:#fff;
+    }
+    .kv .k{ font-size:12px; color:var(--muted); margin-bottom:3px; }
+    .kv .v{ font-size:14px; }
+
+    /* Main content */
+    .section-title{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .section-title h2{
+      margin:0;
+      font-size:18px;
+    }
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .input, .select{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      outline:none;
+      background:#fff;
+      font-size:14px;
+      min-width: 210px;
+    }
+    .select{ min-width: 190px; }
+    .hint{ color:var(--muted); font-size:13px; margin-top:6px; }
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+    .chip{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:13px;
+      color:#111;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+    .dot{
+      width:8px; height:8px; border-radius:999px;
+      background:#111;
+      display:inline-block;
+    }
+    .dot.no{ background:#bbb; }
+
+    .table-wrap{
+      margin-top:12px;
+      overflow:auto;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width: 720px;
+    }
+    thead th{
+      text-align:left;
+      font-size:12px;
+      color:var(--muted);
+      padding:12px 12px;
+      border-bottom:1px solid var(--line);
+      background:#fafafa;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+    tbody td{
+      padding:12px 12px;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+      font-size:14px;
+    }
+    tbody tr:hover{ background:#fcfcfc; }
+    .badge{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .badge .mini{
+      width:8px; height:8px; border-radius:999px; background:#111;
+    }
+    .badge.no .mini{ background:#bbb; }
+    .link{
+      text-decoration:none;
+      border-bottom:1px dashed #aaa;
+      color:#111;
+    }
+    .link:hover{ border-bottom-color:#111; }
+
+    /* NEW: "Back to Home" button (index.html) */
+    .backhome{
+      text-decoration:none;
+      background:#fff;
+      border:1px solid var(--line);
+      padding:10px 14px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      transition:.2s ease;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+    .backhome:hover{ transform:translateY(-1px); background:#fafafa; }
+
+    .two-col{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      margin-top:12px;
+    }
+    @media (max-width: 920px){
+      .two-col{ grid-template-columns: 1fr; }
+    }
+    .list{
+      margin:8px 0 0;
+      padding-left:18px;
+      color:#111;
+      line-height:1.55;
+    }
+    .footer{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Streaming Services USA (2026)</h1>
+        <p>
+          A clean, searchable list of major & notable streaming services (USA) + whether an official merch store was found.
+          <br/>Built for <strong>Dave</strong>.
+        </p>
+      </div>
+
+      <!-- NEW: Back to Home (index.html) + jump link -->
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+        <a class="backhome" href="index.html" title="Back to Home (index.html)">← Back to Home</a>
+        <a class="pill" href="#services" title="Jump to the list">View the list →</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT SIDEBAR -->
+      <aside class="card side">
+        <h2>Quick Navigation</h2>
+        <div class="nav">
+          <a href="#services">📺 Services + Merch</a>
+          <a href="#notes">📝 Notes (Plex, VPN, etc.)</a>
+          <a href="#prefs">🛒 Food & Shopping</a>
+          <a href="#tech">🧾 Devices & Accounts</a>
+          <a href="#profile">👤 Profile Snapshot</a>
+        </div>
+
+        <div class="kv">
+          <div class="row">
+            <div class="k">Coverage</div>
+            <div class="v">USA (2026) — major & notable services</div>
+          </div>
+          <div class="row">
+            <div class="k">Merch rule</div>
+            <div class="v">Only official, dedicated merch stores (not third-party listings)</div>
+          </div>
+          <div class="row">
+            <div class="k">Reminder</div>
+            <div class="v">Pricing/availability changes often — verify on official sites</div>
+          </div>
+        </div>
+
+        <p class="small" style="margin-top:12px;">
+          Tip: Use the search + filters to quickly find a service and whether it has merch.
+        </p>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main>
+        <!-- SERVICES -->
+        <section class="card" id="services">
+          <div class="section-title">
+            <h2>📺 Services + Official Merch Status</h2>
+            <div class="controls">
+              <input id="searchBox" class="input" type="text" placeholder="Search (e.g., Netflix, Plex, ESPN+)…" />
+              <select id="categoryFilter" class="select">
+                <option value="all">All categories</option>
+              </select>
+              <select id="merchFilter" class="select">
+                <option value="all">Merch: Any</option>
+                <option value="yes">Merch: Yes</option>
+                <option value="no">Merch: No</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="chips" aria-label="Legend">
+            <span class="chip"><span class="dot"></span> Merch store found</span>
+            <span class="chip"><span class="dot no"></span> No dedicated merch store found</span>
+          </div>
+
+          <div class="hint" id="resultHint">Showing all services.</div>
+
+          <div class="table-wrap" role="region" aria-label="Streaming services table">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 26%;">Service</th>
+                  <th style="width: 20%;">Category</th>
+                  <th style="width: 18%;">Merch</th>
+                  <th>Merch link / Notes</th>
+                </tr>
+              </thead>
+              <tbody id="serviceRows">
+                <!-- JS renders rows here -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- NOTES -->
+        <section class="card" id="notes" style="margin-top:14px;">
+          <div class="section-title">
+            <h2>📝 Notes</h2>
+          </div>
+          <div class="two-col">
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Plex</h3>
+              <p class="small" style="margin:0;">
+                <strong>PLEX</strong>: Directs you to the streaming service that has a specific movie and/or TV show.
+              </p>
+            </div>
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Availability</h3>
+              <p class="small" style="margin:0;">
+                Some international services may have limited content in the USA or require region access (VPNs may affect availability).
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- PREFERENCES -->
+        <section class="card" id="prefs" style="margin-top:14px;">
+          <div class="section-title">
+            <h2>🛒 Food & Shopping Preferences</h2>
+          </div>
+
+          <div class="two-col">
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Where I like to shop</h3>
+              <ul class="list">
+                <li>Best Buy</li>
+                <li>Amazon</li>
+                <li>Walmart</li>
+                <li>Costco</li>
+                <li>Rewarble</li>
+                <li>MyGiftCardSupply</li>
+                <li>Apple TV USA</li>
+                <li>Apple TV Canada</li>
+                <li>Any place that has great deals on cool stuff</li>
+                <li>Any place that sells items from TV shows, movies, sports, music, and videogames, for example: FUNKO, YOUTOOZ, FANGAMER</li>
+              </ul>
+            </div>
+
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Where I like to eat out</h3>
+              <ul class="list">
+                <li>Popeyes</li>
+                <li>McDonald’s</li>
+                <li>Pizza Pizza</li>
+                <li>Anywhere currently doing TV show, movie, sport, music, and/or videogame promotions</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- DEVICES & ACCOUNTS -->
+        <section class="card" id="tech" style="margin-top:14px;">
+          <div class="section-title">
+            <h2>🧾 Devices, Memberships & Accounts</h2>
+          </div>
+
+          <div class="two-col">
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Subscribed to (streaming excluded)</h3>
+              <ul class="list">
+                <li>PlayStation Plus</li>
+                <li>ChatGPT Plus</li>
+                <li>Roblox Premium</li>
+                <li>Fortnite Crew</li>
+                <li>HP+</li>
+                <li>Windigo VPN</li>
+                <li>Surfshark VPN</li>
+              </ul>
+            </div>
+
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Membership cards owned</h3>
+              <ul class="list">
+                <li>Scene+</li>
+                <li>Costco</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Services</h3>
+              <ul class="list">
+                <li>Banking: CIBC</li>
+                <li>Insurance: TD</li>
+                <li>Internet: Bell</li>
+                <li>Phone plan: Freedom</li>
+              </ul>
+            </div>
+
+            <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+              <h3 style="margin:0 0 8px; font-size:16px;">Devices owned</h3>
+              <ul class="list">
+                <li>Gaming consoles: Sony, Nintendo</li>
+                <li>TV brand: Samsung</li>
+                <li>Phone brand: Samsung</li>
+                <li>Computer brand: ASUS</li>
+                <li>Printer brand: HP</li>
+                <li>Washer & Dryer brand: Samsung</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card" style="box-shadow:none; border:1px solid var(--line); margin-top:14px;">
+            <h3 style="margin:0 0 8px; font-size:16px;">Gaming accounts</h3>
+            <p class="small" style="margin:0;">
+              Roblox ×4, Steam ×3, PlayStation ×3, Nintendo ×2, Epic Games ×1
+            </p>
+          </div>
+        </section>
+
+        <!-- PROFILE -->
+        <section class="card" id="profile" style="margin-top:14px;">
+          <div class="section-title">
+            <h2>👤 Profile Snapshot</h2>
+          </div>
+          <div class="card" style="box-shadow:none; border:1px solid var(--line);">
+            <p class="small" style="margin:0;">
+              <strong>Citizen of:</strong> Canada, Guyana, British Virgin Islands, United Kingdom
+            </p>
+          </div>
+        </section>
+
+        <div class="footer">
+          <p style="margin:14px 0 0;">
+            Made as a single-file HTML page (easy to drop into Notepad / VS Code). Links open in a new tab.
+          </p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Data: Streaming services list (USA, 2026) + merch store link if available
+    const services = [
+      // Major SVOD Platforms
+      { name: "Netflix", category: "Major SVOD Platforms", merch: true, link: "https://www.netflix.shop/", note: "" },
+      { name: "Amazon Prime Video", category: "Major SVOD Platforms", merch: true, link: "https://www.amazon.com/shoptheshow", note: "" },
+      { name: "Disney+", category: "Major SVOD Platforms", merch: true, link: "https://www.shopdisney.com/", note: "" },
+      { name: "Hulu", category: "Major SVOD Platforms", merch: true, link: "https://shop.hulu.com/", note: "" },
+      { name: "Max (formerly HBO Max)", category: "Major SVOD Platforms", merch: true, link: "https://shop.hbo.com/", note: "" },
+      { name: "Paramount+", category: "Major SVOD Platforms", merch: true, link: "https://www.paramountshop.com/", note: "" },
+      { name: "Peacock", category: "Major SVOD Platforms", merch: true, link: "https://shop.peacocktv.com/", note: "" },
+      { name: "Apple TV+", category: "Major SVOD Platforms", merch: false, link: "", note: "" },
+      { name: "MGM+", category: "Major SVOD Platforms", merch: false, link: "", note: "" },
+      { name: "Discovery+", category: "Major SVOD Platforms", merch: false, link: "", note: "" },
+      { name: "YouTube Premium", category: "Major SVOD Platforms", merch: false, link: "", note: "" },
+      { name: "Showtime (integrated with Paramount+)", category: "Major SVOD Platforms", merch: false, link: "", note: "Uses Paramount shop" },
+
+      // Live TV Streaming Services
+      { name: "YouTube TV", category: "Live TV Streaming Services", merch: false, link: "", note: "" },
+      { name: "Hulu + Live TV", category: "Live TV Streaming Services", merch: true, link: "https://shop.hulu.com/", note: "Shared with Hulu" },
+      { name: "Fubo", category: "Live TV Streaming Services", merch: false, link: "", note: "" },
+      { name: "Sling TV", category: "Live TV Streaming Services", merch: false, link: "", note: "" },
+      { name: "Philo", category: "Live TV Streaming Services", merch: false, link: "", note: "" },
+      { name: "DirecTV Stream", category: "Live TV Streaming Services", merch: false, link: "", note: "" },
+      { name: "Twitch (live gaming/esports)", category: "Live TV Streaming Services", merch: true, link: "https://www.amazon.com/twitch", note: "Official merch via Amazon" },
+
+      // Sports-Focused Services
+      { name: "ESPN+", category: "Sports-Focused Services", merch: true, link: "https://merch.espn.com/", note: "" },
+      { name: "DAZN", category: "Sports-Focused Services", merch: false, link: "", note: "" },
+      { name: "NBA League Pass", category: "Sports-Focused Services", merch: false, link: "", note: "" },
+      { name: "NFL+", category: "Sports-Focused Services", merch: false, link: "", note: "" },
+      { name: "MLB.TV", category: "Sports-Focused Services", merch: false, link: "", note: "" },
+      { name: "NHL.TV", category: "Sports-Focused Services", merch: false, link: "", note: "" },
+      { name: "UFC Fight Pass", category: "Sports-Focused Services", merch: false, link: "", note: "" },
+      { name: "Willow TV", category: "Sports-Focused Services", merch: false, link: "", note: "" },
+      { name: "WWE (wrestling/entertainment)", category: "Sports-Focused Services", merch: true, link: "https://shop.wwe.com/", note: "" },
+      
+
+      // Free Ad-Supported (FAST) Services
+      { name: "Tubi", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "Pluto TV", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "Amazon Freevee", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "The Roku Channel", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "Crackle", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "Xumo", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "Samsung TV Plus", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "Vizio WatchFree+", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "Peacock (free tier)", category: "Free Ad-Supported (FAST) Services", merch: true, link: "https://shop.peacocktv.com/", note: "Shared with premium" },
+      { name: "Popcornflix", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "Fearless.li", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+      { name: "Plex (personal/free streaming)", category: "Free Ad-Supported (FAST) Services", merch: true, link: "https://plex-gear.myshopify.com/", note: "" },
+      { name: "All4", category: "Free Ad-Supported (FAST) Services", merch: false, link: "", note: "" },
+
+      // Niche and Specialty Services
+      { name: "Crunchyroll (anime)", category: "Niche and Specialty Services", merch: true, link: "https://store.crunchyroll.com/", note: "" },
+      { name: "HIDIVE (anime)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Shudder (horror)", category: "Niche and Specialty Services", merch: true, link: "https://shop.amc.com/collections/shudder", note: "" },
+      { name: "Criterion Channel (film classics)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Mubi (arthouse cinema)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "BritBox (British TV)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Acorn TV (British/Australian TV)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "AMC+ (AMC content)", category: "Niche and Specialty Services", merch: true, link: "https://shop.amc.com/collections/amc", note: "" },
+      { name: "Starz / Lionsgate+", category: "Niche and Specialty Services", merch: true, link: "https://shop.lionsgate.com/", note: "" },
+      { name: "BET+ (Black entertainment)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "ALLBLK (Black cinema)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Hallmark Movies Now", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Lifetime Movie Club", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Curiosity Stream (documentaries)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Nebula (creator-driven)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "MagellanTV (history/docs)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Sundance Now (indie films)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "History Vault", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Kanopy (library-linked)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Hoopla (library-linked)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Vudu/Fandango at Home (transactional VOD)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Hollywood Suite (classic films, via add-ons)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Zee5 (Indian content)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "CRAVE", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Citytv+ (Canada / add-on)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+
+
+      // UPDATED: iQIYI links (two merch sites)
+      {
+        name: "iQIYI (Chinese/Asian content)",
+        category: "Niche and Specialty Services",
+        merch: true,
+        link: "", // leave blank so we can show 2 links in the note
+        note:
+          "Merch links: https://cpop-universe.com/collections?srsltid=AfmBOooAm2KkEW0ibtxJdg7L9HPn3QFZmZgrktg0qCkY9dKgUJ7vpKRf and https://eastern-world.com/"
+      },
+
+      { name: "JioHotstar (Indian/Disney+ Hotstar content, via bundles)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Rakuten Viki (Asian dramas)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Kocowa (K-dramas)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "WeTV (Chinese dramas)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Hi-YAH! (martial arts)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Screambox (horror)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Arrow Video Channel (cult films)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "BroadwayHD (theater)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Gaia (wellness/docs)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Pure Flix (faith-based)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Revry (LGBTQ+)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "Dekkoo (LGBTQ+ films)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+      { name: "MasterClass (educational)", category: "Niche and Specialty Services", merch: false, link: "", note: "" },
+    ];
+
+    const $rows = document.getElementById("serviceRows");
+    const $search = document.getElementById("searchBox");
+    const $cat = document.getElementById("categoryFilter");
+    const $merch = document.getElementById("merchFilter");
+    const $hint = document.getElementById("resultHint");
+
+    function uniq(arr){ return [...new Set(arr)].sort((a,b)=>a.localeCompare(b)); }
+
+    function populateCategories(){
+      const cats = uniq(services.map(s => s.category));
+      for (const c of cats){
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        $cat.appendChild(opt);
+      }
+    }
+
+    function merchBadge(isYes){
+      const span = document.createElement("span");
+      span.className = "badge" + (isYes ? "" : " no");
+      const mini = document.createElement("span");
+      mini.className = "mini";
+      const txt = document.createElement("span");
+      txt.textContent = isYes ? "Yes" : "No";
+      span.appendChild(mini);
+      span.appendChild(txt);
+      return span;
+    }
+
+    function linkify(text){
+      // Convert URLs into clickable links safely
+      const urlRegex = /(https?:\/\/[^\s)]+)\b/g;
+      return escapeHtml(text).replace(urlRegex, (url) => {
+        const safe = escapeHtml(url);
+        return `<a class="link" href="${safe}" target="_blank" rel="noopener">Open link</a>`;
+      });
+    }
+
+    function render(){
+      const q = ($search.value || "").trim().toLowerCase();
+      const cat = $cat.value;
+      const merch = $merch.value;
+
+      const filtered = services.filter(s => {
+        const matchesText =
+          !q ||
+          s.name.toLowerCase().includes(q) ||
+          s.category.toLowerCase().includes(q) ||
+          (s.note || "").toLowerCase().includes(q);
+
+        const matchesCat = (cat === "all") || (s.category === cat);
+        const matchesMerch =
+          (merch === "all") ||
+          (merch === "yes" && s.merch) ||
+          (merch === "no" && !s.merch);
+
+        return matchesText && matchesCat && matchesMerch;
+      });
+
+      // hint
+      const parts = [];
+      parts.push(`Showing <strong>${filtered.length}</strong> of <strong>${services.length}</strong> services`);
+      if (q) parts.push(`matching “<strong>${escapeHtml(q)}</strong>”`);
+      if (cat !== "all") parts.push(`in <strong>${escapeHtml(cat)}</strong>`);
+      if (merch !== "all") parts.push(`with merch = <strong>${escapeHtml(merch)}</strong>`);
+      $hint.innerHTML = parts.join(" • ") + ".";
+
+      // rows
+      $rows.innerHTML = "";
+      for (const s of filtered){
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        tdName.textContent = s.name;
+
+        const tdCat = document.createElement("td");
+        tdCat.textContent = s.category;
+
+        const tdMerch = document.createElement("td");
+        tdMerch.appendChild(merchBadge(s.merch));
+
+        const tdLink = document.createElement("td");
+
+        // If link exists, show primary link + optional note
+        if (s.merch && s.link){
+          const a = document.createElement("a");
+          a.href = s.link;
+          a.target = "_blank";
+          a.rel = "noopener";
+          a.className = "link";
+          a.textContent = "Open merch store";
+          tdLink.appendChild(a);
+
+          if (s.note){
+            const sp = document.createElement("span");
+            sp.innerHTML = ` <span style="color:#666;">— ${linkify(s.note)}</span>`;
+            tdLink.appendChild(sp);
+          }
+        }
+        // If no primary link but we have notes (like iQIYI), show note with clickable links
+        else if (s.merch && !s.link && s.note){
+          tdLink.innerHTML = `<span style="color:#666;">${linkify(s.note)}</span>`;
+        }
+        // Otherwise: no merch
+        else {
+          tdLink.innerHTML = `<span style="color:#666;">No dedicated official merch store found${s.note ? " — " + linkify(s.note) : ""}</span>`;
+        }
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdCat);
+        tr.appendChild(tdMerch);
+        tr.appendChild(tdLink);
+        $rows.appendChild(tr);
+      }
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // init
+    populateCategories();
+    render();
+
+    // events
+    $search.addEventListener("input", render);
+    $cat.addEventListener("change", render);
+    $merch.addEventListener("change", render);
+  </script>
+</body>
+</html>

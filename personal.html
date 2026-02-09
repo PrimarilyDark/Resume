@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Usuals</title>
+  <style>
+    :root{
+      --bg:#f5f6f8;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --line:#e7eaf0;
+      --shadow: 0 16px 40px rgba(15, 23, 42, 0.10);
+      --radius:18px;
+      --focus: 0 0 0 4px rgba(59,130,246,0.18);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at 20% 0%, #ffffff 0%, var(--bg) 55%, var(--bg) 100%);
+      color:var(--ink);
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:18px;
+    }
+
+    .wrap{
+      width:min(900px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .card{
+      width:100%;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:14px;
+    }
+
+    .title{
+      font-weight:800;
+      font-size:20px;
+      letter-spacing:0.2px;
+      margin:0;
+    }
+
+    .search{
+      position:relative;
+      flex: 0 0 min(320px, 55%);
+    }
+    .search input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px 10px 36px;
+      font-size:14px;
+      outline:none;
+      background:#fff;
+      color:var(--ink);
+      transition: .15s ease;
+    }
+    .search input:focus{
+      box-shadow: var(--focus);
+      border-color:#93c5fd;
+    }
+    .search .icon{
+      position:absolute;
+      left:12px;
+      top:50%;
+      transform:translateY(-50%);
+      font-size:14px;
+      color:var(--muted);
+      user-select:none;
+      pointer-events:none;
+    }
+
+    .services{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:12px;
+      padding:10px 6px 18px;
+      margin:0;
+      list-style:none;
+      min-height:88px;
+      align-items:center;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+      flex: 0 0 auto;
+      border:1px solid var(--line);
+      background:#fbfbfc;
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:700;
+      font-size:14px;
+      letter-spacing:0.15px;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+      user-select:none;
+    }
+    .pill:hover{
+      transform: translateY(-1px);
+      box-shadow:0 10px 20px rgba(15, 23, 42, 0.08);
+      background:#ffffff;
+    }
+    .pill.hide{ display:none; }
+
+    .no-results{
+      display:none;
+      width:100%;
+      text-align:center;
+      color:var(--muted);
+      font-size:14px;
+      padding:10px 0;
+    }
+    .no-results.show{ display:block; }
+
+    .footer{
+      border-top:1px solid var(--line);
+      padding-top:12px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+      min-height:22px;
+    }
+    .footer.no-line{
+      border-top:none;
+      padding-top:0;
+    }
+
+    .btn-row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:center;
+      padding-top:6px;
+    }
+    .btn{
+      appearance:none;
+      border:1px solid var(--line);
+      background:#111;
+      color:#fff;
+      font-weight:800;
+      letter-spacing:0.2px;
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      transition:.15s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:140px;
+    }
+    .btn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 20px rgba(15,23,42,0.12);
+      background:#1f2937;
+    }
+    .btn:focus{ outline:none; box-shadow: var(--focus); }
+    .btn.secondary{
+      background:#fff;
+      color:var(--ink);
+    }
+    .btn.secondary:hover{ background:#f8fafc; }
+
+    @media (max-width: 520px){
+      .topbar{ flex-direction:column; align-items:stretch; }
+      .search{ flex: 1 1 auto; }
+      .title{ font-size:18px; }
+      .btn{ min-width:100%; }
+    }
+
+    /* ---------------------------
+       PASSCODE MODAL (5868 gate)
+       --------------------------- */
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      padding:18px;
+    }
+    .modal-overlay.open{ display:flex; }
+
+    .modal{
+      width:min(420px, 100%);
+      background:rgba(255,255,255,0.94);
+      border-radius:18px;
+      box-shadow:0 18px 55px rgba(0,0,0,0.22);
+      overflow:hidden;
+    }
+    .modal-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:14px 14px 10px;
+      border-bottom:1px solid rgba(0,0,0,0.08);
+    }
+    .modal-title{
+      font-weight:900;
+      font-size:14px;
+      letter-spacing:0.4px;
+      text-transform:uppercase;
+    }
+    .close-x{
+      background:#111;
+      color:#fff;
+      border:0;
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+      transition:.2s ease;
+      font-size:12px;
+    }
+    .close-x:hover{ background:#333; transform:translateY(-1px); }
+
+    .modal-body{ padding:14px; }
+    .hint{ margin:0 0 10px 0; font-size:13px; opacity:0.8; text-align:center; }
+
+    .dots{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      align-items:center;
+      padding:8px 0 6px;
+    }
+    .dot{
+      width:12px; height:12px; border-radius:50%;
+      background:rgba(0,0,0,0.18);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,0.08);
+      transition:0.15s ease;
+    }
+    .dot.filled{ background:#111; }
+
+    .merge-zone{
+      height:86px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      margin:10px 0 6px;
+    }
+    .chip-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:center;
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+    }
+    .chip{
+      width:44px; height:44px; border-radius:14px;
+      background:#111; color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; letter-spacing:1px;
+      box-shadow:0 10px 20px rgba(0,0,0,0.18);
+    }
+    .check{
+      width:56px; height:56px; border-radius:16px;
+      background:rgba(17,17,17,0.06);
+      display:none; align-items:center; justify-content:center;
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,0.06);
+      position:absolute; left:50%; top:50%;
+      transform:translate(-50%,-50%);
+    }
+    .check:before{
+      content:"";
+      width:22px; height:12px;
+      border-left:6px solid #16a34a;
+      border-bottom:6px solid #16a34a;
+      transform:rotate(-45deg);
+      display:block; opacity:0;
+    }
+
+    .pad{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    .pad button{
+      background:#111; color:#fff;
+      border:0; border-radius:14px;
+      padding:14px 0;
+      font-size:18px; font-weight:800;
+      transition:.15s ease;
+      cursor:pointer;
+    }
+    .pad button:hover{ background:#333; transform:translateY(-1px); }
+    .pad .ghost{
+      background:rgba(0,0,0,0.08);
+      color:#111;
+    }
+    .pad .ghost:hover{ background:rgba(0,0,0,0.12); }
+
+    .shake{ animation: shake 0.35s linear; }
+    @keyframes shake{
+      0%{ transform:translateX(0); }
+      20%{ transform:translateX(-10px); }
+      40%{ transform:translateX(10px); }
+      60%{ transform:translateX(-7px); }
+      80%{ transform:translateX(7px); }
+      100%{ transform:translateX(0); }
+    }
+
+    .success .chip{ animation: chipMerge 0.55s ease forwards; }
+    .success .chip:nth-child(1){ animation-delay:0.00s; }
+    .success .chip:nth-child(2){ animation-delay:0.05s; }
+    .success .chip:nth-child(3){ animation-delay:0.10s; }
+    .success .chip:nth-child(4){ animation-delay:0.15s; }
+
+    @keyframes chipMerge{
+      0%{ transform:scale(1); opacity:1; }
+      65%{ transform:scale(0.25); opacity:0.35; }
+      100%{ transform:scale(0.1); opacity:0; }
+    }
+
+    .success .check{ display:flex; animation: checkPop 0.6s ease forwards; }
+    .success .check:before{ animation: drawCheck 0.45s ease forwards; animation-delay:0.25s; }
+
+    @keyframes checkPop{
+      0%{ transform:translate(-50%,-50%) scale(0.75); opacity:0; }
+      60%{ transform:translate(-50%,-50%) scale(1.08); opacity:1; }
+      100%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+    }
+    @keyframes drawCheck{
+      0%{ opacity:0; transform:rotate(-45deg) scale(0.6); }
+      100%{ opacity:1; transform:rotate(-45deg) scale(1); }
+    }
+
+    .locked .pad button{ pointer-events:none; opacity:0.65; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- BOX 1: Streaming -->
+    <section class="card" role="region" aria-label="Streaming platforms card">
+      <div class="topbar">
+        <h2 class="title">What I stream on:</h2>
+
+        <div class="search" aria-label="Search streaming platforms">
+          <span class="icon">🔎</span>
+          <input id="searchStream" type="search" placeholder="Search..." autocomplete="off" />
+        </div>
+      </div>
+
+      <ul class="services" id="streamList">
+        <li class="pill" data-name="netflix">Netflix</li>
+        <li class="pill" data-name="crave">Crave</li>
+        <li class="pill" data-name="paramount plus">Paramount Plus</li>
+        <li class="pill" data-name="prime video">Prime Video</li>
+        <li class="pill" data-name="disney plus">Disney Plus</li>
+        <li class="pill" data-name="apple tv">Apple TV</li>
+
+        <li class="no-results" id="noStreamResults">No matches. Try another search.</li>
+      </ul>
+
+      <div class="footer">
+        generally, I stream on any streaming services that have the shows and movies that I want to watch,
+        but these are my usual streaming platforms.
+      </div>
+    </section>
+
+    <!-- BOX 2: Gaming -->
+    <section class="card" role="region" aria-label="Gaming platforms card">
+      <div class="topbar">
+        <h2 class="title">What I play on?</h2>
+
+        <div class="search" aria-label="Search gaming platforms">
+          <span class="icon">🔎</span>
+          <input id="searchPlay" type="search" placeholder="Search..." autocomplete="off" />
+        </div>
+      </div>
+
+      <ul class="services" id="playList">
+        <li class="pill" data-name="roblox">Roblox <span aria-hidden="true">&nbsp;*4</span></li>
+        <li class="pill" data-name="playstation">Playstation <span aria-hidden="true">&nbsp;*3</span></li>
+        <li class="pill" data-name="nintendo">Nintendo <span aria-hidden="true">&nbsp;*2</span></li>
+        <li class="pill" data-name="steam">Steam <span aria-hidden="true">&nbsp;*3</span></li>
+        <li class="pill" data-name="epic games">Epic Games <span aria-hidden="true">&nbsp;*1</span></li>
+
+        <li class="no-results" id="noPlayResults">No matches. Try another search.</li>
+      </ul>
+
+      <div class="footer"></div>
+    </section>
+
+    <!-- BOX 3: Where I shop at -->
+    <section class="card" role="region" aria-label="Where I shop at card">
+      <div class="topbar">
+        <h2 class="title">Where I shop at</h2>
+
+        <div class="search" aria-label="Search shops">
+          <span class="icon">🔎</span>
+          <input id="searchShop" type="search" placeholder="Search..." autocomplete="off" />
+        </div>
+      </div>
+
+      <ul class="services" id="shopList">
+        <li class="pill" data-name="amazon">Amazon</li>
+        <li class="pill" data-name="walmart">Walmart</li>
+        <li class="pill" data-name="costco">CostCo</li>
+        <li class="pill" data-name="rewarble">Rewarble</li>
+        <li class="pill" data-name="mygiftcardsupply">Mygiftcardsupply</li>
+
+        <li class="no-results" id="noShopResults">No matches. Try another search.</li>
+      </ul>
+
+      <div class="footer">
+        generally, I shop at whichever place has the product I want.
+      </div>
+    </section>
+
+    <!-- BOX 4: Streaming and gaming merch shops -->
+    <section class="card" role="region" aria-label="Streaming and gaming merch shops card">
+      <div class="topbar">
+        <h2 class="title">Streaming and gaming merch shops I shop at:</h2>
+
+        <div class="search" aria-label="Search merch shops">
+          <span class="icon">🔎</span>
+          <input id="searchMerch" type="search" placeholder="Search..." autocomplete="off" />
+        </div>
+      </div>
+
+      <ul class="services" id="merchList">
+        <li class="pill" data-name="netflix.shop">Netflix.shop</li>
+        <li class="pill" data-name="fangamer">Fangamer</li>
+
+        <li class="no-results" id="noMerchResults">No matches. Try another search.</li>
+      </ul>
+
+      <div class="footer">
+        generally, I shop at whichever place has the product I want.
+      </div>
+    </section>
+
+    <!-- BOX 5: Where I eat at -->
+    <section class="card" role="region" aria-label="Where I eat at card">
+      <div class="topbar">
+        <h2 class="title">Where I eat at:</h2>
+
+        <div class="search" aria-label="Search food places">
+          <span class="icon">🔎</span>
+          <input id="searchEat" type="search" placeholder="Search..." autocomplete="off" />
+        </div>
+      </div>
+
+      <ul class="services" id="eatList">
+        <li class="pill" data-name="harveys">Harveys</li>
+        <li class="pill" data-name="pizza pizza">Pizza Pizza</li>
+        <li class="pill" data-name="mcdonalds">McDonalds</li>
+        <li class="pill" data-name="popeyes">Popeyes</li>
+
+        <li class="no-results" id="noEatResults">No matches. Try another search.</li>
+      </ul>
+
+      <div class="footer">
+        generally, I eat at any fast food chain, but these are my usual spots. I also love it when a
+        fast-food chain collab with a TV show, movie, music, sport or video game.
+      </div>
+    </section>
+
+    <!-- BOX LAST (ALWAYS): Old versions -->
+    <section class="card" role="region" aria-label="Old versions of the website">
+      <div class="topbar" style="margin-bottom:10px;">
+        <h2 class="title">Old versions of the website</h2>
+        <div></div>
+      </div>
+
+      <div class="btn-row" aria-label="Old version links">
+        <!-- ✅ these are now keypad-gated -->
+        <a class="btn" id="v1Link" href="sideproject.html">Version 1</a>
+        <a class="btn secondary" id="v2Link" href="sideproject1.html">Version 2</a>
+      </div>
+
+      <div class="footer no-line"></div>
+    </section>
+
+  </div>
+
+  <!-- PASSCODE MODAL -->
+  <div class="modal-overlay" id="padOverlay" aria-hidden="true">
+    <div class="modal" id="padModal" role="dialog" aria-modal="true" aria-label="Enter keycode">
+      <div class="modal-header">
+        <div class="modal-title">Enter Keycode</div>
+        <button class="close-x" id="padCloseBtn" type="button">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="hint">Enter the 4-digit code to open this version.</p>
+
+        <div class="dots">
+          <div class="dot" id="d1"></div>
+          <div class="dot" id="d2"></div>
+          <div class="dot" id="d3"></div>
+          <div class="dot" id="d4"></div>
+        </div>
+
+        <div class="merge-zone">
+          <div class="chip-row" id="chipRow"></div>
+          <div class="check" id="checkIcon"></div>
+        </div>
+
+        <div class="pad">
+          <button type="button" class="num">1</button>
+          <button type="button" class="num">2</button>
+          <button type="button" class="num">3</button>
+          <button type="button" class="num">4</button>
+          <button type="button" class="num">5</button>
+          <button type="button" class="num">6</button>
+          <button type="button" class="num">7</button>
+          <button type="button" class="num">8</button>
+          <button type="button" class="num">9</button>
+
+          <button type="button" class="ghost" id="clearBtn">Clear</button>
+          <button type="button" class="num">0</button>
+          <button type="button" class="ghost" id="backBtn">⌫</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function normalize(s){ return (s || "").toLowerCase().trim(); }
+
+    function setupFilter(inputId, listId, noResultsId){
+      const input = document.getElementById(inputId);
+      const list = document.getElementById(listId);
+      const pills = Array.from(list.querySelectorAll(".pill[data-name]"));
+      const noResults = document.getElementById(noResultsId);
+
+      function filter(){
+        const q = normalize(input.value);
+        let visible = 0;
+
+        pills.forEach(pill => {
+          const name = normalize(pill.getAttribute("data-name"));
+          const text = normalize(pill.textContent);
+          const match = !q || name.includes(q) || text.includes(q);
+          pill.classList.toggle("hide", !match);
+          if (match) visible++;
+        });
+
+        noResults.classList.toggle("show", visible === 0);
+      }
+
+      input.addEventListener("input", filter);
+    }
+
+    setupFilter("searchStream", "streamList", "noStreamResults");
+    setupFilter("searchPlay",   "playList",   "noPlayResults");
+    setupFilter("searchShop",   "shopList",   "noShopResults");
+    setupFilter("searchMerch",  "merchList",  "noMerchResults");
+    setupFilter("searchEat",    "eatList",    "noEatResults");
+
+    // -------------------------
+    // NEW PASSCODE for versions
+    // -------------------------
+    const VERSION_CODE = "5868"; // ✅ required for Version 1 & 2
+    let pendingTarget = null;
+
+    const overlay = document.getElementById("padOverlay");
+    const modal = document.getElementById("padModal");
+    const closeBtn = document.getElementById("padCloseBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const backBtn = document.getElementById("backBtn");
+    const chipRow = document.getElementById("chipRow");
+    const dots = [
+      document.getElementById("d1"),
+      document.getElementById("d2"),
+      document.getElementById("d3"),
+      document.getElementById("d4")
+    ];
+
+    let input = "";
+    let locked = false;
+
+    function openPad(targetHref){
+      pendingTarget = targetHref;
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden", "false");
+      resetPad();
+    }
+
+    function closePad(){
+      overlay.classList.remove("open");
+      overlay.setAttribute("aria-hidden", "true");
+      pendingTarget = null;
+    }
+
+    function resetPad(){
+      locked = false;
+      input = "";
+      modal.classList.remove("shake", "success", "locked");
+      chipRow.innerHTML = "";
+      dots.forEach(d => d.classList.remove("filled"));
+    }
+
+    function updateDots(){
+      dots.forEach((d, i) => d.classList.toggle("filled", i < input.length));
+    }
+
+    function addChip(n){
+      const chip = document.createElement("div");
+      chip.className = "chip";
+      chip.textContent = n;
+      chipRow.appendChild(chip);
+    }
+
+    function popChip(){
+      if(chipRow.lastElementChild) chipRow.removeChild(chipRow.lastElementChild);
+    }
+
+    function wrongCode(){
+      modal.classList.remove("shake");
+      void modal.offsetWidth;
+      modal.classList.add("shake");
+      setTimeout(() => resetPad(), 380);
+    }
+
+    function success(){
+      locked = true;
+      modal.classList.add("locked", "success");
+      setTimeout(() => {
+        if (pendingTarget) window.location.href = pendingTarget;
+      }, 950);
+    }
+
+    function pressDigit(n){
+      if(locked) return;
+      if(input.length >= 4) return;
+
+      input += n;
+      addChip(n);
+      updateDots();
+
+      if(input.length === 4){
+        if(input === VERSION_CODE) success();
+        else wrongCode();
+      }
+    }
+
+    document.getElementById("v1Link").addEventListener("click", (e) => {
+      e.preventDefault();
+      openPad(e.currentTarget.getAttribute("href"));
+    });
+
+    document.getElementById("v2Link").addEventListener("click", (e) => {
+      e.preventDefault();
+      openPad(e.currentTarget.getAttribute("href"));
+    });
+
+    closeBtn.addEventListener("click", closePad);
+
+    overlay.addEventListener("click", (e) => {
+      if(e.target === overlay) closePad();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if(!overlay.classList.contains("open")) return;
+
+      if(e.key === "Escape") return closePad();
+      if(locked) return;
+
+      if(e.key >= "0" && e.key <= "9") pressDigit(e.key);
+      else if(e.key === "Backspace"){
+        if(input.length > 0){
+          input = input.slice(0, -1);
+          popChip();
+          updateDots();
+        }
+      } else if(e.key.toLowerCase() === "c"){
+        resetPad();
+      }
+    });
+
+    modal.querySelectorAll(".num").forEach(btn => {
+      btn.addEventListener("click", () => pressDigit(btn.textContent.trim()));
+    });
+
+    clearBtn.addEventListener("click", () => { if(!locked) resetPad(); });
+
+    backBtn.addEventListener("click", () => {
+      if(locked) return;
+      if(input.length > 0){
+        input = input.slice(0, -1);
+        popChip();
+        updateDots();
+      }
+    });
+  </script>
+</body>
+</html>

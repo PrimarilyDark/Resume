@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cube Knight Boss Fight (Regen + Attack Debug)</title>
+  <style>
+    html, body { margin:0; height:100%; background:#0b0f14; color:#e6edf3; font-family:system-ui, Arial; }
+    #wrap { display:flex; align-items:center; justify-content:center; height:100%; }
+    canvas {
+      background: radial-gradient(1200px 800px at 50% 45%, #111a25 0%, #0b0f14 60%, #070a0e 100%);
+      border:1px solid #223040; border-radius:14px; box-shadow:0 20px 70px rgba(0,0,0,.55);
+    }
+    .hud{
+      position:fixed; left:12px; top:12px; right:12px;
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      pointer-events:none; text-shadow:0 2px 10px rgba(0,0,0,.55); font-weight:600;
+    }
+    .pill{ padding:8px 10px; border:1px solid #253447; border-radius:999px; background:rgba(10,14,18,.45); backdrop-filter: blur(6px); }
+    .bar{ width:320px; height:14px; border-radius:999px; overflow:hidden; border:1px solid #253447; background:rgba(10,14,18,.55); }
+    .bar > div{ height:100%; width:100%; background: linear-gradient(90deg, #ff3b3b, #ff7a3b); }
+    .small{ opacity:.9; font-weight:500; }
+    #centerMsg{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      pointer-events:none; text-align:center; font-size:22px; font-weight:800; letter-spacing:.5px;
+      color:#f4f7ff; text-shadow:0 10px 40px rgba(0,0,0,.8);
+    }
+    #centerMsg .sub{ display:block; margin-top:10px; font-size:14px; font-weight:600; opacity:.85; }
+    .kbd{ display:inline-block; padding:2px 8px; border-radius:8px; border:1px solid #31445b; background:rgba(9,12,16,.55); margin:0 2px; }
+  </style>
+</head>
+<body>
+  <div class="hud">
+    <div class="pill">Boss HP</div>
+    <div class="bar"><div id="bossBar"></div></div>
+    <div class="pill">Player HP: <span id="pHP">100</span></div>
+    <div class="pill small" id="atkLabel">Attack: —</div>
+    <div class="pill small" id="regenLabel">Regen: —</div>
+    <div class="pill small">
+      Move: <span class="kbd">WASD</span>/<span class="kbd">Arrows</span> • Aim: <span class="kbd">Mouse</span>
+      • Shoot: <span class="kbd">Space</span>/<span class="kbd">J</span> • Dash: <span class="kbd">Shift</span> • Restart: <span class="kbd">R</span>
+    </div>
+  </div>
+
+  <div id="centerMsg" style="display:none;"></div>
+
+  <div id="wrap">
+    <canvas id="c" width="980" height="600"></canvas>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const bossBar = document.getElementById("bossBar");
+  const pHPEl = document.getElementById("pHP");
+  const centerMsg = document.getElementById("centerMsg");
+  const atkLabel = document.getElementById("atkLabel");
+  const regenLabel = document.getElementById("regenLabel");
+
+  const W = canvas.width, H = canvas.height;
+
+  // ========= TUNING =========
+  const PLAYER_MAX_HP = 300;
+
+  // Player movement (snappy)
+  const PLAYER_SPEED = 660;
+  const PLAYER_DASH_SPEED = 1500;
+  const PLAYER_DASH_TIME = 0.12;
+  const PLAYER_DASH_CD = 0.62;
+
+  // Boss projectile speed
+  const BOSS_BULLET_SPEED_MULT = 1.55;
+
+  // Shooting
+  const SHOT_COOLDOWN = 0.5;
+  const SHOT_DAMAGE = 10;
+  const BOSS_MAX_HP = 1200;
+
+  // Regen (your spec)
+  // Start regen only after you stop taking damage, 1.0s after last damage instance:
+  const REGEN_DELAY = 1.0;
+  // First 2 seconds of regen: 120 hp/second
+  const REGEN_BURST_DURATION = 0.1;
+  const REGEN_BURST_RATE = 120;  // hp/sec
+  // After burst: 60 hp/second
+  const REGEN_BASE_RATE = 60;    // hp/sec
+
+  // ========= Utilities =========
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const len = (x,y) => Math.hypot(x,y);
+  const norm = (x,y) => {
+    const l = Math.hypot(x,y);
+    if (!isFinite(l) || l <= 1e-9) return [0, 0];
+    return [x/l, y/l];
+  };
+  const rand = (a,b) => a + Math.random()*(b-a);
+  const now = () => performance.now()/1000;
+
+  // ========= Input =========
+  const keys = new Set();
+  let mouse = { x: W/2, y: H/2, down: false };
+
+  addEventListener("keydown", (e) => {
+    keys.add(e.key.toLowerCase());
+    if (["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase())) e.preventDefault();
+    if (e.key.toLowerCase() === "r") hardReset();
+  }, {passive:false});
+  addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+
+  canvas.addEventListener("mousemove", (e) => {
+    const r = canvas.getBoundingClientRect();
+    mouse.x = (e.clientX - r.left) * (canvas.width / r.width);
+    mouse.y = (e.clientY - r.top) * (canvas.height / r.height);
+  });
+  canvas.addEventListener("mousedown", () => mouse.down = true);
+  addEventListener("mouseup", () => mouse.down = false);
+
+  // ========= Game State =========
+  const state = {
+    t: 0,
+    dt: 0,
+    last: now(),
+    over: false,
+    win: false,
+    shake: 0,
+    flash: 0,
+  };
+
+  const player = {
+    x: 160, y: H/2,
+    w: 26, h: 26,
+    vx: 0, vy: 0,
+    hp: PLAYER_MAX_HP,
+    invuln: 0,
+    dashCD: 0,
+    dashing: 0,
+    shotCD: 0,
+    faceX: 1, faceY: 0,
+
+    // regen bookkeeping
+    lastDamagedAt: -9999,
+    regenBurstRemaining: 0
+  };
+
+  const boss = {
+    x: W-190, y: H/2,
+    w: 86, h: 86,
+    vx: 0, vy: 0,
+    hp: BOSS_MAX_HP,
+    phase: 1,
+    enraged: false,
+    telegraph: 0,
+    attackTimer: 0,
+    nextAttackIn: 1.1,
+    currentAttack: null,
+    contactDmg: 18,
+  };
+
+  const bullets = [];
+  const hazards = [];
+  const particles = [];
+
+  // ========= Helpers =========
+  function rectsOverlap(ax,ay,aw,ah, bx,by,bw,bh) {
+    return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+  }
+
+  function spawnParticle(x,y, n=8, base=1) {
+    for (let i=0;i<n;i++){
+      const a = rand(0, Math.PI*2);
+      const sp = rand(70, 320) * base;
+      particles.push({
+        x,y,
+        vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
+        r: rand(1.5,3.2),
+        life: rand(0.25,0.6),
+        t: 0
+      });
+    }
+  }
+
+  function screenShake(amount){ state.shake = Math.max(state.shake, amount); }
+  function spawnHazard(h){ hazards.push(h); }
+
+  function showCenter(text, sub) {
+    centerMsg.style.display = "flex";
+    centerMsg.innerHTML = `${text}<span class="sub">${sub || ""}</span>`;
+  }
+  function hideCenter() {
+    centerMsg.style.display = "none";
+    centerMsg.innerHTML = "";
+  }
+
+  // ========= Regen system =========
+  function updateRegen() {
+    // only regen if alive + not full hp
+    if (state.over) return;
+    if (player.hp <= 0) return;
+    if (player.hp >= PLAYER_MAX_HP) {
+      player.hp = PLAYER_MAX_HP;
+      regenLabel.textContent = "Regen: full";
+      return;
+    }
+
+    const sinceDamage = state.t - player.lastDamagedAt;
+
+    // regen starts only after 2.5s without taking damage
+    if (sinceDamage < REGEN_DELAY) {
+      const wait = (REGEN_DELAY - sinceDamage);
+      regenLabel.textContent = `Regen: waiting ${wait.toFixed(1)}s`;
+      return;
+    }
+
+    // once regen begins, we run burst first (2 seconds total), then base regen
+    let heal = 0;
+
+    if (player.regenBurstRemaining > 0) {
+      const dt = Math.min(state.dt, player.regenBurstRemaining);
+      heal += REGEN_BURST_RATE * dt;
+      player.regenBurstRemaining -= dt;
+      regenLabel.textContent = `Regen: burst (${player.regenBurstRemaining.toFixed(1)}s left)`;
+    } else {
+      heal += REGEN_BASE_RATE * state.dt;
+      regenLabel.textContent = `Regen: +${REGEN_BASE_RATE}/s`;
+    }
+
+    if (heal > 0) {
+      player.hp = Math.min(PLAYER_MAX_HP, player.hp + heal);
+      pHPEl.textContent = Math.ceil(player.hp);
+    }
+  }
+
+  // ========= Player shooting =========
+  function tryShoot() {
+    if (state.over) return;
+    if (player.shotCD > 0) return;
+    player.shotCD = SHOT_COOLDOWN;
+
+    const px = player.x + player.w/2;
+    const py = player.y + player.h/2;
+    const [nx, ny] = norm(mouse.x - px, mouse.y - py);
+
+    const sx = (nx === 0 && ny === 0) ? player.faceX : nx;
+    const sy = (nx === 0 && ny === 0) ? player.faceY : ny;
+
+    player.faceX = sx; player.faceY = sy;
+
+    bullets.push({
+      x: px + sx*18,
+      y: py + sy*18,
+      vx: sx * 900,
+      vy: sy * 900,
+      r: 5,
+      dmg: SHOT_DAMAGE,
+      life: 1.05
+    });
+
+    spawnParticle(px + sx*16, py + sy*16, 6, 0.8);
+  }
+
+  // ========= Boss logic =========
+  function bossPhaseUpdate() {
+    const hpPct = boss.hp / BOSS_MAX_HP;
+    boss.phase = (hpPct <= 0.33) ? 3 : (hpPct <= 0.66) ? 2 : 1;
+    boss.enraged = boss.phase >= 3;
+  }
+
+  function bossChooseAttack() {
+    const pool = (boss.phase === 1)
+      ? ["dashSlash","ringBurst","sprayArc"]
+      : (boss.phase === 2)
+        ? ["dashSlash","ringBurst","sprayArc","laserSweep","mines"]
+        : ["dashSlash","ringBurst","sprayArc","laserSweep","mines","stutterDash"];
+
+    boss.currentAttack = pool[Math.floor(Math.random()*pool.length)];
+    boss.telegraph = 0.50;
+    boss.attackTimer = 0;
+
+    boss._pulse = undefined;
+    boss._laser = null;
+    boss._minesDropped = undefined;
+    boss._sd = undefined;
+    boss._dashCount = undefined;
+    boss._dashDir = undefined;
+    boss._wallLatch = false;
+  }
+
+  function dashSlash() {
+    const targetY = player.y + player.h/2 + rand(-35, 35);
+    const dy = targetY - (boss.y + boss.h/2);
+    boss.vy += clamp(dy*10, -1100, 1100) * state.dt;
+
+    if (boss.attackTimer === 0) {
+      boss._dashDir = (boss.x > W/2) ? -1 : 1;
+      boss._dashCount = 0;
+      boss._wallLatch = false;
+    }
+
+    const dashSpeed = boss.enraged ? 1200 : 1020;
+    boss.vx = boss._dashDir * dashSpeed;
+
+    if (Math.random() < (boss.enraged ? 0.45 : 0.28)) {
+      spawnHazard({
+        type: "orb",
+        x: boss.x + boss.w/2,
+        y: boss.y + boss.h/2,
+        vx: rand(-140,140) * BOSS_BULLET_SPEED_MULT,
+        vy: rand(-140,140) * BOSS_BULLET_SPEED_MULT,
+        r: boss.enraged ? 8 : 7,
+        dmg: 12,
+        life: boss.enraged ? 3.6 : 3.0
+      });
+    }
+
+    const pad = 50;
+    const atWall = (boss.x <= pad + 1) || (boss.x + boss.w >= W - pad - 1);
+    if (atWall) {
+      if (!boss._wallLatch) {
+        boss._wallLatch = true;
+        boss._dashCount++;
+        screenShake(8);
+        spawnParticle(boss.x + boss.w/2, boss.y + boss.h/2, 18, 1.2);
+
+        if (boss._dashCount >= (boss.enraged ? 3 : 2)) {
+          boss.vx = 0;
+          boss.nextAttackIn = boss.enraged ? 0.65 : 0.9;
+          return true;
+        }
+        boss._dashDir *= -1;
+      }
+    } else {
+      boss._wallLatch = false;
+    }
+    return false;
+  }
+
+  function ringBurst() {
+    const cx = boss.x + boss.w/2, cy = boss.y + boss.h/2;
+    const rings = boss.enraged ? 3 : 2;
+    const count = boss.enraged ? 22 : 16;
+
+    for (let r=0; r<rings; r++){
+      const offset = (state.t*0.9 + r*0.32) % (Math.PI*2);
+      for (let i=0;i<count;i++){
+        const a = offset + i*(Math.PI*2/count);
+        const sp = (boss.enraged ? rand(240, 360) : rand(190, 310)) * BOSS_BULLET_SPEED_MULT;
+        spawnHazard({
+          type:"orb",
+          x: cx, y: cy,
+          vx: Math.cos(a)*sp,
+          vy: Math.sin(a)*sp,
+          r: boss.enraged ? 8 : 7,
+          dmg: 14,
+          life: boss.enraged ? 3.7 : 3.2
+        });
+      }
+    }
+    screenShake(10);
+    spawnParticle(cx, cy, 28, 1.4);
+    boss.nextAttackIn = boss.enraged ? 0.6 : 0.9;
+    return true;
+  }
+
+  function sprayArc() {
+    if (boss._pulse === undefined) boss._pulse = 0;
+
+    const cx = boss.x + boss.w/2, cy = boss.y + boss.h/2;
+    const px = player.x + player.w/2, py = player.y + player.h/2;
+
+    const baseAng = Math.atan2(py - cy, px - cx);
+    const spread = boss.enraged ? 1.15 : 0.9;
+    const perPulse = boss.enraged ? 12 : 9;
+    const sp = (boss.enraged ? 420 : 360) * BOSS_BULLET_SPEED_MULT;
+
+    if (boss.attackTimer > boss._pulse * (boss.enraged ? 0.20 : 0.25)) {
+      boss._pulse++;
+      for (let i=0;i<perPulse;i++){
+        const t = (i/(perPulse-1))*2 - 1;
+        const a = baseAng + t*spread + rand(-0.03, 0.03);
+        spawnHazard({
+          type:"orb",
+          x: cx, y: cy,
+          vx: Math.cos(a)*sp + rand(-25,25),
+          vy: Math.sin(a)*sp + rand(-25,25),
+          r: 7,
+          dmg: 12,
+          life: boss.enraged ? 3.2 : 2.8
+        });
+      }
+      screenShake(5);
+      spawnParticle(cx, cy, 12, 1.0);
+
+      if (boss._pulse >= (boss.enraged ? 5 : 4)) {
+        boss._pulse = undefined;
+        boss.nextAttackIn = boss.enraged ? 0.55 : 0.85;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function laserSweep() {
+    if (!boss._laser) {
+      const px = player.x + player.w/2, py = player.y + player.h/2;
+      const cx = boss.x + boss.w/2, cy = boss.y + boss.h/2;
+      boss._laser = {
+        a: Math.atan2(py - cy, px - cx),
+        w: boss.enraged ? 18 : 14,
+        time: 0,
+        dur: boss.enraged ? 1.15 : 1.0,
+        dir: Math.random() < 0.5 ? -1 : 1,
+      };
+    }
+
+    const L = boss._laser;
+    L.time += state.dt;
+    L.a += L.dir * (boss.enraged ? 1.7 : 1.35) * state.dt;
+
+    spawnHazard({
+      type: "laser",
+      x1: boss.x + boss.w/2,
+      y1: boss.y + boss.h/2,
+      a: L.a,
+      len: 1500,
+      w: L.w,
+      dmg: boss.enraged ? 22 : 18,
+      life: 0.07
+    });
+
+    boss.vx *= 0.9;
+    boss.vy += Math.sin(state.t*4) * 18 * state.dt;
+
+    if (L.time >= L.dur) {
+      boss._laser = null;
+      boss.nextAttackIn = boss.enraged ? 0.55 : 0.8;
+      screenShake(9);
+      return true;
+    }
+    return false;
+  }
+
+  function mines() {
+    if (boss._minesDropped === undefined) boss._minesDropped = 0;
+
+    if (boss.attackTimer > boss._minesDropped * (boss.enraged ? 0.24 : 0.30)) {
+      boss._minesDropped++;
+      const x = clamp(player.x + rand(-240, 240), 70, W-70);
+      const y = clamp(player.y + rand(-190, 190), 70, H-70);
+      spawnHazard({
+        type:"mine",
+        x, y,
+        r: boss.enraged ? 12 : 11,
+        arm: boss.enraged ? 0.70 : 0.85,
+        explode: boss.enraged ? 1.20 : 1.40,
+        t: 0,
+        dmg: 22,
+        life: 3.1
+      });
+      screenShake(4);
+    }
+
+    if (boss._minesDropped >= (boss.enraged ? 7 : 6)) {
+      boss._minesDropped = undefined;
+      boss.nextAttackIn = boss.enraged ? 0.55 : 0.85;
+      return true;
+    }
+    return false;
+  }
+
+  function stutterDash() {
+    if (boss._sd === undefined) boss._sd = { step: 0, cd: 0 };
+
+    const sd = boss._sd;
+    sd.cd -= state.dt;
+
+    const targetX = clamp(player.x + rand(120, 260), 220, W-220);
+    const targetY = clamp(player.y + rand(-120, 120), 120, H-120);
+    const [nx, ny] = norm(targetX - (boss.x + boss.w/2), targetY - (boss.y + boss.h/2));
+
+    if (sd.cd <= 0) {
+      sd.step++;
+      sd.cd = boss.enraged ? 0.24 : 0.30;
+
+      boss.vx = nx * (boss.enraged ? 980 : 840);
+      boss.vy = ny * (boss.enraged ? 980 : 840);
+
+      const cx = boss.x + boss.w/2, cy = boss.y + boss.h/2;
+      const px = player.x + player.w/2, py = player.y + player.h/2;
+      const a0 = Math.atan2(py - cy, px - cx);
+      const n = boss.enraged ? 9 : 7;
+
+      for (let i=0;i<n;i++){
+        const a = a0 + (i-(n-1)/2)*0.15 + rand(-0.02,0.02);
+        const sp = (boss.enraged ? 520 : 460) * BOSS_BULLET_SPEED_MULT;
+        spawnHazard({
+          type:"orb",
+          x: cx, y: cy,
+          vx: Math.cos(a) * sp,
+          vy: Math.sin(a) * sp,
+          r: 7,
+          dmg: 12,
+          life: 2.7
+        });
+      }
+
+      screenShake(6);
+      spawnParticle(cx, cy, 12, 1.15);
+
+      if (sd.step >= (boss.enraged ? 8 : 6)) {
+        boss._sd = undefined;
+        boss.nextAttackIn = 0.75;
+        return true;
+      }
+    } else {
+      boss.vx *= 0.94;
+      boss.vy *= 0.94;
+    }
+    return false;
+  }
+
+  const attackExec = { dashSlash, ringBurst, sprayArc, laserSweep, mines, stutterDash };
+
+  // ========= Player movement =========
+  function updatePlayer() {
+    const up = keys.has("w") || keys.has("arrowup");
+    const down = keys.has("s") || keys.has("arrowdown");
+    const left = keys.has("a") || keys.has("arrowleft");
+    const right = keys.has("d") || keys.has("arrowright");
+
+    let ix = (right?1:0) - (left?1:0);
+    let iy = (down?1:0) - (up?1:0);
+    if (ix || iy) {
+      const [nx, ny] = norm(ix, iy);
+      ix = nx; iy = ny;
+      player.faceX = nx; player.faceY = ny;
+    }
+
+    player.dashCD = Math.max(0, player.dashCD - state.dt);
+    player.dashing = Math.max(0, player.dashing - state.dt);
+
+    const dashPressed = keys.has("shift");
+    if (dashPressed && player.dashCD <= 0 && player.dashing <= 0) {
+      let dx = ix, dy = iy;
+      if (!dx && !dy) {
+        const px = player.x + player.w/2, py = player.y + player.h/2;
+        [dx, dy] = norm(mouse.x - px, mouse.y - py);
+        if (!dx && !dy) { dx = player.faceX; dy = player.faceY; }
+      }
+      player.dashing = PLAYER_DASH_TIME;
+      player.dashCD = PLAYER_DASH_CD;
+      player.invuln = Math.max(player.invuln, 0.15);
+      player.vx = dx * PLAYER_DASH_SPEED;
+      player.vy = dy * PLAYER_DASH_SPEED;
+      screenShake(4);
+      spawnParticle(player.x + player.w/2, player.y + player.h/2, 14, 1.1);
+    }
+
+    if (player.dashing <= 0) {
+      player.vx = ix * PLAYER_SPEED;
+      player.vy = iy * PLAYER_SPEED;
+    } else {
+      player.vx *= 0.90;
+      player.vy *= 0.90;
+    }
+
+    player.x += player.vx * state.dt;
+    player.y += player.vy * state.dt;
+
+    const pad = 40;
+    player.x = clamp(player.x, pad, W - pad - player.w);
+    player.y = clamp(player.y, pad, H - pad - player.h);
+
+    player.invuln = Math.max(0, player.invuln - state.dt);
+    player.shotCD = Math.max(0, player.shotCD - state.dt);
+
+    const shootPressed = keys.has(" ") || keys.has("j") || mouse.down;
+    if (shootPressed) tryShoot();
+  }
+
+  // ========= Boss update =========
+  function updateBoss() {
+    bossPhaseUpdate();
+
+    boss.nextAttackIn -= state.dt;
+    if (!boss.currentAttack && boss.nextAttackIn <= 0) bossChooseAttack();
+
+    // Debug label
+    atkLabel.textContent = `Attack: ${boss.currentAttack || "idle"}${boss.enraged ? " (ENRAGED)" : ""}`;
+
+    if (boss.currentAttack) {
+      boss.telegraph -= state.dt;
+
+      if (boss.telegraph > 0) {
+        const px = player.x + player.w/2, py = player.y + player.h/2;
+        const cx = boss.x + boss.w/2, cy = boss.y + boss.h/2;
+        const [nx, ny] = norm(px - cx, py - cy);
+        boss.vx += nx * (boss.enraged ? 140 : 110) * state.dt;
+        boss.vy += ny * (boss.enraged ? 140 : 110) * state.dt;
+      } else {
+        boss.attackTimer += state.dt;
+
+        // SAFETY: if an attack name somehow isn't found, recover instantly
+        const fn = attackExec[boss.currentAttack];
+        if (typeof fn !== "function") {
+          boss.currentAttack = null;
+          boss.nextAttackIn = 0.25;
+        } else {
+          const done = fn();
+          if (done) boss.currentAttack = null;
+        }
+      }
+    }
+
+    boss.vx *= 0.96;
+    boss.vy *= 0.96;
+
+    boss.x += boss.vx * state.dt;
+    boss.y += boss.vy * state.dt;
+
+    const pad = 50;
+    boss.x = clamp(boss.x, pad, W - pad - boss.w);
+    boss.y = clamp(boss.y, pad, H - pad - boss.h);
+
+    // HARD SAFETY: prevent vanishing forever
+    if (!isFinite(boss.x) || !isFinite(boss.y) || !isFinite(boss.vx) || !isFinite(boss.vy)) {
+      boss.x = W - 190; boss.y = H / 2; boss.vx = 0; boss.vy = 0;
+      boss.currentAttack = null; boss.nextAttackIn = 0.6;
+    }
+  }
+
+  // ========= Damage / collisions =========
+  function hurtPlayer(dmg) {
+    player.hp = Math.max(0, player.hp - dmg);
+
+    // mark damage time for regen delay logic
+    player.lastDamagedAt = state.t;
+    // each time you take damage, reset burst-heal window (it will start after delay)
+    player.regenBurstRemaining = REGEN_BURST_DURATION;
+
+    player.invuln = 0.35;
+    state.flash = 0.12;
+    screenShake(8);
+    pHPEl.textContent = Math.ceil(player.hp);
+
+    if (player.hp <= 0) lose();
+  }
+
+  function updateBullets() {
+    for (let i=bullets.length-1; i>=0; i--) {
+      const b = bullets[i];
+      b.life -= state.dt;
+      b.x += b.vx * state.dt;
+      b.y += b.vy * state.dt;
+
+      if (b.life <= 0 || b.x < -50 || b.x > W+50 || b.y < -50 || b.y > H+50) {
+        bullets.splice(i,1); continue;
+      }
+
+      const rx = boss.x, ry = boss.y, rw = boss.w, rh = boss.h;
+      const cx = clamp(b.x, rx, rx+rw);
+      const cy = clamp(b.y, ry, ry+rh);
+      if (len(b.x - cx, b.y - cy) <= b.r) {
+        boss.hp = Math.max(0, boss.hp - b.dmg);
+        state.flash = 0.08;
+        screenShake(3);
+        spawnParticle(b.x, b.y, 10, 1.0);
+        bullets.splice(i,1);
+        if (boss.hp <= 0) win();
+      }
+    }
+  }
+
+  function updateHazards() {
+    for (let i=hazards.length-1; i>=0; i--) {
+      const h = hazards[i];
+      h.life -= state.dt;
+
+      if (h.type === "orb") {
+        h.x += h.vx * state.dt;
+        h.y += h.vy * state.dt;
+
+        const pad = 40;
+        if (h.x < pad || h.x > W - pad) h.vx *= -1;
+        if (h.y < pad || h.y > H - pad) h.vy *= -1;
+
+        if (!state.over && player.invuln <= 0) {
+          const rx = player.x, ry = player.y, rw = player.w, rh = player.h;
+          const cx = clamp(h.x, rx, rx+rw);
+          const cy = clamp(h.y, ry, ry+rh);
+          if (len(h.x - cx, h.y - cy) <= h.r) {
+            hurtPlayer(h.dmg);
+            spawnParticle(h.x, h.y, 14, 1.1);
+            hazards.splice(i,1);
+            continue;
+          }
+        }
+      }
+      else if (h.type === "laser") {
+        if (!state.over && player.invuln <= 0) {
+          const x1 = h.x1, y1 = h.y1;
+          const x2 = x1 + Math.cos(h.a)*h.len;
+          const y2 = y1 + Math.sin(h.a)*h.len;
+
+          const px = player.x + player.w/2, py = player.y + player.h/2;
+          const dx = x2 - x1, dy = y2 - y1;
+          const L2 = dx*dx + dy*dy || 1;
+
+          let t = ((px - x1)*dx + (py - y1)*dy) / L2;
+          t = clamp(t, 0, 1);
+          const sx = x1 + t*dx, sy = y1 + t*dy;
+          const d = len(px - sx, py - sy);
+
+          if (d <= h.w) {
+            hurtPlayer(h.dmg);
+            screenShake(10);
+            spawnParticle(px, py, 24, 1.4);
+          }
+        }
+      }
+      else if (h.type === "mine") {
+        h.t += state.dt;
+
+        if (!h._exploded && h.t >= h.explode) {
+          h._exploded = true;
+          const count = boss.enraged ? 20 : 14;
+          for (let k=0;k<count;k++){
+            const a = k*(Math.PI*2/count) + rand(-0.05,0.05);
+            const sp = (boss.enraged ? rand(240, 360) : rand(210, 320)) * BOSS_BULLET_SPEED_MULT;
+            spawnHazard({
+              type:"orb",
+              x: h.x, y: h.y,
+              vx: Math.cos(a)*sp,
+              vy: Math.sin(a)*sp,
+              r: boss.enraged ? 8 : 7,
+              dmg: 14,
+              life: 3.2
+            });
+          }
+          screenShake(12);
+          spawnParticle(h.x, h.y, 30, 1.6);
+        }
+
+        if (!state.over && player.invuln <= 0 && h.t >= h.arm && !h._exploded) {
+          const px = player.x + player.w/2, py = player.y + player.h/2;
+          if (len(px - h.x, py - h.y) <= h.r + 14) {
+            hurtPlayer(h.dmg);
+            h._exploded = true;
+            screenShake(10);
+            spawnParticle(h.x, h.y, 26, 1.4);
+          }
+        }
+      }
+
+      if (h.life <= 0) hazards.splice(i,1);
+    }
+
+    // boss contact dmg
+    if (!state.over && player.invuln <= 0) {
+      if (rectsOverlap(player.x, player.y, player.w, player.h, boss.x, boss.y, boss.w, boss.h)) {
+        hurtPlayer(boss.contactDmg);
+        const px = player.x + player.w/2, py = player.y + player.h/2;
+        const bx = boss.x + boss.w/2, by = boss.y + boss.h/2;
+        let [nx, ny] = norm(px - bx, py - by);
+        if (!nx && !ny) { nx = 1; ny = 0; }
+        player.vx += nx * 520;
+        player.vy += ny * 520;
+        screenShake(10);
+        spawnParticle(px, py, 20, 1.3);
+      }
+    }
+  }
+
+  function updateParticles() {
+    for (let i=particles.length-1; i>=0; i--){
+      const p = particles[i];
+      p.t += state.dt;
+      p.x += p.vx * state.dt;
+      p.y += p.vy * state.dt;
+      p.vx *= 0.92;
+      p.vy *= 0.92;
+      if (p.t >= p.life) particles.splice(i,1);
+    }
+  }
+
+  // ========= Draw =========
+  function draw() {
+    ctx.setTransform(1,0,0,1,0,0);
+
+    let sx = 0, sy = 0;
+    if (state.shake > 0) {
+      const s = state.shake;
+      sx = rand(-s, s);
+      sy = rand(-s, s);
+      state.shake = Math.max(0, state.shake - 40*state.dt);
+    }
+    ctx.translate(sx, sy);
+
+    ctx.clearRect(-sx, -sy, W, H);
+
+    ctx.strokeStyle = "rgba(80,110,150,0.18)";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(40, 40, W-80, H-80);
+
+    if (boss.currentAttack && boss.telegraph > 0) {
+      const cx = boss.x + boss.w/2, cy = boss.y + boss.h/2;
+      const px = player.x + player.w/2, py = player.y + player.h/2;
+      ctx.save();
+      ctx.globalAlpha = 0.55 + 0.25*Math.sin(state.t*18);
+      ctx.strokeStyle = "rgba(255,90,90,0.65)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(px, py);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    for (const h of hazards) {
+      if (h.type === "orb") {
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255,150,70,0.95)";
+        ctx.arc(h.x, h.y, h.r, 0, Math.PI*2);
+        ctx.fill();
+      } else if (h.type === "laser") {
+        const x1 = h.x1, y1 = h.y1;
+        const x2 = x1 + Math.cos(h.a)*h.len;
+        const y2 = y1 + Math.sin(h.a)*h.len;
+
+        ctx.save();
+        ctx.globalAlpha = 0.45;
+        ctx.strokeStyle = "rgba(255,80,80,0.8)";
+        ctx.lineWidth = h.w*2;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        ctx.globalAlpha = 0.9;
+        ctx.lineWidth = Math.max(2, h.w*0.7);
+        ctx.strokeStyle = "rgba(255,230,230,0.9)";
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.restore();
+      } else if (h.type === "mine") {
+        const armed = h.t >= h.arm && !h._exploded;
+        const pul = 0.55 + 0.45*Math.sin((h.t*10) + 2);
+        ctx.save();
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = armed ? `rgba(255,80,80,${0.55 + 0.35*pul})` : "rgba(200,130,90,0.65)";
+        ctx.beginPath();
+        ctx.arc(h.x, h.y, h.r, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.globalAlpha = 0.6;
+        ctx.strokeStyle = armed ? "rgba(255,120,120,0.9)" : "rgba(200,200,220,0.35)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(h.x, h.y, h.r + (armed ? (10 + 8*pul) : 8), 0, Math.PI*2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    for (const b of bullets) {
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(60,255,120,0.95)";
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    for (const p of particles) {
+      const a = 1 - (p.t / p.life);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.save();
+    ctx.fillStyle = `rgba(255,60,60,${0.92 + 0.08*Math.sin(state.t*8)})`;
+    ctx.fillRect(boss.x, boss.y, boss.w, boss.h);
+    ctx.globalAlpha = 0.9;
+    ctx.strokeStyle = boss.phase === 1 ? "rgba(255,120,120,0.6)"
+                    : boss.phase === 2 ? "rgba(255,160,70,0.7)"
+                    : "rgba(255,220,80,0.8)";
+    ctx.lineWidth = 3.5;
+    ctx.strokeRect(boss.x-1.5, boss.y-1.5, boss.w+3, boss.h+3);
+    ctx.restore();
+
+    ctx.save();
+    const blink = (player.invuln > 0) ? (Math.sin(state.t*40) > 0 ? 0.45 : 1) : 1;
+    ctx.globalAlpha = blink;
+    ctx.fillStyle = "rgba(80,170,255,0.95)";
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    ctx.strokeStyle = "rgba(190,230,255,0.45)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(player.x-1, player.y-1, player.w+2, player.h+2);
+    ctx.restore();
+
+    if (state.flash > 0) {
+      ctx.save();
+      ctx.globalAlpha = state.flash;
+      ctx.fillStyle = "white";
+      ctx.fillRect(0,0,W,H);
+      ctx.restore();
+      state.flash = Math.max(0, state.flash - 2.2*state.dt);
+    }
+  }
+
+  // ========= HUD / end =========
+  function updateHUD() {
+    bossBar.style.width = `${(boss.hp/BOSS_MAX_HP)*100}%`;
+    pHPEl.textContent = Math.ceil(player.hp);
+  }
+
+  function win() {
+    if (state.over) return;
+    state.over = true;
+    state.win = true;
+    screenShake(18);
+    spawnParticle(boss.x + boss.w/2, boss.y + boss.h/2, 60, 2.0);
+    showCenter("YOU WIN.", `Press <span class="kbd">R</span> to run it back.`);
+  }
+
+  function lose() {
+    if (state.over) return;
+    state.over = true;
+    state.win = false;
+    screenShake(14);
+    spawnParticle(player.x + player.w/2, player.y + player.h/2, 50, 1.8);
+    showCenter("YOU DIED.", `Press <span class="kbd">R</span> to retry.`);
+  }
+
+  function hardReset() {
+    state.over = false; state.win = false;
+    bullets.length = 0; hazards.length = 0; particles.length = 0;
+    hideCenter();
+
+    player.x = 160; player.y = H/2; player.vx = 0; player.vy = 0;
+    player.hp = PLAYER_MAX_HP; player.invuln = 0; player.shotCD = 0; player.dashCD = 0; player.dashing = 0;
+    player.faceX = 1; player.faceY = 0;
+    player.lastDamagedAt = -9999;
+    player.regenBurstRemaining = 0;
+
+    boss.x = W - 190; boss.y = H/2; boss.vx = 0; boss.vy = 0;
+    boss.hp = BOSS_MAX_HP; boss.phase = 1; boss.enraged = false;
+    boss.currentAttack = null; boss.nextAttackIn = 1.1; boss.telegraph = 0; boss.attackTimer = 0;
+
+    atkLabel.textContent = "Attack: —";
+    regenLabel.textContent = "Regen: —";
+
+    updateHUD();
+  }
+
+  // ========= Loop =========
+  function tick() {
+    const t = now();
+    state.dt = Math.min(1/30, t - state.last);
+    state.last = t;
+    state.t += state.dt;
+
+    if (!state.over) {
+      updatePlayer();
+      updateBoss();
+      updateBullets();
+      updateHazards();
+      updateRegen();  // <-- regen runs after damage updates each frame
+      updateHUD();
+    } else {
+      regenLabel.textContent = "Regen: —";
+    }
+
+    updateParticles();
+    draw();
+
+    requestAnimationFrame(tick);
+  }
+
+  showCenter(
+    "CUBE KNIGHT: THE RED ONE",
+    `Boss HP: ${BOSS_MAX_HP} • Your shots: ${SHOT_DAMAGE} dmg • Cooldown: ${SHOT_COOLDOWN}s<br/>
+     Regen: wait ${REGEN_DELAY}s after damage → burst ${REGEN_BURST_RATE}/s for ${REGEN_BURST_DURATION}s → then ${REGEN_BASE_RATE}/s`
+  );
+  setTimeout(hideCenter, 1600);
+
+  hardReset();
+  tick();
+})();
+</script>
+</body>
+</html>

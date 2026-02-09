@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chika Fujiwara GIF Gallery</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h1 {
+      color: #ff69b4; /* hot pink for Chika vibes */
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr); /* 3 per row */
+      gap: 15px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .gif-container {
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    /* ✅ Secret button (invisible clickable zone) */
+    .secret-btn{
+      position: fixed;
+      top: 6px;
+      left: 6px;
+      width: 22px;
+      height: 22px;
+      opacity: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      z-index: 9999;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ✅ Secret button: click top-left corner to go to thankyou.html -->
+  <!-- Using ./thankyou.html makes it explicitly look in the same folder -->
+  <button
+    class="secret-btn"
+    aria-label="secret"
+    onclick="window.location.assign('./REMOVED.html')">
+  </button>
+
+  <h1>Chika Fujiwara GIF Collection ♡ (3 per row)</h1>
+  
+  <div class="grid">
+    <!-- GIF 1: Classic panicked / surprised pose (matches your original image vibe) -->
+    <div class="gif-container">
+      <img src="https://media.tenor.com/4O1cHep6qf8AAAAd/chika-fujiwara-kaguya-sama.gif" alt="Chika surprised">
+    </div>
+    
+    <!-- GIF 2: Laughing / cute reaction -->
+    <div class="gif-container">
+      <img src="https://media.tenor.com/I2mixid1cSYAAAAd/love-is-war-kaguya-sama.gif" alt="Chika laughing">
+    </div>
+    
+    <!-- GIF 3: Dancing Chika (iconic one) -->
+    <div class="gif-container">
+      <img src="https://media.tenor.com/13973731/chika-chika-dance-anime.gif" alt="Chika dance">
+    </div>
+    
+    <!-- GIF 4: Another fun expression -->
+    <div class="gif-container">
+      <img src="https://media.tenor.com/S_Bm_Ect9uMAAAAd/chika-delicious.gif" alt="Chika thumbs up">
+    </div>
+    
+    <!-- GIF 5: Victory / arms out -->
+    <div class="gif-container">
+      <img src="https://media.tenor.com/7392533103877486075/chika-fujiwara-kaguya-sama-anime-anime-girl-victory.gif" alt="Chika victory">
+    </div>
+    
+    <!-- GIF 6: Rap / energetic pose -->
+    <div class="gif-container">
+      <img src="https://media.tenor.com/25612586/chika-fujiwara-anime-ultra-romantic-rap.gif" alt="Chika rap">
+    </div>
+    
+    <!-- GIF 7: Angry / mad flying -->
+    <div class="gif-container">
+      <img src="https://media.tenor.com/13677584498698734190/chika-fujiwara-kaguya-sama-angry.gif" alt="Chika angry">
+    </div>
+    
+    <!-- GIF 8: Cute head tilt / reaction -->
+    <div class="gif-container">
+      <img src="https://media.tenor.com/15411808/chika-fujiwara-kaguya-sama-love-is-war-anime-cute.gif" alt="Chika cute">
+    </div>
+    
+    <!-- GIF 9: More laughing / joyful -->
+    <div class="gif-container">
+      <img src="https://media.tenor.com/18043246/chika-fujiwara-anime-kaguya-sama-love-is-war-shut-your-mouth-silence.gif" alt="Chika silence laugh">
+    </div>
+  </div>
+
+  <p style="margin-top: 30px; color: #666;">Chika best girl! Reload for more chaos ♪</p>
+
+</body>
+</html>

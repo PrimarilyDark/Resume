@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thank You</title>
+  <style>
+    :root{
+      --bg: #050607;
+      --green: #34ff7a;
+      --green2:#1bd85d;
+      --glass: rgba(10, 16, 12, 0.55);
+      --stroke: rgba(52, 255, 122, 0.18);
+    }
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background: var(--bg);
+      overflow:hidden;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:#eafff2;
+    }
+
+    /* Animated "0/1" background */
+    canvas{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:0;
+      display:block;
+    }
+
+    /* Center content */
+    .center{
+      position:relative;
+      z-index:1;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      text-align:center;
+    }
+
+    .panel{
+      width:min(720px, 92vw);
+      padding:22px 18px;
+      border-radius:18px;
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px);
+    }
+
+    h1{
+      margin:0 0 14px 0;
+      font-size: clamp(26px, 4vw, 44px);
+      letter-spacing: 0.6px;
+      color: #eafff2;
+      text-shadow: 0 0 18px rgba(52,255,122,0.25);
+      text-transform: lowercase;
+    }
+
+    .gif-wrap{
+      width: min(420px, 78vw);
+      aspect-ratio: `18 / 9;
+      margin: 0 auto;
+      border-radius:16px;
+      overflow:hidden;
+      border: 1px solid rgba(52,255,122,0.25);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.55);
+      position:relative;
+      background: rgba(0,0,0,0.25);
+    }
+
+    .gif-wrap img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+      image-rendering:auto;
+    }
+
+    .sub{
+      margin: 12px 0 0 0;
+      font-size: 14px;
+      color: rgba(234, 255, 242, 0.72);
+    }
+
+    /* tiny scanline vibe */
+    .scanlines{
+      pointer-events:none;
+      position:fixed;
+      inset:0;
+      z-index:2;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03) 0px,
+        rgba(255,255,255,0.03) 1px,
+        rgba(0,0,0,0) 3px,
+        rgba(0,0,0,0) 6px
+      );
+      mix-blend-mode: overlay;
+      opacity: 0.25;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="binCanvas" aria-hidden="true"></canvas>
+
+  <div class="center">
+    <div class="panel">
+      <h1>thank you for making it this far</h1>
+
+      <div class="gif-wrap" title="Random Peter Griffin GIF">
+        <img id="peterGif" alt="Random Peter Griffin gif" />
+      </div>
+
+      <p class="sub"></p>
+    </div>
+  </div>
+
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <script>
+    // ----- Random Peter Griffin GIF (pick one each refresh) -----
+    // You can add/remove URLs here anytime.
+    const PETER_GIFS = [
+      "https://media.giphy.com/media/nx8GZtGrDYQBa/giphy.gif",
+      "https://media.giphy.com/media/JSd7qXkxaylvSiFOKB/giphy.gif",
+      "https://media.giphy.com/media/nx8GZtGrDYQBa/giphy.gif",
+      "https://media.giphy.com/media/nx8GZtGrDYQBa/giphy.gif",
+      "https://media.giphy.com/media/nx8GZtGrDYQBa/giphy.gif",
+      "https://media.giphy.com/media/3o6Zt8MgUuvSbkZYWc/giphy.gif"
+    ];
+
+    const gifEl = document.getElementById("peterGif");
+    gifEl.src = PETER_GIFS[Math.floor(Math.random() * PETER_GIFS.length)];
+
+    // ----- "Hacker" 0/1 drift background (up & down) -----
+    const canvas = document.getElementById("binCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let W, H, DPR;
+    function resize(){
+      DPR = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+      W = Math.floor(window.innerWidth);
+      H = Math.floor(window.innerHeight);
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      buildColumns();
+    }
+
+    // columns of 0/1 that move either up or down
+    const fontSize = 16;
+    let cols = [];
+    function buildColumns(){
+      const count = Math.ceil(W / fontSize);
+      cols = Array.from({ length: count }, (_, i) => ({
+        x: i * fontSize,
+        y: Math.random() * H,
+        dir: Math.random() < 0.5 ? -1 : 1, // -1 up, +1 down
+        speed: 0.6 + Math.random() * 1.8,
+        glow: 0.15 + Math.random() * 0.35,
+        alpha: 0.10 + Math.random() * 0.25
+      }));
+    }
+
+    function draw(){
+      // fade trail
+      ctx.fillStyle = "rgba(5, 6, 7, 0.16)";
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
+
+      for(const c of cols){
+        const bit = Math.random() < 0.5 ? "0" : "1";
+
+        // subtle glow-ish green
+        ctx.fillStyle = `rgba(52, 255, 122, ${c.alpha})`;
+        ctx.fillText(bit, c.x, c.y);
+
+        // occasional brighter "leader"
+        if(Math.random() < c.glow){
+          ctx.fillStyle = `rgba(27, 216, 93, ${Math.min(0.75, c.alpha + 0.35)})`;
+          ctx.fillText(bit, c.x, c.y);
+        }
+
+        c.y += c.dir * c.speed * fontSize * 0.22;
+
+        // wrap around
+        if(c.y < -fontSize) c.y = H + fontSize;
+        if(c.y > H + fontSize) c.y = -fontSize;
+
+        // occasionally flip direction so it feels alive
+        if(Math.random() < 0.0025){
+          c.dir *= -1;
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+    draw();
+  </script>
+</body>
+</html>

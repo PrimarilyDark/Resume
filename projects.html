@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects</title>
+  <style>
+    :root{
+      --bg:#f5f6f8;
+      --card:#ffffff;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --line:#e7eaf0;
+      --shadow: 0 14px 36px rgba(15, 23, 42, 0.10);
+      --radius:18px;
+
+      --btn:#2563eb;       /* default nav button */
+      --btn2:#0f172a;      /* dark alt */
+      --home:#e53935;      /* red home */
+      --projects:#2e7d32;  /* green projects */
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Arial, sans-serif;
+      color:var(--ink);
+      background: radial-gradient(circle at 15% 0%, #ffffff 0%, var(--bg) 55%, var(--bg) 100%);
+    }
+
+    .wrap{
+      width:min(1050px, 100%);
+      margin:0 auto;
+      padding:22px;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+      flex-wrap:wrap;
+    }
+
+    h1{
+      margin:0;
+      font-size:34px;
+      letter-spacing:0.3px;
+    }
+
+    .sub{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-left:auto;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:16px;
+      margin-top:14px;
+    }
+
+    .card{
+      grid-column: span 12;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+
+    @media (min-width: 860px){
+      .card.half{ grid-column: span 6; }
+    }
+
+    .card h2{
+      margin:0 0 10px;
+      font-size:18px;
+    }
+
+    .item{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #fbfbfd);
+    }
+
+    .item-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .item-title{
+      margin:0;
+      font-size:16px;
+    }
+
+    .item-desc{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    a.link{
+      color:var(--btn);
+      text-decoration:none;
+      font-weight:700;
+    }
+    a.link:hover{ text-decoration:underline; }
+
+    .btnrow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:8px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      border:none;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      text-decoration:none;
+      color:white;
+      background:var(--btn);
+      box-shadow: 0 10px 20px rgba(37,99,235,0.18);
+      transition: transform 0.08s ease, filter 0.15s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{ filter: brightness(1.03); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.alt{
+      background:var(--btn2);
+      box-shadow: 0 10px 20px rgba(15,23,42,0.14);
+    }
+
+    /* NAV BUTTON COLORS */
+    .btn.home{
+      background:var(--home);
+      box-shadow: 0 10px 20px rgba(229,57,53,0.18);
+    }
+    .btn.projects{
+      background:var(--projects);
+      box-shadow: 0 10px 20px rgba(46,125,50,0.18);
+    }
+
+    footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Projects</h1>
+        <p class="sub">A simple list of what I’ve built (and what I’ve scrapped).</p>
+      </div>
+
+      <!-- Navigation buttons + Work Experience -->
+      <div class="top-actions">
+        <a class="btn home" href="index.html">Home</a>
+        <a class="btn" href="about.html">About</a>
+        <a class="btn" href="education.html">Education</a>
+        <a class="btn" href="skills.html">Skills</a>
+        <a class="btn projects" href="projects.html">Projects</a>
+        <a class="btn" href="sharedfiles.html">Shared Files</a>
+        <a class="btn" href="licenses.html">Licenses</a>
+        <a class="btn" href="workexperience.html">Work Experience</a>
+      </div>
+    </header>
+
+    <section class="grid">
+      <!-- Projects -->
+      <div class="card half">
+        <h2>Projects</h2>
+
+        <div class="item">
+          <div class="item-top">
+            <div>
+              <p class="item-title"><strong>Project 1:</strong> 2D FUN GAME</p>
+              <p class="item-desc">Roblox experience link:</p>
+            </div>
+            <a class="link" href="https://www.roblox.com/games/138353983627796/2D-FUN-GAME" target="_blank" rel="noopener noreferrer">
+              Open ↗
+            </a>
+          </div>
+
+          <div class="btnrow">
+            <a class="btn" href="https://www.roblox.com/games/138353983627796/2D-FUN-GAME" target="_blank" rel="noopener noreferrer">
+              Play on Roblox
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrapped Webpages -->
+      <div class="card half">
+        <h2>Scrapped Webpages</h2>
+
+        <div class="item">
+          <p class="item-title"><strong>Archive / Access</strong></p>
+          <p class="item-desc">Old experiments and retired pages live here.</p>
+
+          <div class="btnrow">
+            <a class="btn alt" href="access1.html">Go to access1</a>
+            <a class="btn alt" href="bossfight.html">Go to bossfight</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> Projects
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
+
+

@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About | Dave Chandi Persaud</title>
+  <style>
+    :root{
+      --bg: #0b0f17;
+      --card: rgba(255,255,255,0.08);
+      --card2: rgba(255,255,255,0.06);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --border: rgba(255,255,255,0.14);
+      --shadow: 0 18px 60px rgba(0,0,0,0.45);
+      --radius: 18px;
+
+      /* nav colors */
+      --home: rgba(229,57,53,0.26);   /* red home */
+      --homeB: rgba(229,57,53,0.55);
+      --green: rgba(46,125,50,0.28);  /* green about */
+      --greenB: rgba(46,125,50,0.65);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 15% 10%, rgba(88, 101, 242, 0.35), transparent 60%),
+        radial-gradient(900px 500px at 85% 20%, rgba(34, 211, 238, 0.20), transparent 60%),
+        radial-gradient(900px 500px at 60% 90%, rgba(255, 100, 180, 0.18), transparent 60%),
+        var(--bg);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding: 22px 14px;
+    }
+
+    .wrap{
+      width: min(980px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    /* Top bar */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      flex-wrap:wrap;
+    }
+
+    .left{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 0;
+      flex-wrap:wrap;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width: 0;
+    }
+    .title h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: 0.2px;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .title p{
+      margin:0;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.10);
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease, filter .15s ease;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.22);
+    }
+    .btn:active{ transform: translateY(0px); }
+
+    /* special nav colors */
+    .btn.home{
+      background: var(--home);
+      border-color: var(--homeB);
+    }
+    .btn.home:hover{
+      background: rgba(229,57,53,0.34);
+      border-color: rgba(229,57,53,0.72);
+    }
+
+    .btn.about{
+      background: var(--green);
+      border-color: var(--greenB);
+    }
+    .btn.about:hover{
+      background: rgba(46,125,50,0.36);
+      border-color: rgba(46,125,50,0.82);
+    }
+
+    .right{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+      margin-left:auto;
+    }
+
+    /* Toggle */
+    .toggleWrap{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      user-select:none;
+    }
+
+    .toggleLabel{
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.1;
+      max-width: 320px;
+    }
+
+    .switch{
+      position: relative;
+      width: 54px;
+      height: 30px;
+      flex: 0 0 auto;
+    }
+    .switch input{
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider{
+      position:absolute;
+      inset:0;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 999px;
+      transition: .2s ease;
+      cursor:pointer;
+    }
+    .slider:before{
+      content:"";
+      position:absolute;
+      height: 24px;
+      width: 24px;
+      left: 3px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.92);
+      border-radius: 50%;
+      transition: .2s ease;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    }
+    .switch input:checked + .slider{
+      background: rgba(88, 101, 242, 0.55);
+      border-color: rgba(88, 101, 242, 0.70);
+    }
+    .switch input:checked + .slider:before{
+      transform: translate(24px, -50%);
+    }
+
+    /* Main card */
+    .card{
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .cardHead{
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap: wrap;
+    }
+
+    .cardHead h2{
+      margin:0;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+    .cardHead .sub{
+      margin:0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .content{ padding: 18px; }
+
+    /* Sections that swap */
+    .panel{
+      display:none;
+      animation: fadeIn .18s ease;
+    }
+    .panel.active{ display:block; }
+
+    .emptyBox{
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px dashed rgba(255,255,255,0.22);
+      background: rgba(0,0,0,0.18);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .infoGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      max-width: 640px;
+    }
+
+    .row{
+      padding: 14px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+
+    .k{
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .2px;
+      text-transform: none;
+    }
+    .v{
+      font-size: 16px;
+      font-weight: 750;
+      letter-spacing: .2px;
+    }
+
+    @keyframes fadeIn{
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0px); }
+    }
+
+    @media (max-width: 520px){
+      .title h1{ font-size: 16px; }
+      .toggleLabel{ max-width: 200px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="left">
+        <!-- NAV BUTTONS (About is green) -->
+        <a class="btn home" href="index.html" aria-label="Go to Home (index)">
+          Home
+        </a>
+        <a class="btn about" href="about.html" aria-label="About page">
+          About
+        </a>
+        <a class="btn" href="education.html">Education</a>
+        <a class="btn" href="skills.html">Skills</a>
+        <a class="btn" href="projects.html">Projects</a>
+        <a class="btn" href="sharedfiles.html">Shared Files</a>
+        <a class="btn" href="licenses.html">Licenses</a>
+        <a class="btn" href="workexperience.html">Work Experience</a>
+
+        <div class="title">
+          <h1 id="pageTitle">About</h1>
+          <p id="pageSubtitle">Toggle to switch views</p>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="toggleWrap" title="Switch between About and Website Info">
+          <div class="toggleLabel" id="toggleText">
+            Viewing: About page of Dave Chandi Persaud
+          </div>
+
+          <label class="switch">
+            <input id="viewToggle" type="checkbox" aria-label="Toggle About / Website Info" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CARD -->
+    <section class="card">
+      <header class="cardHead">
+        <div>
+          <h2 id="cardHeader">About</h2>
+          <p class="sub" id="cardSub">This section is intentionally empty for now.</p>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- ABOUT PANEL (empty for now) -->
+        <div id="aboutPanel" class="panel active">
+          <div class="emptyBox">
+            I watch television in my free time; I prioritize my sanity, health and education. I truly like the idea of doing nothing besides watching television, video games and small PLC projects. I do not have much to say for an about section, but thanks for reading this.
+          </div>
+          <div class="emptyBox">
+            Authorized to work in Canada, Guyana, United Kingdom, British Virgin Islands
+          </div>
+        </div>
+
+        <!-- WEBSITE INFO PANEL -->
+        <div id="infoPanel" class="panel">
+          <div class="infoGrid">
+            <div class="row">
+              <div class="k">Website Creator</div>
+              <div class="v">Dave Chandi Persaud</div>
+            </div>            <div class="row">
+              <div class="k">Tools Used to Create Website</div>
+              <div class="v">ChatGPT</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const toggle = document.getElementById("viewToggle");
+    const aboutPanel = document.getElementById("aboutPanel");
+    const infoPanel = document.getElementById("infoPanel");
+
+    const pageTitle = document.getElementById("pageTitle");
+    const pageSubtitle = document.getElementById("pageSubtitle");
+    const cardHeader = document.getElementById("cardHeader");
+    const cardSub = document.getElementById("cardSub");
+    const toggleText = document.getElementById("toggleText");
+
+    function setView(showInfo){
+      if(showInfo){
+        aboutPanel.classList.remove("active");
+        infoPanel.classList.add("active");
+
+        pageTitle.textContent = "About";
+        pageSubtitle.textContent = "Website information";
+        cardHeader.textContent = "About";
+        cardSub.textContent = "Website details";
+
+        toggleText.textContent = "Viewing: Website Creator info";
+      } else {
+        infoPanel.classList.remove("active");
+        aboutPanel.classList.add("active");
+
+        pageTitle.textContent = "About";
+        pageSubtitle.textContent = "About page of Dave Chandi Persaud";
+        cardHeader.textContent = "About";
+        cardSub.textContent = "This section is intentionally empty for now.";
+
+        toggleText.textContent = "Viewing: About page of Dave Chandi Persaud";
+      }
+    }
+
+    // default: show About (unchecked)
+    setView(false);
+
+    toggle.addEventListener("change", () => {
+      setView(toggle.checked);
+    });
+  </script>
+</body>
+</html>

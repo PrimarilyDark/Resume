@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dave C Persaud</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      overflow: hidden;
+    }
+
+    #bgCanvas, #rainCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    #bgCanvas { z-index: 0; }
+    #rainCanvas { z-index: 1; display: none; }
+
+    #mist {
+      position: fixed;
+      left: -20vw; right: -20vw; bottom: -20vh; height: 55vh;
+      z-index: 2; pointer-events: none; display: none; opacity: 0.22;
+      filter: blur(22px);
+      background:
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.18), transparent 58%),
+        radial-gradient(circle at 60% 60%, rgba(255,255,255,0.12), transparent 62%),
+        radial-gradient(circle at 85% 45%, rgba(255,255,255,0.10), transparent 60%),
+        linear-gradient(to top, rgba(255,255,255,0.18), transparent);
+      animation: mistDrift 7.5s ease-in-out infinite alternate;
+    }
+    @keyframes mistDrift {
+      0% { transform: translate3d(-2%, 0, 0) scale(1.02); }
+      100% { transform: translate3d(2%, 0, 0) scale(1.05); }
+    }
+
+    .container {
+      position: relative; z-index: 3; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 20px; text-align: center;
+    }
+
+    .panel {
+      padding: 22px 18px; border-radius: 18px;
+      background: rgba(255,255,255,0.75); backdrop-filter: blur(6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+    }
+
+    h1 { margin: 0 0 18px; font-size: 40px; }
+
+    .buttons {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      justify-content: center; max-width: 1000px;
+    }
+
+    .btn, button {
+      padding: 12px 18px; border: none; border-radius: 10px;
+      cursor: pointer; font-size: 16px; background: #111; color: white;
+      text-decoration: none; transition: 0.2s ease;
+    }
+    .btn:hover, button:hover {
+      transform: translateY(-2px); background: #333;
+    }
+
+    body.rainy {
+      background: radial-gradient(circle at 30% 20%, #0b1222 0%, #05070c 55%, #020308 100%);
+    }
+    body.rainy .panel {
+      background: rgba(10,14,24,0.72); box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+    }
+    body.rainy h1 { color: rgba(255,255,255,0.92); }
+    body.rainy .btn, body.rainy button {
+      background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.92);
+    }
+    body.rainy .btn:hover, body.rainy button:hover {
+      background: rgba(255,255,255,0.18);
+    }
+
+    .settings {
+      position: fixed; right: 14px; bottom: 14px; z-index: 4;
+      width: min(320px, calc(100vw - 28px));
+      background: rgba(255,255,255,0.78); backdrop-filter: blur(6px);
+      border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      padding: 12px 12px 10px;
+      display: none;
+    }
+    .settings-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .settings-title { font-weight: 700; font-size: 14px; letter-spacing: 0.2px; }
+    .mini-btn {
+      border: 0; background: #111; color: #fff; border-radius: 10px;
+      padding: 8px 10px; cursor: pointer; font-size: 12px; transition: 0.2s ease;
+    }
+    .mini-btn:hover { background: #333; transform: translateY(-1px); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0; font-size: 13px; }
+    input[type="range"] { width: 160px; accent-color: #111; }
+    .value { font-variant-numeric: tabular-nums; opacity: 0.85; min-width: 50px; text-align: right; }
+    input[type="checkbox"] { accent-color: #111; }
+
+    .toggle-settings {
+      padding: 12px 18px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.05);
+      cursor: pointer;
+      font-size: 15px;
+      display: flex; align-items: center; gap: 8px;
+      color: #333;
+      user-select: none;
+    }
+    .toggle-settings:hover { background: rgba(0,0,0,0.1); }
+
+    /* Keypad modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 18px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      width: min(420px, 100%); background: rgba(255,255,255,0.92);
+      border-radius: 18px; box-shadow: 0 18px 55px rgba(0,0,0,0.22);
+      overflow: hidden;
+      outline: none; /* for focus */
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 14px 14px 10px; border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .modal-title { font-weight: 800; font-size: 14px; letter-spacing: 0.4px; text-transform: uppercase; }
+    .close-x {
+      background: #111; color: #fff; border: 0; border-radius: 10px;
+      padding: 8px 10px; cursor: pointer; transition: .2s ease; font-size: 12px;
+    }
+    .close-x:hover { background: #333; transform: translateY(-1px); }
+
+    .modal-body { padding: 14px; }
+    .hint { margin: 0 0 10px; font-size: 13px; opacity: 0.8; }
+
+    .dots { display: flex; gap: 10px; justify-content: center; padding: 10px 0 6px; }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: rgba(0,0,0,0.18); box-shadow: inset 0 0 0 2px rgba(0,0,0,0.08);
+      transition: 0.15s ease;
+    }
+    .dot.filled { background: #111; }
+
+    .merge-zone { height: 86px; position: relative; margin: 10px 0 6px; }
+    .chip-row {
+      display: flex; gap: 10px; position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+    }
+    .chip {
+      width: 44px; height: 44px; border-radius: 14px; background: #111; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; letter-spacing: 1px; box-shadow: 0 10px 20px rgba(0,0,0,0.18);
+    }
+
+    .check {
+      width: 56px; height: 56px; border-radius: 16px;
+      background: rgba(17,17,17,0.06); display: none; align-items: center;
+      justify-content: center; box-shadow: inset 0 0 0 2px rgba(0,0,0,0.06);
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    }
+    .check:before {
+      content: ""; width: 22px; height: 12px;
+      border-left: 6px solid #16a34a; border-bottom: 6px solid #16a34a;
+      transform: rotate(-45deg); opacity: 0;
+    }
+
+    .pad {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;
+    }
+    .pad button {
+      background: #111; color: #fff; border: 0; border-radius: 14px;
+      padding: 14px 0; font-size: 18px; font-weight: 800; transition: .15s ease;
+      cursor: pointer;
+    }
+    .pad button:hover { background: #333; transform: translateY(-1px); }
+    .pad button:focus { outline: 2px solid #555; outline-offset: 2px; }
+
+    .pad .ghost { background: rgba(0,0,0,0.08); color: #111; }
+
+    .shake { animation: shake 0.35s linear; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-7px); }
+      80% { transform: translateX(7px); }
+    }
+
+    .success .chip { animation: chipMerge 0.55s ease forwards; }
+    .success .chip:nth-child(1) { animation-delay: 0s; }
+    .success .chip:nth-child(2) { animation-delay: 0.05s; }
+    .success .chip:nth-child(3) { animation-delay: 0.10s; }
+    .success .chip:nth-child(4) { animation-delay: 0.15s; }
+    @keyframes chipMerge {
+      0%   { transform: scale(1); opacity: 1; }
+      65%  { transform: scale(0.25); opacity: 0.35; }
+      100% { transform: scale(0.1); opacity: 0; }
+    }
+
+    .success .check { display: flex; animation: checkPop 0.6s ease forwards; }
+    .success .check:before { animation: drawCheck 0.45s ease forwards; animation-delay: 0.25s; }
+    @keyframes checkPop {
+      0%   { transform: translate(-50%,-50%) scale(0.75); opacity: 0; }
+      60%  { transform: translate(-50%,-50%) scale(1.08); opacity: 1; }
+      100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+    }
+    @keyframes drawCheck {
+      0%   { opacity: 0; transform: rotate(-45deg) scale(0.6); }
+      100% { opacity: 1; transform: rotate(-45deg) scale(1); }
+    }
+
+    .locked .pad button { pointer-events: none; opacity: 0.65; }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+  <canvas id="rainCanvas"></canvas>
+  <div id="mist"></div>
+
+  <div class="container">
+    <div class="panel">
+      <h1>Dave C Persaud</h1>
+
+      <div class="buttons">
+        <a class="btn" href="about.html">About</a>
+        <a class="btn" href="education.html">Education</a>
+        <a class="btn" href="skills.html">Skills</a>
+        <a class="btn" href="projects.html">Projects</a>
+        <a class="btn" href="sharedfiles.html">Shared Files</a>
+        <a class="btn" href="licenses.html">Licenses</a>
+        <a class="btn" href="workexperience.html">Work Experience</a>
+       
+        <button class="btn" id="infoBtn" type="button">Information</button>
+
+        
+
+        <label class="toggle-settings">
+          <input id="showParticleSettings" type="checkbox" checked />
+          Show particle settings
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings" id="settings">
+    <div class="settings-top">
+      <div class="settings-title">Particle Settings</div>
+      <button class="mini-btn" id="togglePanelBtn" type="button">Hide</button>
+    </div>
+    <div id="settingsBody">
+      <div class="row">
+        <div>Mode</div>
+        <input id="particleMode" type="range" min="0" max="2" step="1" value="2" />
+        <div class="value" id="modeValue">Version 2</div>
+      </div>
+      <div class="row">
+        <div>Speed</div>
+        <input id="speedSlider" type="range" min="0.3" max="3.0" step="0.1" value="1.0" />
+        <div class="value" id="speedValue">1.0×</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="padOverlay">
+    <div class="modal" id="padModal" tabindex="0">
+      <div class="modal-header">
+        <div class="modal-title">Enter Keycode</div>
+        <button class="close-x" id="padCloseBtn">Close</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint" id="modalHint">Enter the 4-digit code for Information.</p>
+        <div class="dots">
+          <div class="dot" id="d1"></div><div class="dot" id="d2"></div>
+          <div class="dot" id="d3"></div><div class="dot" id="d4"></div>
+        </div>
+        <div class="merge-zone">
+          <div class="chip-row" id="chipRow"></div>
+          <div class="check" id="checkIcon"></div>
+        </div>
+        <div class="pad">
+          <button type="button" class="num">1</button><button type="button" class="num">2</button><button type="button" class="num">3</button>
+          <button type="button" class="num">4</button><button type="button" class="num">5</button><button type="button" class="num">6</button>
+          <button type="button" class="num">7</button><button type="button" class="num">8</button><button type="button" class="num">9</button>
+          <button type="button" class="ghost" id="clearBtn">Clear</button>
+          <button type="button" class="num">0</button>
+          <button type="button" class="ghost" id="backBtn">⌫</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ──────────────────────────────────────────────────────────────
+    // Canvas & Settings
+    // ──────────────────────────────────────────────────────────────
+    const canvas = document.getElementById("bgCanvas");
+    const ctx = canvas.getContext("2d", { alpha: true });
+    let W = 0, H = 0, DPR = 1;
+
+    function resizeCanvas() {
+      DPR = window.devicePixelRatio || 1;
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    // Settings persistence
+    const STORAGE_KEY = "dcp_particle_settings_v8";
+    let currentMode = 2;
+    let speedMultiplier = 1.0;
+    let panelOpen = true;
+    let showParticleSettings = true;
+    let rainyMode = Math.random() < 0.10;
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch { return null; }
+    }
+    function saveSettings() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          mode: currentMode,
+          speed: speedMultiplier,
+          panelOpen,
+          showParticleSettings
+        }));
+      } catch {}
+    }
+
+    const saved = loadSettings();
+    if (saved) {
+      currentMode = saved.mode ?? 2;
+      speedMultiplier = saved.speed ?? 1.0;
+      panelOpen = saved.panelOpen ?? true;
+      showParticleSettings = saved.showParticleSettings ?? true;
+    }
+
+    const modeSlider   = document.getElementById("particleMode");
+    const modeValue    = document.getElementById("modeValue");
+    const speedSlider  = document.getElementById("speedSlider");
+    const speedValue   = document.getElementById("speedValue");
+    const togglePanelBtn = document.getElementById("togglePanelBtn");
+    const settingsBody = document.getElementById("settingsBody");
+    const settingsPanel = document.getElementById("settings");
+    const showSettingsChk = document.getElementById("showParticleSettings");
+
+    modeSlider.value = currentMode;
+    modeValue.textContent = ["OFF", "Version 1", "Version 2"][currentMode];
+    speedSlider.value = speedMultiplier;
+    speedValue.textContent = speedMultiplier.toFixed(1) + "×";
+    settingsBody.style.display = panelOpen ? "block" : "none";
+    togglePanelBtn.textContent = panelOpen ? "Hide" : "Show";
+    showSettingsChk.checked = showParticleSettings;
+    settingsPanel.style.display = showParticleSettings ? "block" : "none";
+
+    function updateSpeedUI() {
+      const enabled = currentMode === 2 && !rainyMode;
+      speedSlider.disabled = !enabled;
+      speedSlider.style.opacity = enabled ? "1" : "0.5";
+    }
+    updateSpeedUI();
+
+    modeSlider.addEventListener("input", () => {
+      currentMode = parseInt(modeSlider.value);
+      modeValue.textContent = ["OFF", "Version 1", "Version 2"][currentMode];
+      saveSettings();
+      updateSpeedUI();
+    });
+
+    speedSlider.addEventListener("input", () => {
+      speedMultiplier = parseFloat(speedSlider.value);
+      speedValue.textContent = speedMultiplier.toFixed(1) + "×";
+      saveSettings();
+    });
+
+    togglePanelBtn.addEventListener("click", () => {
+      panelOpen = !panelOpen;
+      settingsBody.style.display = panelOpen ? "block" : "none";
+      togglePanelBtn.textContent = panelOpen ? "Hide" : "Show";
+      saveSettings();
+    });
+
+    showSettingsChk.addEventListener("change", () => {
+      showParticleSettings = showSettingsChk.checked;
+      settingsPanel.style.display = showParticleSettings ? "block" : "none";
+      saveSettings();
+    });
+
+    // ──────────────────────────────────────────────────────────────
+    // Particles (Version 1 & 2)
+    // ──────────────────────────────────────────────────────────────
+    const v1Particles = [];
+    function spawnV1() {
+      if (Math.random() < 0.35) {
+        v1Particles.push({ x: Math.random()*W, y: Math.random()*H, life: 90 + Math.random()*90 });
+      }
+    }
+    function updateV1() {
+      for (let i = v1Particles.length - 1; i >= 0; i--) {
+        const p = v1Particles[i];
+        p.life--;
+        if (p.life <= 0) { v1Particles.splice(i, 1); continue; }
+        ctx.fillStyle = `rgba(0,0,0,${p.life / 140})`;
+        ctx.fillRect(p.x - 5, p.y - 5, 10, 10);
+      }
+    }
+
+    const v2Particles = [];
+    const spawnPerFrame = 2;
+    const spawnChance = 0.82;
+    const friction = 0.987;
+    const minLife = 180;
+    const maxLife = 360;
+
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+
+    function biasedPoint() {
+      const uniformX = rand(0, W), uniformY = rand(0, H);
+      const cx = W/2, cy = H/2;
+      const centerX = cx + rand(-W*0.28, W*0.28);
+      const centerY = cy + rand(-H*0.28, H*0.28);
+      const t = 0.55;
+      return { x: uniformX * (1-t) + centerX * t, y: uniformY * (1-t) + centerY * t };
+    }
+
+    function edgePoint() {
+      const side = Math.floor(rand(0,4));
+      if (side === 0) return {x: rand(0,W), y: -10};
+      if (side === 1) return {x: W+10, y: rand(0,H)};
+      if (side === 2) return {x: rand(0,W), y: H+10};
+      return {x: -10, y: rand(0,H)};
+    }
+
+    function spawnDiamond() {
+      const fromEdge = Math.random() < 0.30;
+      const start = fromEdge ? edgePoint() : biasedPoint();
+      const cx = W/2, cy = H/2;
+      const dx = start.x - cx, dy = start.y - cy;
+      const angle = Math.atan2(dy, dx) + rand(-0.9, 0.9);
+      const baseSpeed = fromEdge ? rand(0.4,1.6) : rand(0.6,2.4);
+      const size = rand(6,18);
+
+      v2Particles.push({
+        x: start.x, y: start.y,
+        vx: Math.cos(angle) * baseSpeed,
+        vy: Math.sin(angle) * baseSpeed,
+        size, rot: rand(0, Math.PI*2), rotSpeed: rand(-0.02,0.02),
+        life: Math.floor(rand(minLife, maxLife)), age: 0,
+        shade: rand(0.12, 0.40)
+      });
+    }
+
+    function drawDiamond(p, alpha) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      const g = Math.floor(255 * (1 - p.shade));
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = `rgb(${g},${g},${g})`;
+      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Rain (sticky, 10% chance on load)
+    // ──────────────────────────────────────────────────────────────
+    const rainCanvas = document.getElementById("rainCanvas");
+    const rctx = rainCanvas.getContext("2d", { alpha: true });
+    const mist = document.getElementById("mist");
+    let rainDrops = [];
+    let rainAnimId = null;
+
+    function resizeRain() {
+      rainCanvas.width = Math.floor(W * DPR);
+      rainCanvas.height = Math.floor(H * DPR);
+      rainCanvas.style.width = W + "px";
+      rainCanvas.style.height = H + "px";
+      rctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+
+    function initRain() {
+      rainDrops = [];
+      const density = Math.max(220, Math.min(900, Math.floor((W * H) / 11000)));
+      for (let i = 0; i < density; i++) {
+        rainDrops.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          len: 18 + Math.random() * 32,
+          speed: 10 + Math.random() * 18,
+          thick: 1.1 + Math.random() * 1.8,
+          drift: -2.8 + Math.random() * 5.6,
+          alpha: 0.18 + Math.random() * 0.28
+        });
+      }
+    }
+
+    function drawRain() {
+      rctx.clearRect(0, 0, W, H);
+      rctx.fillStyle = "rgba(0,0,0,0.10)";
+      rctx.fillRect(0, 0, W, H);
+      rctx.lineCap = "round";
+
+      rainDrops.forEach(d => {
+        rctx.lineWidth = d.thick;
+        rctx.strokeStyle = `rgba(190,215,255,${d.alpha})`;
+        rctx.beginPath();
+        rctx.moveTo(d.x, d.y);
+        rctx.lineTo(d.x + d.drift * 2.2, d.y + d.len);
+        rctx.stroke();
+
+        d.x += d.drift;
+        d.y += d.speed;
+
+        if (d.y > H + 60) { d.y = -60; d.x = Math.random() * W; }
+        if (d.x < -80) d.x = W + 80;
+        if (d.x > W + 80) d.x = -80;
+      });
+
+      rainAnimId = requestAnimationFrame(drawRain);
+    }
+
+    if (rainyMode) {
+      document.body.classList.add("rainy");
+      rainCanvas.style.display = "block";
+      mist.style.display = "block";
+      resizeRain();
+      initRain();
+      drawRain();
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Animation loop
+    // ──────────────────────────────────────────────────────────────
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+
+      if (!rainyMode) {
+        if (currentMode === 1) {
+          spawnV1();
+          updateV1();
+        } else if (currentMode === 2) {
+          for (let i = 0; i < spawnPerFrame; i++) {
+            if (Math.random() < spawnChance) spawnDiamond();
+          }
+          for (let i = v2Particles.length - 1; i >= 0; i--) {
+            const p = v2Particles[i];
+            p.age++;
+            p.x += p.vx * speedMultiplier;
+            p.y += p.vy * speedMultiplier;
+            p.vx *= friction;
+            p.vy *= friction;
+            p.rot += p.rotSpeed * speedMultiplier;
+            const t = p.age / p.life;
+            const alpha = Math.max(0, 1 - t*t);
+            drawDiamond(p, alpha);
+            if (p.age >= p.life || alpha <= 0 || p.x < -80 || p.x > W+80 || p.y < -80 || p.y > H+80) {
+              v2Particles.splice(i, 1);
+            }
+          }
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // ──────────────────────────────────────────────────────────────
+    // Keypad with fixed keyboard input
+    // ──────────────────────────────────────────────────────────────
+    const infoBtn = document.getElementById("infoBtn");
+    const overlay = document.getElementById("padOverlay");
+    const modal = document.getElementById("padModal");
+    const chipRow = document.getElementById("chipRow");
+    const dots = [document.getElementById("d1"), document.getElementById("d2"), document.getElementById("d3"), document.getElementById("d4")];
+    const modalHint = document.getElementById("modalHint");
+
+    const PERSONAL_CODE = "4619";
+    const RAIN_TIME_CODE = "5471";
+
+    let input = "";
+    let locked = false;
+
+    function openPad() {
+      modalHint.textContent = rainyMode
+        ? "Rain mode active. Enter your code."
+        : "Enter the 4-digit code for Information.";
+
+      overlay.classList.add("open");
+      resetPad();
+
+      // Focus modal for reliable keyboard input
+      setTimeout(() => modal.focus(), 100);
+    }
+
+    function closePad() {
+      overlay.classList.remove("open");
+    }
+
+    function resetPad() {
+      locked = false;
+      input = "";
+      modal.classList.remove("shake", "success", "locked");
+      chipRow.innerHTML = "";
+      dots.forEach(d => d.classList.remove("filled"));
+      modalHint.textContent = rainyMode
+        ? "Rain mode active. Enter your code."
+        : "Enter the 4-digit code for Information.";
+    }
+
+    function pressDigit(n) {
+      if (locked || input.length >= 4) return;
+      input += n;
+      dots[input.length-1].classList.add("filled");
+      const chip = document.createElement("div");
+      chip.className = "chip"; chip.textContent = n;
+      chipRow.appendChild(chip);
+
+      if (input.length === 4) {
+        if (input === PERSONAL_CODE) {
+          locked = true;
+          modal.classList.add("locked", "success");
+          setTimeout(() => window.location.href = "personal.html", 1000);
+        } else if (rainyMode && input === RAIN_TIME_CODE) {
+          locked = true;
+          modal.classList.add("locked", "success");
+          setTimeout(() => window.location.href = "access.html", 1000);
+        } else {
+          modal.classList.add("shake");
+          setTimeout(resetPad, 400);
+        }
+      }
+    }
+
+    infoBtn.onclick = openPad;
+    document.getElementById("padCloseBtn").onclick = closePad;
+    overlay.onclick = e => { if (e.target === overlay) closePad(); };
+
+    // ── FIXED KEYBOARD SUPPORT ──
+    document.addEventListener("keydown", e => {
+      if (!overlay.classList.contains("open") || locked) return;
+
+      if (e.key === "Escape") {
+        closePad();
+        e.preventDefault();
+        return;
+      }
+
+      if (e.key >= "0" && e.key <= "9") {
+        pressDigit(e.key);
+        e.preventDefault();
+      } else if (e.key === "Backspace" || e.key === "Delete") {
+        if (input.length > 0) {
+          dots[input.length-1].classList.remove("filled");
+          input = input.slice(0, -1);
+          chipRow.removeChild(chipRow.lastElementChild);
+        }
+        e.preventDefault();
+      } else if (e.key.toLowerCase() === "c") {
+        resetPad();
+        e.preventDefault();
+      }
+    });
+
+    // Click handlers for on-screen buttons
+    document.querySelectorAll(".num").forEach(btn => {
+      btn.onclick = () => pressDigit(btn.textContent.trim());
+    });
+
+    document.getElementById("clearBtn").onclick = () => { if (!locked) resetPad(); };
+    document.getElementById("backBtn").onclick = () => {
+      if (locked) return;
+      if (input.length > 0) {
+        dots[input.length-1].classList.remove("filled");
+        input = input.slice(0,-1);
+        chipRow.removeChild(chipRow.lastElementChild);
+      }
+    };
+  </script>
+</body>
+</html>
