@@ -4,221 +4,217 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Work Experience</title>
-
   <style>
-    :root{
-      --bg:#0b0f1a;
-      --card:#111827;
-      --ink:#e5e7eb;
-      --muted:#94a3b8;
-      --line:#243145;
-
-      --radius:18px;
+    :root {
+      --bg: #0b0f1a;
+      --card: #111827;
+      --ink: #e5e7eb;
+      --muted: #94a3b8;
+      --line: #243145;
+      --radius: 16px;
       --shadow: 0 18px 50px rgba(0,0,0,0.45);
-
-      --accent:#22c55e; /* subtle green */
+      --accent: #22c55e;
 
       /* nav colors */
-      --nav:#111;
-      --home:#e53935;   /* red home */
-      --active:#2e7d32; /* green active (Work Experience button) */
+      --home: #e53935;
+      --active: #2e7d32;
     }
 
-    *{ box-sizing:border-box; }
+    * { box-sizing: border-box; }
 
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family: Arial, sans-serif;
-      color:var(--ink);
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
       background:
         radial-gradient(900px 600px at 20% 10%, rgba(34,197,94,0.18), transparent 60%),
         radial-gradient(800px 500px at 80% 20%, rgba(148,163,184,0.12), transparent 55%),
         linear-gradient(180deg, #070a12 0%, var(--bg) 70%);
     }
 
-    header{
-      padding: 18px 18px 0;
-      max-width: 980px;
+    .wrap {
+      width: min(980px, 100%);
       margin: 0 auto;
+      padding: 28px 20px;
     }
 
-    /* NAV ROW (Work Experience is green) */
-    .navrow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      margin-bottom:18px;
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 40px;
     }
 
-    a.nav{
-      text-decoration:none;
-      background:rgba(255,255,255,0.06);
-      color:var(--ink);
-      padding:10px 14px;
-      border-radius:12px;
-      border:1px solid rgba(148,163,184,0.22);
-      transition:.2s ease;
-      display:inline-block;
-      white-space:nowrap;
-      font-weight:800;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-    }
-    a.nav:hover{
-      transform:translateY(-2px);
-      border-color: rgba(148,163,184,0.35);
-      background: rgba(2,6,23,0.55);
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
     }
 
-    a.nav.home{
+    .navrow {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: rgba(255,255,255,0.04);
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(148,163,184,0.4);
+    }
+
+    .btn.home {
       background: rgba(229,57,53,0.18);
       border-color: rgba(229,57,53,0.45);
     }
-    a.nav.home:hover{
+    .btn.home:hover {
+      background: rgba(229,57,53,0.24);
       border-color: rgba(229,57,53,0.65);
-      background: rgba(229,57,53,0.22);
     }
 
-    a.nav.work{
+    .btn.active {
       background: rgba(46,125,50,0.22);
       border-color: rgba(46,125,50,0.55);
     }
-    a.nav.work:hover{
-      border-color: rgba(46,125,50,0.75);
+    .btn.active:hover {
       background: rgba(46,125,50,0.28);
+      border-color: rgba(46,125,50,0.75);
     }
 
-    .title{
-      margin:0;
-      font-size: 34px;
-      letter-spacing: 0.5px;
-      font-weight: 800;
+    .title h1 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
     }
 
-    .subtitle{
-      margin: 8px 0 0;
-      color: var(--muted);
-      line-height: 1.5;
-      max-width: 60ch;
+    main {
+      padding: 0 4px;
     }
 
-    main{
-      max-width: 980px;
-      margin: 22px auto 40px;
-      padding: 0 18px;
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(17,24,39,0.92), rgba(17,24,39,0.75));
-      border: 1px solid rgba(36,49,69,0.85);
+    .card {
+      background: linear-gradient(180deg, rgba(17,24,39,0.92), rgba(17,24,39,0.78));
+      border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 22px;
-      backdrop-filter: blur(8px);
+      padding: 32px;
+      backdrop-filter: blur(10px);
+      text-align: center;
     }
 
-    .label{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      color: var(--muted);
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      margin: 0 0 14px;
+    .card h2 {
+      margin: 0 0 24px;
+      font-size: 22px;
+      font-weight: 600;
     }
 
-    .dot{
-      width:10px;height:10px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 4px rgba(34,197,94,0.12);
-    }
-
-    a.link{
-      display: inline-block;
-      color: var(--ink);
-      text-decoration: none;
-      font-weight: 700;
-      padding: 14px 14px;
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
       border-radius: 12px;
-      border: 1px solid rgba(148,163,184,0.25);
-      background: rgba(2,6,23,0.35);
-      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
-      max-width: 100%;
-      word-break: break-word;
+      border: 1px solid rgba(34,197,94,0.4);
+      background: rgba(34,197,94,0.12);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.18s ease;
+      box-shadow: 0 10px 24px rgba(34,197,94,0.15);
     }
 
-    a.link:hover{
+    .link-btn:hover {
       transform: translateY(-2px);
-      border-color: rgba(34,197,94,0.55);
-      background: rgba(2,6,23,0.55);
+      background: rgba(34,197,94,0.22);
+      border-color: rgba(34,197,94,0.6);
+      box-shadow: 0 14px 32px rgba(34,197,94,0.22);
     }
 
-    .hint{
-      margin: 12px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.5;
+    .link-btn::after {
+      content: "↗";
+      font-size: 18px;
     }
 
-    footer{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 0 18px 28px;
-      color: rgba(148,163,184,0.8);
-      font-size: 12px;
+    footer {
+      margin-top: 60px;
+      padding-bottom: 32px;
+      color: rgba(148,163,184,0.7);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .top-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .navrow {
+        justify-content: flex-start;
+      }
     }
   </style>
 </head>
-
 <body>
-  <header>
-    <!-- NAV BUTTONS (Work Experience is green) -->
-    <nav class="navrow" aria-label="Site navigation">
-      <a class="nav home" href="index.html">Home</a>
-      <a class="nav" href="about.html">About</a>
-      <a class="nav" href="education.html">Education</a>
-      <a class="nav" href="skills.html">Skills</a>
-      <a class="nav" href="projects.html">Projects</a>
-      <a class="nav" href="sharedfiles.html">Shared Files</a>
-      <a class="nav" href="licenses.html">Licenses</a>
-      <a class="nav work" href="workexperience.html">Work Experience</a>
-    </nav>
+  <div class="wrap">
+    <header>
+      <div class="top-row">
+        <div class="title">
+          <h1>Work Experience</h1>
+        </div>
 
-    <h1 class="title">Work Experience</h1>
-    <p class="subtitle">
-      “This page contains only the official link to the resume containing the work experience.
-    </p>
-  </header>
+        <nav class="navrow" aria-label="Site navigation">
+          <a class="btn home" href="index.html">Home</a>
+          <a class="btn" href="about.html">About</a>
+          <a class="btn" href="education.html">Education</a>
+          <a class="btn" href="skills.html">Skills</a>
+          <a class="btn" href="projects.html">Projects</a>
+          <a class="btn" href="sharedfiles.html">Shared Files</a>
+          <a class="btn" href="licenses.html">Licenses</a>
+          <a class="btn active" href="workexperience.html">Work Experience</a>
+        </nav>
+      </div>
+    </header>
 
-  <main>
-    <section class="card" aria-label="Work Experience Link">
-      <div class="label"><span class="dot" aria-hidden="true"></span> Link</div>
+    <main>
+      <div class="card">
+        <h2>View Full Resume</h2>
+        <a class="link-btn"
+           href="https://www.linkedin.com/posts/dave-c-persaud-b4b374355_cvresume-ugcPost-7426398606301057024-KXmT?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFiCTGsBGLT1fOZh99mLzxV5FTulko-q50U"
+           target="_blank" rel="noopener noreferrer">
+          Open on LinkedIn
+        </a>
+      </div>
+    </main>
 
-      <a
-        class="link"
-        href="https://www.linkedin.com/posts/dave-c-persaud-b4b374355_cvresume-ugcPost-7426398606301057024-KXmT?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFiCTGsBGLT1fOZh99mLzxV5FTulko-q50U"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Open Work Experience (LinkedIn Post)
-      </a>
-
-      <p class="hint">
-        Tip: opens in a new tab so your website stays open.
-      </p>
-    </section>
-  </main>
-
-  <footer>
-    © <span id="y"></span> • Work Experience
-  </footer>
+    <footer>
+      © <span id="year"></span> • All rights reserved
+    </footer>
+  </div>
 
   <script>
-    document.getElementById("y").textContent = new Date().getFullYear();
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
