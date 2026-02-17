@@ -5,290 +5,336 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>About | Dave Chandi Persaud</title>
   <style>
-    :root{
-      --bg: #0b0f17;
-      --card: rgba(255,255,255,0.08);
-      --card2: rgba(255,255,255,0.06);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.72);
-      --border: rgba(255,255,255,0.14);
-      --shadow: 0 18px 60px rgba(0,0,0,0.45);
-      --radius: 18px;
-
-      /* nav colors */
-      --home: rgba(229,57,53,0.26);   /* red home */
-      --homeB: rgba(229,57,53,0.55);
-      --green: rgba(46,125,50,0.28);  /* green about */
-      --greenB: rgba(46,125,50,0.65);
+    :root {
+      --bg-primary: #0a0f1a;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --bg-card-hover: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.1);
+      --border-hover: rgba(255, 255, 255, 0.2);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --accent-cyan: #22d3ee;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --accent-orange: #f97316;
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      --radius: 20px;
+      --radius-sm: 12px;
     }
 
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(900px 500px at 15% 10%, rgba(88, 101, 242, 0.35), transparent 60%),
-        radial-gradient(900px 500px at 85% 20%, rgba(34, 211, 238, 0.20), transparent 60%),
-        radial-gradient(900px 500px at 60% 90%, rgba(255, 100, 180, 0.18), transparent 60%),
-        var(--bg);
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      padding: 22px 14px;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      min-height: 100vh;
+      padding: 24px;
+      position: relative;
     }
 
-    .wrap{
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: 
+        radial-gradient(ellipse 80% 50% at 20% 40%, rgba(168, 85, 247, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 60%, rgba(34, 211, 238, 0.08), transparent),
+        var(--bg-primary);
+    }
+
+    .wrap {
       width: min(980px, 100%);
-      display:flex;
-      flex-direction:column;
-      gap:14px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Top bar */
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      background: var(--card);
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      flex-wrap:wrap;
+      backdrop-filter: blur(20px);
+      flex-wrap: wrap;
     }
 
-    .left{
-      display:flex;
-      align-items:center;
+    .left {
+      display: flex;
+      align-items: center;
       gap: 12px;
       min-width: 0;
-      flex-wrap:wrap;
+      flex-wrap: wrap;
     }
 
-    .title{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
+    .title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       min-width: 0;
     }
-    .title h1{
-      margin:0;
-      font-size: 18px;
-      letter-spacing: 0.2px;
-      line-height: 1.1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .title p{
-      margin:0;
-      font-size: 12px;
-      color: var(--muted);
+
+    .title h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding: 10px 12px;
-      border-radius: 12px;
+    .title p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--border);
-      background: rgba(255,255,255,0.10);
-      color: var(--text);
-      text-decoration:none;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-primary);
+      text-decoration: none;
       font-weight: 600;
-      letter-spacing: 0.2px;
-      transition: transform .15s ease, background .15s ease, border-color .15s ease, filter .15s ease;
-      user-select:none;
+      font-size: 14px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       white-space: nowrap;
     }
-    .btn:hover{
-      transform: translateY(-1px);
-      background: rgba(255,255,255,0.14);
-      border-color: rgba(255,255,255,0.22);
-    }
-    .btn:active{ transform: translateY(0px); }
 
-    /* special nav colors */
-    .btn.home{
-      background: var(--home);
-      border-color: var(--homeB);
-    }
-    .btn.home:hover{
-      background: rgba(229,57,53,0.34);
-      border-color: rgba(229,57,53,0.72);
+    .btn:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.1);
+      border-color: var(--border-hover);
     }
 
-    .btn.about{
-      background: var(--green);
-      border-color: var(--greenB);
-    }
-    .btn.about:hover{
-      background: rgba(46,125,50,0.36);
-      border-color: rgba(46,125,50,0.82);
+    .btn.home {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+      border-color: rgba(239, 68, 68, 0.4);
     }
 
-    .right{
-      display:flex;
-      align-items:center;
-      gap: 10px;
+    .btn.home:hover {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.15) 100%);
+      border-color: rgba(239, 68, 68, 0.6);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn.about {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    .btn.about:hover {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(34, 197, 94, 0.15) 100%);
+      border-color: rgba(34, 197, 94, 0.6);
+      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.2);
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       flex-wrap: wrap;
-      justify-content:flex-end;
-      margin-left:auto;
+      justify-content: flex-end;
+      margin-left: auto;
     }
 
     /* Toggle */
-    .toggleWrap{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 14px;
+    .toggleWrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--border);
-      background: rgba(0,0,0,0.18);
-      user-select:none;
+      background: rgba(0,0,0,0.2);
+      user-select: none;
     }
 
-    .toggleLabel{
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.1;
-      max-width: 320px;
+    .toggleLabel {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.3;
+      max-width: 280px;
     }
 
-    .switch{
+    .switch {
       position: relative;
-      width: 54px;
-      height: 30px;
+      width: 52px;
+      height: 28px;
       flex: 0 0 auto;
     }
-    .switch input{
+
+    .switch input {
       opacity: 0;
       width: 0;
       height: 0;
     }
-    .slider{
-      position:absolute;
-      inset:0;
-      background: rgba(255,255,255,0.18);
-      border: 1px solid rgba(255,255,255,0.20);
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 999px;
-      transition: .2s ease;
-      cursor:pointer;
+      transition: 0.3s ease;
+      cursor: pointer;
     }
-    .slider:before{
-      content:"";
-      position:absolute;
-      height: 24px;
-      width: 24px;
-      left: 3px;
+
+    .slider:before {
+      content: "";
+      position: absolute;
+      height: 22px;
+      width: 22px;
+      left: 2px;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(255,255,255,0.92);
+      background: white;
       border-radius: 50%;
-      transition: .2s ease;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+      transition: 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    .switch input:checked + .slider{
-      background: rgba(88, 101, 242, 0.55);
-      border-color: rgba(88, 101, 242, 0.70);
+
+    .switch input:checked + .slider {
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
+      border-color: transparent;
     }
-    .switch input:checked + .slider:before{
-      transform: translate(24px, -50%);
+
+    .switch input:checked + .slider:before {
+      transform: translate(26px, -50%);
     }
 
     /* Main card */
-    .card{
-      background: var(--card2);
+    .card {
+      background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      overflow:hidden;
+      backdrop-filter: blur(20px);
+      overflow: hidden;
+      animation: slideUp 0.5s ease 0.1s both;
     }
 
-    .cardHead{
-      padding: 18px 18px 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:12px;
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cardHead {
+      padding: 22px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
       flex-wrap: wrap;
     }
 
-    .cardHead h2{
-      margin:0;
-      font-size: 20px;
-      letter-spacing: 0.2px;
-    }
-    .cardHead .sub{
-      margin:0;
-      color: var(--muted);
-      font-size: 13px;
+    .cardHead h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
-    .content{ padding: 18px; }
-
-    /* Sections that swap */
-    .panel{
-      display:none;
-      animation: fadeIn .18s ease;
-    }
-    .panel.active{ display:block; }
-
-    .emptyBox{
-      padding: 16px;
-      border-radius: 14px;
-      border: 1px dashed rgba(255,255,255,0.22);
-      background: rgba(0,0,0,0.18);
-      color: var(--muted);
+    .cardHead .sub {
+      margin: 6px 0 0;
+      color: var(--text-muted);
       font-size: 14px;
     }
 
-    .infoGrid{
-      display:grid;
+    .content { padding: 24px; }
+
+    /* Panels */
+    .panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .panel.active { display: block; }
+
+    .emptyBox {
+      padding: 20px;
+      border-radius: var(--radius-sm);
+      border: 1px dashed rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.2);
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .emptyBox:last-child { margin-bottom: 0; }
+
+    .infoGrid {
+      display: grid;
       grid-template-columns: 1fr;
-      gap: 10px;
+      gap: 12px;
       max-width: 640px;
     }
 
-    .row{
-      padding: 14px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
+    .row {
+      padding: 18px 20px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
     }
 
-    .k{
+    .row:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--border-hover);
+    }
+
+    .k {
       font-size: 12px;
-      color: var(--muted);
-      letter-spacing: .2px;
-      text-transform: none;
-    }
-    .v{
-      font-size: 16px;
-      font-weight: 750;
-      letter-spacing: .2px;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      font-weight: 600;
     }
 
-    @keyframes fadeIn{
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0px); }
+    .v {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
-    @media (max-width: 520px){
-      .title h1{ font-size: 16px; }
-      .toggleLabel{ max-width: 200px; }
+    @media (max-width: 640px) {
+      body { padding: 16px; }
+      .topbar { padding: 14px 16px; }
+      .title h1 { font-size: 18px; }
+      .toggleLabel { max-width: 180px; font-size: 12px; }
+      .cardHead { padding: 18px 20px 14px; }
+      .cardHead h2 { font-size: 20px; }
+      .content { padding: 20px; }
     }
   </style>
 </head>
@@ -298,13 +344,8 @@
     <!-- TOP BAR -->
     <div class="topbar">
       <div class="left">
-        <!-- NAV BUTTONS (About is green) -->
-        <a class="btn home" href="index.html" aria-label="Go to Home (index)">
-          Home
-        </a>
-        <a class="btn about" href="about.html" aria-label="About page">
-          About
-        </a>
+        <a class="btn home" href="index.html" aria-label="Go to Home">Home</a>
+        <a class="btn about" href="about.html" aria-label="About page">About</a>
         <a class="btn" href="education.html">Education</a>
         <a class="btn" href="skills.html">Skills</a>
         <a class="btn" href="projects.html">Projects</a>
@@ -337,18 +378,18 @@
       <header class="cardHead">
         <div>
           <h2 id="cardHeader">About</h2>
-          <p class="sub" id="cardSub">This section is intentionally empty for now.</p>
+          <p class="sub" id="cardSub">Personal insights and background</p>
         </div>
       </header>
 
       <div class="content">
-        <!-- ABOUT PANEL (empty for now) -->
+        <!-- ABOUT PANEL -->
         <div id="aboutPanel" class="panel active">
           <div class="emptyBox">
             I watch television in my free time; I prioritize my sanity, health and education. I truly like the idea of doing nothing besides watching television, video games and small PLC projects. I do not have much to say for an about section, but thanks for reading this.
           </div>
           <div class="emptyBox">
-            Authorized to work in Canada, Guyana, United Kingdom, British Virgin Islands
+            <strong>Authorized to work in:</strong> Canada, Guyana, United Kingdom, British Virgin Islands
           </div>
         </div>
 
@@ -358,7 +399,8 @@
             <div class="row">
               <div class="k">Website Creator</div>
               <div class="v">Dave Chandi Persaud</div>
-            </div>            <div class="row">
+            </div>
+            <div class="row">
               <div class="k">Tools Used to Create Website</div>
               <div class="v">ChatGPT</div>
             </div>
@@ -379,8 +421,8 @@
     const cardSub = document.getElementById("cardSub");
     const toggleText = document.getElementById("toggleText");
 
-    function setView(showInfo){
-      if(showInfo){
+    function setView(showInfo) {
+      if(showInfo) {
         aboutPanel.classList.remove("active");
         infoPanel.classList.add("active");
 
@@ -397,13 +439,12 @@
         pageTitle.textContent = "About";
         pageSubtitle.textContent = "About page of Dave Chandi Persaud";
         cardHeader.textContent = "About";
-        cardSub.textContent = "This section is intentionally empty for now.";
+        cardSub.textContent = "Personal insights and background";
 
         toggleText.textContent = "Viewing: About page of Dave Chandi Persaud";
       }
     }
 
-    // default: show About (unchecked)
     setView(false);
 
     toggle.addEventListener("change", () => {
