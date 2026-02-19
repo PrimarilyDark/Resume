@@ -7,77 +7,108 @@
 <style>
   :root{
     --nav-dark:#111;
-    --home:#e53935;     /* red home */
-    --green:#2e7d32;    /* green skills */
+    --home:#e53935;
+    --green:#2e7d32;
   }
-
   body{
     margin:0;
     min-height:100vh;
-    display:flex;
-    align-items:flex-start; /* top of screen */
-    justify-content:center;
     font-family: Arial, sans-serif;
     background:#f4f4f4;
     overflow:hidden;
   }
 
+    /* === STANDARD NAVIGATION HEADER - Consistent across all pages === */
+    .main-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      padding: 14px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      background: #1a1a1a;
+      color: #fff;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      border: none;
+      cursor: pointer;
+    }
+    .nav-link:hover {
+      transform: translateY(-2px);
+      background: #333;
+    }
+    .nav-link.active {
+      background: #2e7d32;
+    }
+    .nav-link.active:hover {
+      background: #1b5e20;
+    }
+    /* Home button always red */
+    .nav-link[href="index.html"] {
+      background: #e53935;
+    }
+    .nav-link[href="index.html"]:hover {
+      background: #c62828;
+    }
+    /* Prevent focus styles on page load */
+    .nav-link:focus { outline: none; }
+    .nav-link:focus-visible { outline: 2px solid #666; outline-offset: 2px; }
+    /* Page content wrapper - accounts for fixed header */
+    .page-wrapper {
+      padding-top: 90px;
+      min-height: 100vh;
+    }
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .main-nav { padding: 10px 12px; }
+      .nav-container { gap: 6px; }
+      .nav-link { padding: 8px 12px; font-size: 12px; }
+      .page-wrapper { padding-top: 70px; }
+    }
+
   .wrap{
     width:min(1000px, 100%);
+    margin:0 auto;
     padding:20px;
   }
-
-  .topbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:14px;
-    margin-bottom:14px;
-    flex-wrap:wrap;
+  .page-title{
+    margin:0 0 20px;
+    font-size:32px;
   }
-
-  h1{ margin:0; font-size:32px; }
-
-  /* NAV ROW */
-  .navrow{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    flex-wrap:wrap;
-    margin-left:auto;
-  }
-
-  a.nav{
-    text-decoration:none;
-    background:var(--nav-dark);
-    color:#fff;
-    padding:10px 14px;
-    border-radius:10px;
-    transition:.2s ease;
-    display:inline-block;
-    white-space:nowrap;
-    font-weight:700;
-  }
-  a.nav:hover{ filter:brightness(1.05); transform:translateY(-2px); }
-
-  /* special colors */
-  a.nav.home{ background:var(--home); }
-  a.nav.skills{ background:var(--green); }
-
   .grid{
     display:grid;
     grid-template-columns: 1.15fr 0.85fr;
     gap:14px;
   }
-
   .card{
     background:white;
     border-radius:16px;
     padding:18px;
     box-shadow:0 10px 30px rgba(0,0,0,0.10);
   }
-
-
   .skillsbox{
     border:2px solid #e5e7eb;
     border-radius:14px;
@@ -92,8 +123,6 @@
     word-break: break-word;
   }
   .skillsbox a:hover{ text-decoration:underline; }
-
-  /* ---- Girl ---- */
   .stage{
     position:relative;
     height:420px;
@@ -101,7 +130,6 @@
     overflow:hidden;
     background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0));
   }
-
   .girl{
     position:absolute;
     left:50%;
@@ -115,8 +143,6 @@
     0%,100%{ transform:translate(-50%,-50%) translateY(0); }
     50%{ transform:translate(-50%,-50%) translateY(-10px); }
   }
-
-  /* Head */
   .head{
     position:absolute;
     left:50%;
@@ -129,7 +155,6 @@
     box-shadow: inset 0 -10px 0 rgba(0,0,0,0.05);
     z-index:2;
   }
-
   .eye-arc{
     position:absolute;
     top:86px;
@@ -141,7 +166,6 @@
   }
   .eye-arc.left{ left:44px; transform:rotate(-6deg); }
   .eye-arc.right{ right:44px; transform:rotate(6deg); }
-
   .smile{
     position:absolute;
     left:50%;
@@ -153,14 +177,6 @@
     border-color: transparent transparent rgba(0,0,0,0.55) transparent;
     border-radius: 0 0 999px 999px;
   }
-
-  /* Hair */
-  .hair-back,
-  .hair-front,
-  .strand{
-    opacity:1;
-  }
-
   .hair-back{
     position:absolute;
     left:50%;
@@ -184,7 +200,6 @@
     clip-path: polygon(0 0, 100% 0, 92% 62%, 70% 54%, 58% 78%, 46% 54%, 26% 66%, 10% 54%);
     z-index:3;
   }
-
   .strand{
     position:absolute;
     top:130px;
@@ -196,8 +211,6 @@
   }
   .strand.left{ left:26px; transform:rotate(10deg); }
   .strand.right{ right:26px; transform:rotate(-10deg); }
-
-  /* Hat (FORCED to front) */
   .hat{
     position:absolute;
     left:50%;
@@ -229,8 +242,6 @@
     border-radius: 999px;
     box-shadow: inset 0 -10px 0 rgba(0,0,0,0.06);
   }
-
-  /* Sunflower (also front) */
   .sunflower{
     position:absolute;
     left:18px;
@@ -274,8 +285,6 @@
     border-radius:50%;
     box-shadow: inset 0 0 0 4px rgba(0,0,0,0.12);
   }
-
-  /* Body + dress */
   .neck{
     position:absolute;
     left:50%;
@@ -310,7 +319,6 @@
                 radial-gradient(circle at 80% 25%, rgba(0,0,0,0.04) 0 14%, transparent 15%);
     opacity:0.75;
   }
-
   .shoulder{
     position:absolute;
     top:290px;
@@ -322,8 +330,6 @@
   }
   .shoulder.left{ left:22px; transform:rotate(-10deg); }
   .shoulder.right{ right:22px; transform:rotate(10deg); }
-
-  /* Mobile */
   @media (max-width: 860px){
     body{ overflow:auto; }
     .grid{ grid-template-columns: 1fr; }
@@ -331,69 +337,115 @@
   }
 </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <h1>Skills</h1>
 
-      <!-- Buttons from before; Skills is green -->
-      <div class="navrow">
-        <a class="nav home" href="index.html">Home</a>
-        <a class="nav" href="about.html">About</a>
-        <a class="nav" href="education.html">Education</a>
-        <a class="nav skills" href="skills.html">Skills</a>
-        <a class="nav" href="projects.html">Projects</a>
-        <a class="nav" href="sharedfiles.html">Shared Files</a>
-        <a class="nav" href="licenses.html">Licenses</a>
-        <a class="nav" href="workexperience.html">Work Experience</a>
-      </div>
-    </div>
+    <!-- STANDARD NAVIGATION HEADER - Identical on all pages -->
+    <header class="main-nav">
+      <nav class="nav-container" id="mainNav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="about.html">About</a>
+        <a class="nav-link" href="education.html">Education</a>
+        <a class="nav-link active" href="skills.html">Skills</a>
+        <a class="nav-link" href="projects.html">Projects</a>
+        <a class="nav-link" href="sharedfiles.html">Shared Files</a>
+        <a class="nav-link" href="licenses.html">Licenses</a>
+        <a class="nav-link" href="workexperience.html">Work Experience</a>
+      </nav>
+    </header>
 
-    <div class="grid">
-      <!-- Left column: link box -->
-      <div class="card">
-        <h2 style="margin:0 0 10px; font-size:22px;">Skills found here:</h2>
-        <div class="skillsbox">
-          <a href="https://www.linkedin.com/in/dave-c-persaud-b4b374355" target="_blank" rel="noopener noreferrer">
-            www.linkedin.com/in/dave-c-persaud-b4b374355
-          </a>
+  <div class="page-wrapper">
+    <div class="wrap">
+      <h1 class="page-title">Skills</h1>
+      <div class="grid">
+        <div class="card">
+          <h2 style="margin:0 0 10px; font-size:22px;">Skills found here:</h2>
+          <div class="skillsbox">
+            <a href="https://www.linkedin.com/in/dave-c-persaud-b4b374355" target="_blank" rel="noopener noreferrer">
+              www.linkedin.com/in/dave-c-persaud-b4b374355
+            </a>
+          </div>
         </div>
-      </div>
-
-      
-<!-- Right column: girl -->
-      <div class="card stage">
-        <div class="girl" aria-label="Girl made with HTML and CSS">
-          <div class="hair-back"></div>
-
-          <div class="head">
-            <div class="eye-arc left"></div>
-            <div class="eye-arc right"></div>
-            <div class="smile"></div>
-          </div>
-
-          <div class="hair-front"></div>
-          <div class="strand left"></div>
-          <div class="strand right"></div>
-
-          <div class="hat">
-            <div class="hat-top"></div>
-            <div class="hat-brim"></div>
-            <div class="sunflower" aria-hidden="true">
-              <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
-              <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
-              <div class="center"></div>
+        <div class="card stage">
+          <div class="girl" aria-label="Girl made with HTML and CSS">
+            <div class="hair-back"></div>
+            <div class="head">
+              <div class="eye-arc left"></div>
+              <div class="eye-arc right"></div>
+              <div class="smile"></div>
             </div>
+            <div class="hair-front"></div>
+            <div class="strand left"></div>
+            <div class="strand right"></div>
+            <div class="hat">
+              <div class="hat-top"></div>
+              <div class="hat-brim"></div>
+              <div class="sunflower" aria-hidden="true">
+                <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+                <div class="petal"></div><div class="petal"></div><div class="petal"></div><div class="petal"></div>
+                <div class="center"></div>
+              </div>
+            </div>
+            <div class="neck"></div>
+            <div class="shoulder left"></div>
+            <div class="shoulder right"></div>
+            <div class="dress"></div>
           </div>
-
-          <div class="neck"></div>
-          <div class="shoulder left"></div>
-          <div class="shoulder right"></div>
-          <div class="dress"></div>
         </div>
       </div>
     </div>
   </div>
+  <script>
+    (function() {
+      window.addEventListener('pageshow', function() {
+        document.activeElement.blur();
+        if (document.body) document.body.focus();
+      });
+      document.addEventListener('DOMContentLoaded', function() {
+        document.activeElement.blur();
+      });
+    })();
+  </script>
+
+  <script>
+    // Arrow key navigation for main nav
+    (function() {
+      const navLinks = document.querySelectorAll('#mainNav .nav-link');
+      let currentIdx = 0;
+
+      // Find current page index
+      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      navLinks.forEach((link, idx) => {
+        if (link.getAttribute('href') === currentPage) currentIdx = idx;
+      });
+
+      document.addEventListener('keydown', function(e) {
+        // Only handle when not in input
+        if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          currentIdx = (currentIdx + 1) % navLinks.length;
+          navLinks[currentIdx].focus();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          currentIdx = (currentIdx - 1 + navLinks.length) % navLinks.length;
+          navLinks[currentIdx].focus();
+        } else if (e.key === 'Enter' && document.activeElement.classList.contains('nav-link')) {
+          e.preventDefault();
+          window.location.href = document.activeElement.getAttribute('href');
+        }
+      });
+
+      // Clear focus on page load
+      window.addEventListener('pageshow', function() {
+        document.activeElement.blur();
+        if (document.body) document.body.focus();
+      });
+      document.addEventListener('DOMContentLoaded', function() {
+        document.activeElement.blur();
+      });
+    })();
+  </script>
+
 </body>
 </html>
