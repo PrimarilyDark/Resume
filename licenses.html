@@ -3,82 +3,195 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Not Available</title>
+  <title>Licenses | Dave C Persaud</title>
   <style>
-    body{
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-      padding:24px;
+    :root {
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e7eaf0;
+      --shadow: 0 14px 36px rgba(15, 23, 42, 0.10);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
       font-family: Arial, sans-serif;
-      background:#f4f4f4;
+      color: var(--ink);
+      background: radial-gradient(circle at 15% 0%, #ffffff 0%, var(--bg) 55%, var(--bg) 100%);
     }
 
-    .topbar{
-      width:100%;
-      max-width:900px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:18px;
+    /* === STANDARD NAVIGATION HEADER - Consistent across all pages === */
+    .main-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      padding: 14px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      background: #1a1a1a;
+      color: #fff;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      border: none;
+      cursor: pointer;
+    }
+    .nav-link:hover {
+      transform: translateY(-2px);
+      background: #333;
+    }
+    .nav-link.active {
+      background: #2e7d32;
+    }
+    .nav-link.active:hover {
+      background: #1b5e20;
+    }
+    /* Home button always red */
+    .nav-link[href="index.html"] {
+      background: #e53935;
+    }
+    .nav-link[href="index.html"]:hover {
+      background: #c62828;
+    }
+    /* Prevent focus styles on page load */
+    .nav-link:focus { outline: none; }
+    .nav-link:focus-visible { outline: 2px solid #666; outline-offset: 2px; }
+    /* Page content wrapper - accounts for fixed header */
+    .page-wrapper {
+      padding-top: 90px;
+      min-height: 100vh;
+    }
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .main-nav { padding: 10px 12px; }
+      .nav-container { gap: 6px; }
+      .nav-link { padding: 8px 12px; font-size: 12px; }
+      .page-wrapper { padding-top: 70px; }
     }
 
-    .nav-btn{
-      display:inline-block;
-      text-decoration:none;
-      padding:10px 16px;
-      border-radius:12px;
-      background:#111;
-      color:#fff;
-      font-weight:600;
-      font-size:14px;
+    .wrap {
+      width: min(900px, 100%);
+      margin: 0 auto;
+      padding: 20px;
     }
-    .nav-btn:hover{ opacity:0.9; }
-
-    /* Home button (red) */
-    .home-btn{ background:#e53935; }
-    .home-btn:hover{ opacity:0.92; }
-
-    /* Licenses button (green) */
-    .licenses-btn{ background:#2e7d32; }
-    .licenses-btn:hover{ opacity:0.92; }
-
-    .box{
-      width:100%;
-      max-width:900px;
-      background:#ffffff;
-      border-radius:18px;
-      padding:28px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-      text-align:center;
+    .page-title {
+      margin: 0 0 20px;
+      font-size: 34px;
+      letter-spacing: 0.3px;
     }
-
-    .box p{
-      margin:0;
-      font-size:20px;
-      font-weight:700;
-      color:#333;
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 40px;
+      text-align: center;
+    }
+    .card p {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    footer {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <a class="nav-btn home-btn" href="index.html">Home</a>
-    <a class="nav-btn" href="about.html">About</a>
-    <a class="nav-btn" href="education.html">Education</a>
-    <a class="nav-btn" href="skills.html">Skills</a>
-    <a class="nav-btn" href="projects.html">Projects</a>
-    <a class="nav-btn" href="sharedfiles.html">Shared Files</a>
-    <a class="nav-btn licenses-btn" href="licenses.html">Licenses</a>
-    <a class="nav-btn" href="workexperience.html">Work Experience</a>
+
+    <!-- STANDARD NAVIGATION HEADER - Identical on all pages -->
+    <header class="main-nav">
+      <nav class="nav-container" id="mainNav">
+        <a class="nav-link" href="index.html" data-nav-idx="0">Home</a>
+        <a class="nav-link" href="about.html" data-nav-idx="1">About</a>
+        <a class="nav-link" href="education.html" data-nav-idx="2">Education</a>
+        <a class="nav-link" href="skills.html" data-nav-idx="3">Skills</a>
+        <a class="nav-link" href="projects.html" data-nav-idx="4">Projects</a>
+        <a class="nav-link" href="sharedfiles.html" data-nav-idx="5">Shared Files</a>
+        <a class="nav-link active" href="licenses.html" data-nav-idx="6">Licenses</a>
+        <a class="nav-link" href="workexperience.html" data-nav-idx="7">Work Experience</a>
+      </nav>
+    </header>
+
+  <div class="page-wrapper">
+    <div class="wrap">
+      <h1 class="page-title">Licenses</h1>
+      <div class="card">
+        <p>Not Available</p>
+      </div>
+      <footer>© <span id="year"></span> • Dave C Persaud</footer>
+    </div>
   </div>
 
-  <div class="box">
-    <p>not available</p>
-  </div>
+  <script>
+    // Arrow key navigation for main nav
+    (function() {
+      const navLinks = document.querySelectorAll('#mainNav .nav-link');
+      let currentIdx = 0;
+
+      // Find current page index
+      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      navLinks.forEach((link, idx) => {
+        if (link.getAttribute('href') === currentPage) currentIdx = idx;
+      });
+
+      document.addEventListener('keydown', function(e) {
+        // Only handle when not in input
+        if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          currentIdx = (currentIdx + 1) % navLinks.length;
+          navLinks[currentIdx].focus();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          currentIdx = (currentIdx - 1 + navLinks.length) % navLinks.length;
+          navLinks[currentIdx].focus();
+        } else if (e.key === 'Enter' && document.activeElement.classList.contains('nav-link')) {
+          e.preventDefault();
+          window.location.href = document.activeElement.getAttribute('href');
+        }
+      });
+
+      // Clear focus on page load
+      window.addEventListener('pageshow', function() {
+        document.activeElement.blur();
+        if (document.body) document.body.focus();
+      });
+      document.addEventListener('DOMContentLoaded', function() {
+        document.activeElement.blur();
+      });
+    })();
+  </script>
+
 </body>
 </html>
