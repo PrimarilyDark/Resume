@@ -17,12 +17,7 @@
       --radius2: 14px;
       --focus: 0 0 0 4px rgba(99,102,241,0.35);
       --accent: #6366f1;
-
-      /* nav button colors */
-      --home: #e53935;
-      --green: #2e7d32;
     }
-
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -34,38 +29,160 @@
         radial-gradient(900px 500px at 90% 10%, rgba(56,189,248,0.18), transparent 55%),
         var(--bg);
     }
-
     a { color: inherit; text-decoration: none; }
+
+    /* === STANDARD NAVIGATION HEADER - Consistent across all pages === */
+    .main-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(11,18,32,0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 14px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      border: none;
+      cursor: pointer;
+    }
+    .nav-link:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.2);
+    }
+    .nav-link.active {
+      background: #2e7d32;
+    }
+    .nav-link.active:hover {
+      background: #1b5e20;
+    }
+    /* Home button always red */
+    .nav-link[href="index.html"] {
+      background: #e53935;
+    }
+    .nav-link[href="index.html"]:hover {
+      background: #c62828;
+    }
+    /* Prevent focus styles on page load */
+    .nav-link:focus { outline: none; }
+    .nav-link:focus-visible { outline: 2px solid #666; outline-offset: 2px; }
+    /* Page content wrapper - accounts for fixed header */
+    .page-wrapper {
+      padding-top: 90px;
+      min-height: 100vh;
+    }
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .main-nav { padding: 10px 12px; }
+      .nav-container { gap: 6px; }
+      .nav-link { padding: 8px 12px; font-size: 12px; }
+      .page-wrapper { padding-top: 70px; }
+    }
 
     .wrap {
       width: min(1100px, 100%);
       margin: 0 auto;
-      padding: 28px 22px;
+      padding: 20px;
     }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      margin-bottom: 32px;
-      flex-wrap: wrap;
-    }
-
-    .title h1 {
-      margin: 0;
+    .page-title {
+      margin: 0 0 20px;
       font-size: 30px;
       font-weight: 700;
       letter-spacing: -0.2px;
     }
-
-    .navrow {
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 20px;
+    }
+    @media (max-width: 960px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
       display: flex;
-      gap: 10px;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
       flex-wrap: wrap;
     }
-
+    .panel-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .file-list {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .file-card {
+      background: rgba(17,31,61,0.6);
+      border: 1px solid var(--line);
+      border-radius: var(--radius2);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .file-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .file-name {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .file-type {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+      background: rgba(99,102,241,0.16);
+      border: 1px solid rgba(99,102,241,0.38);
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -80,19 +197,13 @@
       font-size: 14px;
       transition: all 0.15s ease;
       white-space: nowrap;
+      color: var(--ink);
     }
-
     .btn:hover {
       transform: translateY(-1px);
       background: rgba(255,255,255,0.08);
       border-color: rgba(255,255,255,0.2);
     }
-
-    .btn:focus {
-      outline: none;
-      box-shadow: var(--focus);
-    }
-
     .btn.primary {
       background: rgba(99,102,241,0.2);
       border-color: rgba(99,102,241,0.48);
@@ -101,110 +212,9 @@
       background: rgba(99,102,241,0.26);
       border-color: rgba(99,102,241,0.6);
     }
-
-    .btn.home {
-      background: rgba(229,57,53,0.22);
-      border-color: rgba(229,57,53,0.55);
-    }
-    .btn.home:hover {
-      background: rgba(229,57,53,0.28);
-      border-color: rgba(229,57,53,0.68);
-    }
-
-    .btn.shared-green {
-      background: rgba(46,125,50,0.24);
-      border-color: rgba(46,125,50,0.6);
-    }
-    .btn.shared-green:hover {
-      background: rgba(46,125,50,0.3);
-      border-color: rgba(46,125,50,0.72);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 960px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-
-    .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .panel-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .panel-header h2 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .file-list {
-      padding: 16px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .file-card {
-      background: rgba(17,31,61,0.6);
-      border: 1px solid var(--line);
-      border-radius: var(--radius2);
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .file-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .file-name {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .file-type {
-      font-size: 12px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.9);
-      background: rgba(99,102,241,0.16);
-      border: 1px solid rgba(99,102,241,0.38);
-      padding: 5px 12px;
-      border-radius: 999px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
     .preview {
       padding: 20px;
     }
-
     .frame-wrap {
       background: rgba(0,0,0,0.25);
       border: 1px solid var(--line);
@@ -212,13 +222,11 @@
       overflow: hidden;
       box-shadow: 0 12px 28px rgba(0,0,0,0.3);
     }
-
     .ratio {
       position: relative;
       width: 100%;
-      padding-top: 56.25%; /* 16:9 */
+      padding-top: 56.25%;
     }
-
     .ratio iframe {
       position: absolute;
       inset: 0;
@@ -226,7 +234,6 @@
       height: 100%;
       border: 0;
     }
-
     .footer {
       margin-top: 40px;
       color: rgba(255,255,255,0.4);
@@ -236,81 +243,154 @@
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="title">
-        <h1>Shared Files</h1>
-      </div>
 
-      <div class="navrow" aria-label="Site navigation">
-        <a class="btn home"     href="index.html">Home</a>
-        <a class="btn"          href="about.html">About</a>
-        <a class="btn"          href="education.html">Education</a>
-        <a class="btn"          href="skills.html">Skills</a>
-        <a class="btn"          href="projects.html">Projects</a>
-        <a class="btn shared-green" href="sharedfiles.html">Shared Files</a>
-        <a class="btn"          href="licenses.html">Licenses</a>
-        <a class="btn"          href="workexperience.html">Work Experience</a>
-      </div>
-    </div>
+    <!-- STANDARD NAVIGATION HEADER - Identical on all pages -->
+    <header class="main-nav">
+      <nav class="nav-container" id="mainNav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="about.html">About</a>
+        <a class="nav-link" href="education.html">Education</a>
+        <a class="nav-link" href="skills.html">Skills</a>
+        <a class="nav-link" href="projects.html">Projects</a>
+        <a class="nav-link active" href="sharedfiles.html">Shared Files</a>
+        <a class="nav-link" href="licenses.html">Licenses</a>
+        <a class="nav-link" href="workexperience.html">Work Experience</a>
+      </nav>
+    </header>
 
-    <div class="grid">
-      <!-- Left: Files -->
-      <section class="panel">
-        <div class="panel-header">
-          <h2>Shared Items</h2>
-          <a class="btn primary"
-             href="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing"
-             target="_blank" rel="noopener noreferrer">
-            ↗ Open Main File
-          </a>
-        </div>
-
-        <div class="file-list">
-          <div class="file-card">
-            <div class="file-top">
-              <p class="file-name">Google Slides Presentation</p>
-              <span class="file-type">Slides</span>
-            </div>
-
-            <div class="actions">
-              <a class="btn primary"
-                 href="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing"
-                 target="_blank" rel="noopener noreferrer">
-                ↗ Open in Slides
-              </a>
-              <button class="btn" id="copyLinkBtn">📋 Copy Link</button>
+  <div class="page-wrapper">
+    <div class="wrap">
+      <h1 class="page-title">Shared Files</h1>
+      <div class="grid">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Shared Items</h2>
+            <a class="btn primary" href="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">↗ Open Main File</a>
+          </div>
+          <div class="file-list">
+            <div class="file-card">
+              <div class="file-top">
+                <p class="file-name">Google Slides Presentation</p>
+                <span class="file-type">Slides</span>
+              </div>
+              <div class="actions">
+                <a class="btn primary" href="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">↗ Open in Slides</a>
+                <button class="btn" id="copyLinkBtn">📋 Copy Link</button>
+              </div>
             </div>
           </div>
-
-          <!-- Add more .file-card items here later -->
-        </div>
-      </section>
-
-      <!-- Right: Preview -->
-      <aside class="panel">
-        <div class="panel-header">
-          <h2>Preview</h2>
-        </div>
-
-        <div class="preview">
-          <div class="frame-wrap">
-            <div class="ratio">
-              <iframe
-                title="Presentation Preview"
-                src="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/embed?start=false&loop=false&delayms=3000"
-                allowfullscreen
-              ></iframe>
+        </section>
+        <aside class="panel">
+          <div class="panel-header"><h2>Preview</h2></div>
+          <div class="preview">
+            <div class="frame-wrap">
+              <div class="ratio">
+                <iframe title="Presentation Preview" src="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/embed?start=false&loop=false&delayms=3000" allowfullscreen></iframe>
+              </div>
             </div>
           </div>
-        </div>
-      </aside>
+        </aside>
+      </div>
+      <div class="footer">© Shared Files</div>
     </div>
-
-    <div class="footer">© Shared Files</div>
   </div>
+  <script>
+    const fileLink = "https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing";
+    document.getElementById("copyLinkBtn")?.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(fileLink);
+        const btn = document.getElementById("copyLinkBtn");
+        const original = btn.textContent;
+        btn.textContent = "✅ Copied";
+        setTimeout(() => btn.textContent = original, 1400);
+      } catch {
+        alert("Copy failed.\nLink: " + fileLink);
+      }
+    });
+    (function() {
+      window.addEventListener('pageshow', function() {
+        document.activeElement.blur();
+        if (document.body) document.body.focus();
+      });
+      document.addEventListener('DOMContentLoaded', function() {
+        document.activeElement.blur();
+      });
+    })();
+  </script>
 
   <script>
+    // Arrow key navigation for main nav
+    (function() {
+      const navLinks = document.querySelectorAll('#mainNav .nav-link');
+      let currentIdx = 0;
+
+      // Find current page index
+      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      navLinks.forEach((link, idx) => {
+        if (link.getAttribute('href') === currentPage) currentIdx = idx;
+      });
+
+      document.addEventListener('keydown', function(e) {
+        // Only handle when not in input
+        if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          currentIdx = (currentIdx + 1) % navLinks.length;
+          navLinks[currentIdx].focus();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          currentIdx = (currentIdx - 1 + navLinks.length) % navLinks.length;
+          navLinks[currentIdx].focus();
+        } else if (e.key === 'Enter' && document.activeElement.classList.contains('nav-link')) {
+          e.preventDefault();
+          window.location.href = document.activeElement.getAttribute('href');
+        }
+      });
+
+      // Clear focus on page load
+      window.addEventListener('pageshow', function() {
+        document.activeElement.blur();
+        if (document.body) document.body.focus();
+      });
+      document.addEventListener('DOMContentLoaded', function() {
+        document.activeElement.blur();
+      });
+    })();
+  </script>
+
+</body>
+</html>ut(clearFocus, 50);
+      });
+
+      // Also clear immediately
+      clearFocus();
+
+      // Keyboard navigation with arrow keys (main nav only)
+      let focusedIndex = -1;
+      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      focusedIndex = navButtons.findIndex(btn => btn.getAttribute('href') === currentPage);
+      if (focusedIndex === -1) focusedIndex = 0;
+
+      document.addEventListener('keydown', function(e) {
+        // Only handle arrow keys when no input/modal is active
+        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          focusedIndex = (focusedIndex + 1) % navButtons.length;
+          navButtons[focusedIndex].focus();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          focusedIndex = (focusedIndex - 1 + navButtons.length) % navButtons.length;
+          navButtons[focusedIndex].focus();
+        } else if (e.key === 'Enter' && focusedIndex >= 0 && document.activeElement === navButtons[focusedIndex]) {
+          e.preventDefault();
+          window.location.href = navButtons[focusedIndex].getAttribute('href');
+        }
+      });
+    })();
+
     const fileLink = "https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing";
 
     document.getElementById("copyLinkBtn")?.addEventListener("click", async () => {
@@ -325,5 +405,47 @@
       }
     });
   </script>
+
+  <script>
+    // Arrow key navigation for main nav
+    (function() {
+      const navLinks = document.querySelectorAll('#mainNav .nav-link');
+      let currentIdx = 0;
+
+      // Find current page index
+      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      navLinks.forEach((link, idx) => {
+        if (link.getAttribute('href') === currentPage) currentIdx = idx;
+      });
+
+      document.addEventListener('keydown', function(e) {
+        // Only handle when not in input
+        if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          currentIdx = (currentIdx + 1) % navLinks.length;
+          navLinks[currentIdx].focus();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          currentIdx = (currentIdx - 1 + navLinks.length) % navLinks.length;
+          navLinks[currentIdx].focus();
+        } else if (e.key === 'Enter' && document.activeElement.classList.contains('nav-link')) {
+          e.preventDefault();
+          window.location.href = document.activeElement.getAttribute('href');
+        }
+      });
+
+      // Clear focus on page load
+      window.addEventListener('pageshow', function() {
+        document.activeElement.blur();
+        if (document.body) document.body.focus();
+      });
+      document.addEventListener('DOMContentLoaded', function() {
+        document.activeElement.blur();
+      });
+    })();
+  </script>
+
 </body>
 </html>
