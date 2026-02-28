@@ -148,6 +148,47 @@
       content: "↗";
       font-size: 18px;
     }
+
+    /* === GLOW FINISH BOX === */
+    .glow-box {
+      margin-top: 20px;
+      background: linear-gradient(135deg, rgba(17,24,39,0.95), rgba(17,24,39,0.85));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow), 0 0 40px rgba(34,197,94,0.1);
+      padding: 24px 32px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      transition: all 0.3s ease;
+    }
+    .glow-box:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow), 0 0 60px rgba(34,197,94,0.2);
+      border-color: rgba(34,197,94,0.3);
+    }
+    .glow-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 20px rgba(34,197,94,0.3);
+    }
+    .glow-flag {
+      width: 80px;
+      height: 40px;
+      object-fit: contain;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.2);
+    }
+
     footer {
       margin-top: 60px;
       padding-bottom: 32px;
@@ -179,11 +220,18 @@
       <div class="card">
         <h2>View Full Resume</h2>
         <a class="link-btn"
-           href="https://www.linkedin.com/posts/dave-c-persaud-b4b374355_cvresume-ugcPost-7426398606301057024-KXmT?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFiCTGsBGLT1fOZh99mLzxV5FTulko-q50U"
+           href="https://www.linkedin.com/posts/dave-c-persaud-b4b374355_cvresume-ugcPost-7426398606301057024-KXmT?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFiCTGsBGLT1fOZh99mLzxV5FTulko-q50U "
            target="_blank" rel="noopener noreferrer">
           Open on LinkedIn
         </a>
       </div>
+      
+      <!-- Glow Finish Box -->
+      <div class="glow-box">
+        <span class="glow-text">Glow Finish</span>
+        <img src="BVI.png" alt="BVI Flag" class="glow-flag" />
+      </div>
+      
       <footer>© <span id="year"></span> • All rights reserved</footer>
     </div>
   </div>
