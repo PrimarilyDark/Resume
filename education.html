@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Education | Dave C Persaud</title>
+
   <style>
     :root{
       --bg:#f5f6f8;
@@ -15,7 +16,11 @@
       --radius:18px;
       --green:#16a34a;
     }
-    *{ box-sizing:border-box; }
+
+    *{
+      box-sizing:border-box;
+    }
+
     body{
       margin:0;
       min-height:100vh;
@@ -38,6 +43,7 @@
       padding: 14px 20px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
+
     .nav-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -47,6 +53,7 @@
       gap: 10px;
       flex-wrap: wrap;
     }
+
     .nav-link {
       display: inline-flex;
       align-items: center;
@@ -62,40 +69,63 @@
       border: none;
       cursor: pointer;
     }
+
     .nav-link:hover {
       transform: translateY(-2px);
       background: #333;
     }
+
     .nav-link.active {
       background: #2e7d32;
     }
+
     .nav-link.active:hover {
       background: #1b5e20;
     }
+
     /* Home button always red */
     .nav-link[href="index.html"] {
       background: #e53935;
     }
+
     .nav-link[href="index.html"]:hover {
       background: #c62828;
     }
+
     /* Prevent focus styles on page load */
-    .nav-link:focus { outline: none; }
-    .nav-link:focus-visible { outline: 2px solid #666; outline-offset: 2px; }
+    .nav-link:focus {
+      outline: none;
+    }
+
+    .nav-link:focus-visible {
+      outline: 2px solid #666;
+      outline-offset: 2px;
+    }
+
     /* Page content wrapper - accounts for fixed header */
     .page-wrapper {
       padding-top: 90px;
       min-height: 100vh;
     }
+
     /* Mobile responsive */
     @media (max-width: 768px) {
-      .main-nav { padding: 10px 12px; }
-      .nav-container { gap: 6px; }
-      .nav-link { padding: 8px 12px; font-size: 12px; }
-      .page-wrapper { padding-top: 70px; }
-    }
-      .nav-link { padding: 8px 12px; font-size: 12px; }
-      .page-wrapper { padding-top: 70px; }
+      .main-nav {
+        padding: 10px 12px;
+      }
+
+      .nav-container {
+        gap: 6px;
+      }
+
+      .nav-link {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+
+      .page-wrapper {
+        padding-top: 70px;
+      }
     }
 
     .wrap{
@@ -103,16 +133,19 @@
       margin:0 auto;
       padding:20px;
     }
+
     .page-title{
       margin:0 0 20px;
       font-size:32px;
       letter-spacing:-0.4px;
     }
+
     .stack{
       display:flex;
       flex-direction:column;
       gap:16px;
     }
+
     .edu-card{
       background:var(--card);
       border-radius:var(--radius);
@@ -120,41 +153,49 @@
       border:1px solid rgba(15, 23, 42, 0.06);
       overflow:hidden;
     }
+
     .edu-inner{
       display:grid;
       grid-template-columns: 1fr 320px;
       gap:0;
       min-height: 260px;
     }
+
     .left{
       padding:20px 20px 18px;
     }
+
     .header{
       display:flex;
       flex-direction:column;
       gap:6px;
       margin-bottom:14px;
     }
+
     .school{
       margin:0;
       font-size:22px;
       letter-spacing:-0.3px;
     }
+
     .degree{
       margin:0;
       font-size:14px;
       color:rgba(15,23,42,0.78);
     }
+
     .dates{
       margin:0;
       font-size:13px;
       color:var(--muted);
     }
+
     .rows{
       display:flex;
       flex-direction:column;
       gap:10px;
     }
+
     .row{
       display:grid;
       grid-template-columns: 140px 1fr;
@@ -164,63 +205,45 @@
       border-radius:14px;
       background: linear-gradient(180deg, rgba(15,23,42,0.018), rgba(15,23,42,0.010));
     }
+
     .label{
       font-weight:800;
       font-size:13px;
       color:rgba(15,23,42,0.66);
       letter-spacing:0.2px;
     }
+
     .value{
       font-size:13px;
       color:rgba(15,23,42,0.92);
       word-break:break-word;
     }
+
     .value a{
       color:inherit;
       text-decoration:underline;
       text-underline-offset:3px;
     }
-    .cert-wrap{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
+
+    .cert-link-box{
+      border:2px solid #e5e7eb;
+      border-radius:14px;
+      padding:14px;
+      background:#fafafa;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
     }
-    .cert-chip{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(15,23,42,0.14);
-      background: #ffffff;
-      color: rgba(15,23,42,0.92);
+
+    .cert-link-box a{
+      color:#2e7d32;
+      font-weight:700;
       text-decoration:none;
-      font-size:13px;
-      font-weight:800;
-      transition: .18s ease;
-      box-shadow: 0 10px 18px rgba(2,6,23,0.08);
+      word-break:break-word;
     }
-    .cert-chip:hover{ transform:translateY(-1px); box-shadow: 0 14px 24px rgba(2,6,23,0.10); }
-    .cert-dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background: rgba(22,163,74,0.95);
-      box-shadow: 0 0 0 3px rgba(22,163,74,0.12);
-      flex:none;
+
+    .cert-link-box a:hover{
+      text-decoration:underline;
     }
-    .cert-fallback{
-      margin-top:10px;
-      font-size:12px;
-      color:rgba(15,23,42,0.65);
-      line-height:1.35;
-    }
-    .cert-fallback code{
-      background:rgba(15,23,42,0.06);
-      padding:2px 6px;
-      border-radius:8px;
-    }
+
     .right{
       padding:18px;
       border-left:1px solid var(--line);
@@ -229,17 +252,20 @@
       align-items:center;
       justify-content:center;
     }
+
     .right-panel{
       width:100%;
       display:flex;
       flex-direction:column;
       gap:12px;
     }
+
     .badge-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:12px;
     }
+
     .box{
       border-radius:16px;
       border:1px solid rgba(15,23,42,0.10);
@@ -252,6 +278,7 @@
       justify-content:center;
       padding:12px;
     }
+
     .wes{
       background:
         radial-gradient(circle at 30% 20%, rgba(22,163,74,0.22), rgba(22,163,74,0.06) 60%),
@@ -261,6 +288,7 @@
       flex-direction:column;
       gap:6px;
     }
+
     .wes .small{
       font-size:12px;
       font-weight:900;
@@ -268,6 +296,7 @@
       color:rgba(15,23,42,0.60);
       text-transform:uppercase;
     }
+
     .wes .big{
       font-size:30px;
       font-weight:1000;
@@ -275,6 +304,7 @@
       color: var(--green);
       line-height:1;
     }
+
     .flag img{
       width:100%;
       height:100%;
@@ -283,64 +313,108 @@
       display:block;
       border-radius:10px;
     }
+
     .flag-wide{
       grid-column: 1 / span 2;
       min-height:140px;
       padding:14px;
     }
+
     @media (max-width: 950px){
-      .edu-inner{ grid-template-columns: 1fr; }
-      .right{ border-left:none; border-top:1px solid var(--line); }
-      .badge-grid{ grid-template-columns: 1fr 1fr; }
-      .flag-wide{ grid-column:auto; }
+      .edu-inner{
+        grid-template-columns: 1fr;
+      }
+
+      .right{
+        border-left:none;
+        border-top:1px solid var(--line);
+      }
+
+      .badge-grid{
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .flag-wide{
+        grid-column:auto;
+      }
     }
+
     @media (max-width: 560px){
-      .row{ grid-template-columns: 1fr; }
-      .badge-grid{ grid-template-columns: 1fr; }
-      .flag-wide{ min-height:130px; }
+      .row{
+        grid-template-columns: 1fr;
+      }
+
+      .badge-grid{
+        grid-template-columns: 1fr;
+      }
+
+      .flag-wide{
+        min-height:130px;
+      }
     }
   </style>
-<base target="_blank">
 </head>
+
 <body>
 
-    <!-- STANDARD NAVIGATION HEADER - Identical on all pages -->
-    <header class="main-nav">
-      <nav class="nav-container" id="mainNav">
-        <a class="nav-link" href="index.html">Home</a>
-        <a class="nav-link" href="about.html">About</a>
-        <a class="nav-link active" href="education.html">Education</a>
-        <a class="nav-link" href="skills.html">Skills</a>
-        <a class="nav-link" href="projects.html">Projects</a>
-        <a class="nav-link" href="sharedfiles.html">Shared Files</a>
-        <a class="nav-link" href="licenses.html">Licenses</a>
-        <a class="nav-link" href="workexperience.html">Work Experience</a>
-      </nav>
-    </header>
+  <!-- STANDARD NAVIGATION HEADER - Identical on all pages -->
+  <header class="main-nav">
+    <nav class="nav-container" id="mainNav">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="about.html">About</a>
+      <a class="nav-link active" href="education.html">Education</a>
+      <a class="nav-link" href="skills.html">Skills</a>
+      <a class="nav-link" href="projects.html">Projects</a>
+      <a class="nav-link" href="sharedfiles.html">Shared Files</a>
+      <a class="nav-link" href="licenses.html">Licenses</a>
+      <a class="nav-link" href="workexperience.html">Work Experience</a>
+    </nav>
+  </header>
 
   <div class="page-wrapper">
     <div class="wrap">
       <h1 class="page-title">Education</h1>
+
       <div class="stack">
+
         <!-- HLSCC -->
         <section class="edu-card">
           <div class="edu-inner">
+
             <div class="left">
               <div class="header">
                 <h2 class="school">H. Lavity Stoutt Community College</h2>
                 <p class="degree">Associate of Science (AS), Accounting</p>
                 <p class="dates">Aug 2022 – May 2024</p>
               </div>
+
               <div class="rows">
-                <div class="row"><div class="label">Location</div><div class="value">Tortola, British Virgin Islands</div></div>
-                <div class="row"><div class="label">Status</div><div class="value">Alumni</div></div>
-                <div class="row"><div class="label">Societies</div><div class="value">National Technical Honor Society</div></div>
+                <div class="row">
+                  <div class="label">Location</div>
+                  <div class="value">Tortola, British Virgin Islands</div>
+                </div>
+
+                <div class="row">
+                  <div class="label">Status</div>
+                  <div class="value">Alumni</div>
+                </div>
+
+                <div class="row">
+                  <div class="label">Societies</div>
+                  <div class="value">National Technical Honor Society</div>
+                </div>
+
                 <div class="row">
                   <div class="label">Credential link</div>
-                  <div class="value"><a href="https://www.parchment.com/u/award/103781b801587623112d5f47f03b75c7" target="_blank" rel="noopener">View credential on Parchment</a></div>
+                  <div class="value">
+                    <a href="https://www.parchment.com/u/award/103781b801587623112d5f47f03b75c7" target="_blank" rel="noopener">
+                      View credential on Parchment
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
+
             <aside class="right">
               <div class="right-panel">
                 <div class="badge-grid">
@@ -348,42 +422,63 @@
                     <div class="small">Verified by</div>
                     <div class="big">WES</div>
                   </div>
+
                   <div class="box flag" aria-label="British Virgin Islands flag">
                     <img src="BVI.png" alt="British Virgin Islands flag" />
                   </div>
                 </div>
               </div>
             </aside>
+
           </div>
         </section>
+
         <!-- SENECA -->
         <section class="edu-card">
           <div class="edu-inner">
+
             <div class="left">
               <div class="header">
                 <h2 class="school">Seneca Polytechnic</h2>
                 <p class="degree">Advanced Diploma of Electromechanical Engineering Technology (Automation)</p>
                 <p class="dates">Expected: May 2027</p>
               </div>
+
               <div class="rows">
-                <div class="row"><div class="label">Location</div><div class="value">Toronto, Canada</div></div>
-                <div class="row"><div class="label">Status</div><div class="value">Update information</div></div>
-                <div class="row"><div class="label">Societies</div><div class="value">None</div></div>
-                <div class="row"><div class="label">Credential link</div><div class="value">None</div></div>
                 <div class="row">
-                  <div class="label">Certifications Earned</div>
+                  <div class="label">Location</div>
+                  <div class="value">Toronto, Canada</div>
+                </div>
+
+                <div class="row">
+                  <div class="label">Status</div>
+                  <div class="value">Update information</div>
+                </div>
+
+                <div class="row">
+                  <div class="label">Societies</div>
+                  <div class="value">None</div>
+                </div>
+
+                <div class="row">
+                  <div class="label">Credential link</div>
+                  <div class="value">None</div>
+                </div>
+
+                <div class="row">
+                  <div class="label">Certifications</div>
+
                   <div class="value">
-                    <div class="cert-wrap">
-                      <a class="cert-chip" href="Dave Chandi Persaud KUKA Robotics Basics.pdf" target="_blank" rel="noopener"><span class="cert-dot"></span>KUKA ROB555 (Dec 2025)</a>
-                      <a class="cert-chip" href="Dave Chandi Persaud Siemens - Totally Integrated Automation.pdf" target="_blank" rel="noopener"><span class="cert-dot"></span>Siemens TIA555 (Dec 2025)</a>
-                      <a class="cert-chip" href="EPLAN_ECS_SENECA_08_2025_Dave Persaud.pdf" target="_blank" rel="noopener"><span class="cert-dot"></span>EPLAN ECS (Aug 2025)</a>
-                      <a class="cert-chip" href="CSF453 Control Systems Fundamentals.pdf" target="_blank" rel="noopener"><span class="cert-dot"></span>CSF453 Control Systems Fundamentals</a>
+                    <div class="cert-link-box">
+                      <a href="https://www.linkedin.com/in/%F0%9F%92%A0-dave-c-persaud-b4b374355/details/certifications/" target="_blank" rel="noopener noreferrer">
+                        View my certifications on LinkedIn
+                      </a>
                     </div>
-                    <div class="cert-fallback">If a button doesn't open, rename your PDF to match the exact text in <code>href="..."</code> (including spaces and parentheses).</div>
                   </div>
                 </div>
               </div>
             </div>
+
             <aside class="right">
               <div class="right-panel">
                 <div class="badge-grid">
@@ -393,20 +488,31 @@
                 </div>
               </div>
             </aside>
+
           </div>
         </section>
+
       </div>
     </div>
   </div>
+
   <script>
     // Clear focus on page load
     (function() {
       window.addEventListener('pageshow', function() {
-        document.activeElement.blur();
-        if (document.body) document.body.focus();
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
+
+        if (document.body) {
+          document.body.focus();
+        }
       });
+
       document.addEventListener('DOMContentLoaded', function() {
-        document.activeElement.blur();
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
       });
     })();
   </script>
@@ -419,23 +525,39 @@
 
       // Find current page index
       const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
       navLinks.forEach((link, idx) => {
-        if (link.getAttribute('href') === currentPage) currentIdx = idx;
+        if (link.getAttribute('href') === currentPage) {
+          currentIdx = idx;
+        }
       });
 
       document.addEventListener('keydown', function(e) {
-        // Only handle when not in input
-        if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+        // Only handle when not typing in an input or textarea
+        if (
+          document.activeElement &&
+          ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
+        ) {
+          return;
+        }
 
         if (e.key === 'ArrowRight') {
           e.preventDefault();
           currentIdx = (currentIdx + 1) % navLinks.length;
           navLinks[currentIdx].focus();
-        } else if (e.key === 'ArrowLeft') {
+        }
+
+        else if (e.key === 'ArrowLeft') {
           e.preventDefault();
           currentIdx = (currentIdx - 1 + navLinks.length) % navLinks.length;
           navLinks[currentIdx].focus();
-        } else if (e.key === 'Enter' && document.activeElement.classList.contains('nav-link')) {
+        }
+
+        else if (
+          e.key === 'Enter' &&
+          document.activeElement &&
+          document.activeElement.classList.contains('nav-link')
+        ) {
           e.preventDefault();
           window.location.href = document.activeElement.getAttribute('href');
         }
@@ -443,11 +565,19 @@
 
       // Clear focus on page load
       window.addEventListener('pageshow', function() {
-        document.activeElement.blur();
-        if (document.body) document.body.focus();
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
+
+        if (document.body) {
+          document.body.focus();
+        }
       });
+
       document.addEventListener('DOMContentLoaded', function() {
-        document.activeElement.blur();
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
       });
     })();
   </script>
