@@ -21,8 +21,9 @@
       box-sizing:border-box;
     }
 
-    html{
-      overflow-y: scroll;
+    html,
+    body{
+      overflow-x:hidden;
     }
 
     body{
@@ -38,7 +39,7 @@
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
+      width: 100vw;
       z-index: 1000;
       background: rgba(255,255,255,0.95);
       backdrop-filter: blur(10px);
@@ -392,7 +393,7 @@
                 <div class="row">
                   <div class="label">Credential link</div>
                   <div class="value">
-                    <a href="https://www.parchment.com/u/award/103781b801587623112d5f47f03b75c7" target="_blank" rel="noopener">
+                    <a href="https://www.parchment.com/u/award/103781b801587623112d5f47f03b75c7" target="_blank" rel="noopener noreferrer">
                       View credential on Parchment
                     </a>
                   </div>
