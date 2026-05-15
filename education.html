@@ -1,586 +1,289 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Education | Dave C Persaud</title>
-
-  <style>
-    :root{
-      --bg:#f5f6f8;
-      --card:#ffffff;
-      --ink:#0f172a;
-      --muted:#64748b;
-      --line:#e7eaf0;
-      --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
-      --radius:18px;
-      --green:#16a34a;
-    }
-
-    *{
-      box-sizing:border-box;
-    }
-
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family: Arial, sans-serif;
-      background: radial-gradient(circle at 20% 0%, #ffffff 0%, var(--bg) 55%, var(--bg) 100%);
-      color:var(--ink);
-    }
-
-    /* === STANDARD NAVIGATION HEADER - Consistent across all pages === */
-    .main-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      padding: 14px 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .nav-link {
-      display: inline-flex;
-      align-items: center;
-      padding: 10px 16px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
-      background: #1a1a1a;
-      color: #fff;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-      border: none;
-      cursor: pointer;
-    }
-
-    .nav-link:hover {
-      transform: translateY(-2px);
-      background: #333;
-    }
-
-    .nav-link.active {
-      background: #2e7d32;
-    }
-
-    .nav-link.active:hover {
-      background: #1b5e20;
-    }
-
-    /* Home button always red */
-    .nav-link[href="index.html"] {
-      background: #e53935;
-    }
-
-    .nav-link[href="index.html"]:hover {
-      background: #c62828;
-    }
-
-    /* Prevent focus styles on page load */
-    .nav-link:focus {
-      outline: none;
-    }
-
-    .nav-link:focus-visible {
-      outline: 2px solid #666;
-      outline-offset: 2px;
-    }
-
-    /* Page content wrapper - accounts for fixed header */
-    .page-wrapper {
-      padding-top: 90px;
-      min-height: 100vh;
-    }
-
-    /* Mobile responsive */
-    @media (max-width: 768px) {
-      .main-nav {
-        padding: 10px 12px;
-      }
-
-      .nav-container {
-        gap: 6px;
-      }
-
-      .nav-link {
-        padding: 8px 12px;
-        font-size: 12px;
-      }
-
-      .page-wrapper {
-        padding-top: 70px;
-      }
-    }
-
-    .wrap{
-      width:min(1180px, 100%);
-      margin:0 auto;
-      padding:20px;
-    }
-
-    .page-title{
-      margin:0 0 20px;
-      font-size:32px;
-      letter-spacing:-0.4px;
-    }
-
-    .stack{
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-    }
-
-    .edu-card{
-      background:var(--card);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      border:1px solid rgba(15, 23, 42, 0.06);
-      overflow:hidden;
-    }
-
-    .edu-inner{
-      display:grid;
-      grid-template-columns: 1fr 320px;
-      gap:0;
-      min-height: 260px;
-    }
-
-    .left{
-      padding:20px 20px 18px;
-    }
-
-    .header{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      margin-bottom:14px;
-    }
-
-    .school{
-      margin:0;
-      font-size:22px;
-      letter-spacing:-0.3px;
-    }
-
-    .degree{
-      margin:0;
-      font-size:14px;
-      color:rgba(15,23,42,0.78);
-    }
-
-    .dates{
-      margin:0;
-      font-size:13px;
-      color:var(--muted);
-    }
-
-    .rows{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .row{
-      display:grid;
-      grid-template-columns: 140px 1fr;
-      gap:12px;
-      padding:12px 14px;
-      border:1px solid rgba(15,23,42,0.06);
-      border-radius:14px;
-      background: linear-gradient(180deg, rgba(15,23,42,0.018), rgba(15,23,42,0.010));
-    }
-
-    .label{
-      font-weight:800;
-      font-size:13px;
-      color:rgba(15,23,42,0.66);
-      letter-spacing:0.2px;
-    }
-
-    .value{
-      font-size:13px;
-      color:rgba(15,23,42,0.92);
-      word-break:break-word;
-    }
-
-    .value a{
-      color:inherit;
-      text-decoration:underline;
-      text-underline-offset:3px;
-    }
-
-    .cert-link-box{
-      border:2px solid #e5e7eb;
-      border-radius:14px;
-      padding:14px;
-      background:#fafafa;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
-    }
-
-    .cert-link-box a{
-      color:#2e7d32;
-      font-weight:700;
-      text-decoration:none;
-      word-break:break-word;
-    }
-
-    .cert-link-box a:hover{
-      text-decoration:underline;
-    }
-
-    .right{
-      padding:18px;
-      border-left:1px solid var(--line);
-      background: linear-gradient(180deg, rgba(15,23,42,0.018), rgba(15,23,42,0.00));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .right-panel{
-      width:100%;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .badge-grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-
-    .box{
-      border-radius:16px;
-      border:1px solid rgba(15,23,42,0.10);
-      background:#fff;
-      box-shadow: 0 14px 26px rgba(15,23,42,0.08);
-      overflow:hidden;
-      min-height:118px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:12px;
-    }
-
-    .wes{
-      background:
-        radial-gradient(circle at 30% 20%, rgba(22,163,74,0.22), rgba(22,163,74,0.06) 60%),
-        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.86));
-      border:1px solid rgba(22,163,74,0.25);
-      text-align:center;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    .wes .small{
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:0.4px;
-      color:rgba(15,23,42,0.60);
-      text-transform:uppercase;
-    }
-
-    .wes .big{
-      font-size:30px;
-      font-weight:1000;
-      letter-spacing:1px;
-      color: var(--green);
-      line-height:1;
-    }
-
-    .flag img{
-      width:100%;
-      height:100%;
-      max-height:130px;
-      object-fit:contain;
-      display:block;
-      border-radius:10px;
-    }
-
-    .flag-wide{
-      grid-column: 1 / span 2;
-      min-height:140px;
-      padding:14px;
-    }
-
-    @media (max-width: 950px){
-      .edu-inner{
-        grid-template-columns: 1fr;
-      }
-
-      .right{
-        border-left:none;
-        border-top:1px solid var(--line);
-      }
-
-      .badge-grid{
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .flag-wide{
-        grid-column:auto;
-      }
-    }
-
-    @media (max-width: 560px){
-      .row{
-        grid-template-columns: 1fr;
-      }
-
-      .badge-grid{
-        grid-template-columns: 1fr;
-      }
-
-      .flag-wide{
-        min-height:130px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-  <!-- STANDARD NAVIGATION HEADER - Identical on all pages -->
-  <header class="main-nav">
-    <nav class="nav-container" id="mainNav">
-      <a class="nav-link" href="index.html">Home</a>
-      <a class="nav-link" href="about.html">About</a>
-      <a class="nav-link active" href="education.html">Education</a>
-      <a class="nav-link" href="skills.html">Skills</a>
-      <a class="nav-link" href="projects.html">Projects</a>
-      <a class="nav-link" href="sharedfiles.html">Shared Files</a>
-      <a class="nav-link" href="licenses.html">Licenses</a>
-      <a class="nav-link" href="workexperience.html">Work Experience</a>
-    </nav>
-  </header>
-
-  <div class="page-wrapper">
-    <div class="wrap">
-      <h1 class="page-title">Education</h1>
-
-      <div class="stack">
-
-        <!-- HLSCC -->
-        <section class="edu-card">
-          <div class="edu-inner">
-
-            <div class="left">
-              <div class="header">
-                <h2 class="school">H. Lavity Stoutt Community College</h2>
-                <p class="degree">Associate of Science (AS), Accounting</p>
-                <p class="dates">Aug 2022 – May 2024</p>
-              </div>
-
-              <div class="rows">
-                <div class="row">
-                  <div class="label">Location</div>
-                  <div class="value">Tortola, British Virgin Islands</div>
-                </div>
-
-                <div class="row">
-                  <div class="label">Status</div>
-                  <div class="value">Alumni</div>
-                </div>
-
-                <div class="row">
-                  <div class="label">Societies</div>
-                  <div class="value">National Technical Honor Society</div>
-                </div>
-
-                <div class="row">
-                  <div class="label">Credential link</div>
-                  <div class="value">
-                    <a href="https://www.parchment.com/u/award/103781b801587623112d5f47f03b75c7" target="_blank" rel="noopener">
-                      View credential on Parchment
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <aside class="right">
-              <div class="right-panel">
-                <div class="badge-grid">
-                  <div class="box wes" aria-label="Verified by WES">
-                    <div class="small">Verified by</div>
-                    <div class="big">WES</div>
-                  </div>
-
-                  <div class="box flag" aria-label="British Virgin Islands flag">
-                    <img src="BVI.png" alt="British Virgin Islands flag" />
-                  </div>
-                </div>
-              </div>
-            </aside>
-
-          </div>
-        </section>
-
-        <!-- SENECA -->
-        <section class="edu-card">
-          <div class="edu-inner">
-
-            <div class="left">
-              <div class="header">
-                <h2 class="school">Seneca Polytechnic</h2>
-                <p class="degree">Advanced Diploma of Electromechanical Engineering Technology (Automation)</p>
-                <p class="dates">Expected: May 2027</p>
-              </div>
-
-              <div class="rows">
-                <div class="row">
-                  <div class="label">Location</div>
-                  <div class="value">Toronto, Canada</div>
-                </div>
-
-                <div class="row">
-                  <div class="label">Status</div>
-                  <div class="value">Update information</div>
-                </div>
-
-                <div class="row">
-                  <div class="label">Societies</div>
-                  <div class="value">None</div>
-                </div>
-
-                <div class="row">
-                  <div class="label">Credential link</div>
-                  <div class="value">None</div>
-                </div>
-
-                <div class="row">
-                  <div class="label">Certifications</div>
-
-                  <div class="value">
-                    <div class="cert-link-box">
-                      <a href="https://www.linkedin.com/in/%F0%9F%92%A0-dave-c-persaud-b4b374355/details/certifications/" target="_blank" rel="noopener noreferrer">
-                        View my certifications on LinkedIn
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <aside class="right">
-              <div class="right-panel">
-                <div class="badge-grid">
-                  <div class="box flag flag-wide" aria-label="Canada flag">
-                    <img src="Canada.png" alt="Canada flag" />
-                  </div>
-                </div>
-              </div>
-            </aside>
-
-          </div>
-        </section>
-
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Clear focus on page load
-    (function() {
-      window.addEventListener('pageshow', function() {
-        if (document.activeElement) {
-          document.activeElement.blur();
-        }
-
-        if (document.body) {
-          document.body.focus();
-        }
-      });
-
-      document.addEventListener('DOMContentLoaded', function() {
-        if (document.activeElement) {
-          document.activeElement.blur();
-        }
-      });
-    })();
-  </script>
-
-  <script>
-    // Arrow key navigation for main nav
-    (function() {
-      const navLinks = document.querySelectorAll('#mainNav .nav-link');
-      let currentIdx = 0;
-
-      // Find current page index
-      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
-      navLinks.forEach((link, idx) => {
-        if (link.getAttribute('href') === currentPage) {
-          currentIdx = idx;
-        }
-      });
-
-      document.addEventListener('keydown', function(e) {
-        // Only handle when not typing in an input or textarea
-        if (
-          document.activeElement &&
-          ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
-        ) {
-          return;
-        }
-
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          currentIdx = (currentIdx + 1) % navLinks.length;
-          navLinks[currentIdx].focus();
-        }
-
-        else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          currentIdx = (currentIdx - 1 + navLinks.length) % navLinks.length;
-          navLinks[currentIdx].focus();
-        }
-
-        else if (
-          e.key === 'Enter' &&
-          document.activeElement &&
-          document.activeElement.classList.contains('nav-link')
-        ) {
-          e.preventDefault();
-          window.location.href = document.activeElement.getAttribute('href');
-        }
-      });
-
-      // Clear focus on page load
-      window.addEventListener('pageshow', function() {
-        if (document.activeElement) {
-          document.activeElement.blur();
-        }
-
-        if (document.body) {
-          document.body.focus();
-        }
-      });
-
-      document.addEventListener('DOMContentLoaded', function() {
-        if (document.activeElement) {
-          document.activeElement.blur();
-        }
-      });
-    })();
-  </script>
-
-</body>
-</html>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --card:#ffffff;
+    --ink:#0f172a;
+    --muted:#64748b;
+    --line:#e7eaf0;
+    --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    --radius:18px;
+    --green:#16a34a;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at 20% 0%, #ffffff 0%, var(--bg) 55%, var(--bg) 100%);
+    color:var(--ink);
+  }
+
+  /* === STANDARD NAVIGATION HEADER - Consistent across all pages === */
+  .main-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 14px 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    background: #1a1a1a;
+    color: #fff;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+  }
+
+  .nav-link:hover {
+    transform: translateY(-2px);
+    background: #333;
+  }
+
+  .nav-link.active {
+    background: #2e7d32;
+  }
+
+  .nav-link.active:hover {
+    background: #1b5e20;
+  }
+
+  .nav-link[href="index.html"] {
+    background: #e53935;
+  }
+
+  .nav-link[href="index.html"]:hover {
+    background: #c62828;
+  }
+
+  .nav-link:focus { outline: none; }
+
+  .nav-link:focus-visible {
+    outline: 2px solid #666;
+    outline-offset: 2px;
+  }
+
+  .page-wrapper {
+    padding-top: 90px;
+    min-height: 100vh;
+  }
+
+  @media (max-width: 768px) {
+    .main-nav { padding: 10px 12px; }
+    .nav-container { gap: 6px; }
+    .nav-link { padding: 8px 12px; font-size: 12px; }
+    .page-wrapper { padding-top: 70px; }
+  }
+
+  .wrap{
+    width:min(1180px, 100%);
+    margin:0 auto;
+    padding:20px;
+  }
+
+  .page-title{
+    margin:0 0 20px;
+    font-size:32px;
+    letter-spacing:-0.4px;
+  }
+
+  .stack{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .edu-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    border:1px solid rgba(15, 23, 42, 0.06);
+    overflow:hidden;
+  }
+
+  .edu-inner{
+    display:grid;
+    grid-template-columns: 1fr 320px;
+    gap:0;
+    min-height: 260px;
+  }
+
+  .left{
+    padding:20px 20px 18px;
+  }
+
+  .header{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:14px;
+  }
+
+  .school{
+    margin:0;
+    font-size:22px;
+    letter-spacing:-0.3px;
+  }
+
+  .degree{
+    margin:0;
+    font-size:14px;
+    color:rgba(15,23,42,0.78);
+  }
+
+  .dates{
+    margin:0;
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .rows{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .row{
+    display:grid;
+    grid-template-columns: 140px 1fr;
+    gap:12px;
+    padding:12px 14px;
+    border:1px solid rgba(15,23,42,0.06);
+    border-radius:14px;
+    background: linear-gradient(180deg, rgba(15,23,42,0.018), rgba(15,23,42,0.010));
+  }
+
+  .label{
+    font-weight:800;
+    font-size:13px;
+    color:rgba(15,23,42,0.66);
+    letter-spacing:0.2px;
+  }
+
+  .value{
+    font-size:13px;
+    color:rgba(15,23,42,0.92);
+    word-break:break-word;
+  }
+
+  .value a{
+    color:inherit;
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+
+  .right{
+    padding:18px;
+    border-left:1px solid var(--line);
+    background: linear-gradient(180deg, rgba(15,23,42,0.018), rgba(15,23,42,0.00));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .right-panel{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .badge-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px;
+  }
+
+  .box{
+    border-radius:16px;
+    border:1px solid rgba(15,23,42,0.10);
+    background:#fff;
+    box-shadow: 0 14px 26px rgba(15,23,42,0.08);
+    overflow:hidden;
+    min-height:118px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:12px;
+  }
+
+  .wes{
+    background:
+      radial-gradient(circle at 30% 20%, rgba(22,163,74,0.22), rgba(22,163,74,0.06) 60%),
+      linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.86));
+    border:1px solid rgba(22,163,74,0.25);
+    text-align:center;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .wes .small{
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:0.4px;
+    color:rgba(15,23,42,0.60);
+    text-transform:uppercase;
+  }
+
+  .wes .big{
+    font-size:30px;
+    font-weight:1000;
+    letter-spacing:1px;
+    color: var(--green);
+    line-height:1;
+  }
+
+  .flag img{
+    width:100%;
+    height:100%;
+    max-height:130px;
+    object-fit:contain;
+    display:block;
+    border-radius:10px;
+  }
+
+  .flag-wide{
+    grid-column: 1 / span 2;
+    min-height:140px;
+    padding:14px;
+  }
+
+  @media (max-width: 950px){
+    .edu-inner{ grid-template-columns: 1fr; }
+    .right{ border-left:none; border-top:1px solid var(--line); }
+    .badge-grid{ grid-template-columns: 1fr 1fr; }
+    .flag-wide{ grid-column:auto; }
+  }
+
+  @media (max-width: 560px){
+    .row{ grid-template-columns: 1fr; }
+    .badge-grid{ grid-template-columns: 1fr; }
+    .flag-wide{ min-height:130px; }
+  }
+</style>
