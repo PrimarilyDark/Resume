@@ -15,6 +15,11 @@
       --radius:18px;
       --btn:#2563eb;
       --btn2:#0f172a;
+      --scrap:#7f1d1d;
+      --current:#166534;
+      --soft-blue:#eff6ff;
+      --soft-red:#fff1f2;
+      --soft-green:#f0fdf4;
     }
     *{ box-sizing:border-box; }
     body{
@@ -22,7 +27,10 @@
       min-height:100vh;
       font-family: Arial, sans-serif;
       color:var(--ink);
-      background: radial-gradient(circle at 15% 0%, #ffffff 0%, var(--bg) 55%, var(--bg) 100%);
+      background:
+        radial-gradient(circle at 15% 0%, #ffffff 0%, transparent 35%),
+        radial-gradient(circle at 85% 15%, #e0f2fe 0%, transparent 28%),
+        linear-gradient(180deg, var(--bg), #eef2f7);
     }
 
     /* === STANDARD NAVIGATION HEADER - Consistent across all pages === */
@@ -101,15 +109,24 @@
       margin:0 auto;
       padding:20px;
     }
+    .hero{
+      margin-bottom:18px;
+      padding:22px;
+      border:1px solid var(--line);
+      border-radius:24px;
+      background:rgba(255,255,255,0.78);
+      box-shadow:var(--shadow);
+    }
     .page-title{
       margin:0 0 6px;
-      font-size:34px;
+      font-size:36px;
       letter-spacing:0.3px;
     }
     .sub{
-      margin:0 0 20px;
+      margin:0;
       color:var(--muted);
       font-size:14px;
+      line-height:1.45;
     }
     .grid{
       display:grid;
@@ -123,6 +140,8 @@
       border-radius:var(--radius);
       box-shadow: var(--shadow);
       padding:18px;
+      position:relative;
+      overflow:hidden;
     }
     @media (min-width: 860px){
       .card.half{ grid-column: span 6; }
@@ -130,6 +149,29 @@
     .card h2{
       margin:0 0 10px;
       font-size:18px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:5px 9px;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:0.2px;
+      text-transform:uppercase;
+    }
+    .badge.current{
+      background:var(--soft-green);
+      color:var(--current);
+      border:1px solid #bbf7d0;
+    }
+    .badge.scrapped{
+      background:var(--soft-red);
+      color:var(--scrap);
+      border:1px solid #fecdd3;
     }
     .item{
       display:flex;
@@ -139,6 +181,14 @@
       border-radius:14px;
       border:1px solid var(--line);
       background: linear-gradient(180deg, #ffffff, #fbfbfd);
+    }
+    .item + .item{ margin-top:12px; }
+    .item.current-item{
+      background:linear-gradient(180deg, #ffffff, var(--soft-blue));
+    }
+    .item.scrapped-item{
+      background:linear-gradient(180deg, #ffffff, #fff7f7);
+      opacity:0.95;
     }
     .item-top{
       display:flex;
@@ -191,6 +241,10 @@
       background:var(--btn2);
       box-shadow: 0 10px 20px rgba(15,23,42,0.14);
     }
+    .btn.scrap{
+      background:var(--scrap);
+      box-shadow: 0 10px 20px rgba(127,29,29,0.14);
+    }
     footer{
       margin-top:18px;
       color:var(--muted);
@@ -217,28 +271,60 @@
 
   <div class="page-wrapper">
     <div class="wrap">
-      <h1 class="page-title">Projects</h1>
-      <p class="sub">A simple list of what I've built (and what I've scrapped).</p>
+      <div class="hero">
+        <h1 class="page-title">Projects</h1>
+        <p class="sub">Current work is now focused on the preview pages. Older experiments and the Roblox project have been moved into the scrapped/archive section.</p>
+      </div>
+
       <section class="grid">
         <div class="card half">
-          <h2>Projects</h2>
-          <div class="item">
+          <h2>Current Projects <span class="badge current">Current</span></h2>
+
+          <div class="item current-item">
             <div class="item-top">
               <div>
-                <p class="item-title"><strong>Project 1:</strong> 2D FUN GAME</p>
-                <p class="item-desc">Roblox experience link:</p>
+                <p class="item-title"><strong>Project 1:</strong> Preview</p>
+                <p class="item-desc">Current webpage build. Click the button to open the preview page.</p>
+              </div>
+              <a class="link" href="preview.html">Open ↗</a>
+            </div>
+            <div class="btnrow">
+              <a class="btn" href="preview.html">Open Preview</a>
+            </div>
+          </div>
+
+          <div class="item current-item">
+            <div class="item-top">
+              <div>
+                <p class="item-title"><strong>Project 2:</strong> Preview 1</p>
+                <p class="item-desc">Second current webpage build. Click the button to open the preview1 page.</p>
+              </div>
+              <a class="link" href="preview1.html">Open ↗</a>
+            </div>
+            <div class="btnrow">
+              <a class="btn" href="preview1.html">Open Preview 1</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card half">
+          <h2>Scrapped / Archive <span class="badge scrapped">Scrapped</span></h2>
+
+          <div class="item scrapped-item">
+            <div class="item-top">
+              <div>
+                <p class="item-title"><strong>Roblox Project:</strong> 2D FUN GAME</p>
+                <p class="item-desc">This project is now archived/scrapped instead of being listed as current.</p>
               </div>
               <a class="link" href="https://www.roblox.com/games/138353983627796/2D-FUN-GAME" target="_blank" rel="noopener noreferrer">Open ↗</a>
             </div>
             <div class="btnrow">
-              <a class="btn" href="https://www.roblox.com/games/138353983627796/2D-FUN-GAME" target="_blank" rel="noopener noreferrer">Play on Roblox</a>
+              <a class="btn scrap" href="https://www.roblox.com/games/138353983627796/2D-FUN-GAME" target="_blank" rel="noopener noreferrer">View Roblox Archive</a>
             </div>
           </div>
-        </div>
-        <div class="card half">
-          <h2>Scrapped Webpages</h2>
-          <div class="item">
-            <p class="item-title"><strong>Archive / Access</strong></p>
+
+          <div class="item scrapped-item">
+            <p class="item-title"><strong>Old Webpages</strong></p>
             <p class="item-desc">Old experiments and retired pages live here.</p>
             <div class="btnrow">
               <a class="btn alt" href="access1.html">Go to access1</a>
