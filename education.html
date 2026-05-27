@@ -310,7 +310,7 @@
 
 <body>
 
-  <!-- STANDARD NAVIGATION HEADER - Identical on all pages -->
+    <!-- STANDARD NAVIGATION HEADER - Identical on all pages -->
     <header class="main-nav">
       <nav class="nav-container" id="mainNav">
         <a class="nav-link" href="index.html">Home</a>
@@ -446,26 +446,6 @@
     </div>
   </div>
 
-  <script>
-    // Clear focus on page load
-    (function() {
-      window.addEventListener('pageshow', function() {
-        if (document.activeElement) {
-          document.activeElement.blur();
-        }
-
-        if (document.body) {
-          document.body.focus();
-        }
-      });
-
-      document.addEventListener('DOMContentLoaded', function() {
-        if (document.activeElement) {
-          document.activeElement.blur();
-        }
-      });
-    })();
-  </script>
 
   <script>
     // Arrow key navigation for main nav
