@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Achievement Dice</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    :root {
+      --bg: #080910;
+      --panel: rgba(16, 18, 31, 0.88);
+      --panel-strong: rgba(23, 27, 48, 0.95);
+      --line: rgba(255, 255, 255, 0.12);
+      --text: #f4f7ff;
+      --muted: #a9b0c9;
+      --accent: #7b61ff;
+      --accent2: #ff6fd8;
+      --good: #7cffc4;
+      --danger: #ff6f8e;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(123, 97, 255, 0.35), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(255, 111, 216, 0.18), transparent 36%),
+        linear-gradient(180deg, #080910, #11131f 45%, #05060b);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 90%);
+    }
+
+    .hidden { display: none !important; }
+
+    .login-wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: min(430px, 100%);
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      backdrop-filter: blur(20px);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-card::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -90px;
+      top: -90px;
+      background: radial-gradient(circle, rgba(255,111,216,0.3), transparent 68%);
+      pointer-events: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 30px rgba(123,97,255,0.45);
+      font-size: 25px;
+    }
+
+    .brand h1 {
+      font-size: 1.55rem;
+      letter-spacing: 0.4px;
+    }
+
+    .brand p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 3px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin: 14px 0 7px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.25);
+      color: var(--text);
+      outline: none;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      border-color: rgba(123,97,255,0.8);
+      box-shadow: 0 0 0 4px rgba(123,97,255,0.15);
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 700;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    }
+
+    button:hover { transform: translateY(-2px); }
+    button:active { transform: translateY(0) scale(0.98); }
+
+    .primary-btn, .secondary-btn {
+      padding: 13px 14px;
+      border-radius: 14px;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 14px 35px rgba(123, 97, 255, 0.25);
+    }
+
+    .secondary-btn {
+      background: rgba(255,255,255,0.09);
+      border: 1px solid var(--line);
+    }
+
+    .message {
+      min-height: 22px;
+      margin-top: 14px;
+      color: var(--danger);
+      font-size: 0.92rem;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(5, 7, 16, 0.7);
+      backdrop-filter: blur(20px);
+      padding: 22px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .side-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .user-pill {
+      padding: 9px 12px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .logout {
+      padding: 9px 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .sidebar h2 {
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+    }
+
+    .side-note {
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.4;
+      margin-bottom: 18px;
+    }
+
+    .achievement-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .achievement-item {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 11px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      opacity: 0.45;
+    }
+
+    .achievement-item.unlocked {
+      opacity: 1;
+      background: linear-gradient(135deg, rgba(123,97,255,0.18), rgba(255,111,216,0.12));
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .achievement-item img {
+      width: 54px;
+      height: 54px;
+      object-fit: cover;
+      border-radius: 13px;
+      border: 1px solid var(--line);
+      background: #111;
+    }
+
+    .achievement-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .achievement-desc {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin: 3px 0 8px;
+      line-height: 1.3;
+    }
+
+    .play-sound {
+      padding: 7px 9px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 0.78rem;
+    }
+
+    .play-sound:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+      transform: none;
+    }
+
+    main {
+      display: grid;
+      place-items: center;
+      padding: 36px;
+    }
+
+    .game-card {
+      width: min(760px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035));
+      box-shadow: 0 35px 100px rgba(0,0,0,0.4);
+      backdrop-filter: blur(18px);
+      padding: 34px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: radial-gradient(circle at 50% 0%, rgba(123,97,255,0.24), transparent 42%);
+      pointer-events: none;
+    }
+
+    .game-card > * { position: relative; }
+
+    .game-card h1 {
+      font-size: clamp(2rem, 4vw, 4rem);
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .game-card p {
+      color: var(--muted);
+      line-height: 1.55;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .odds {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 22px 0 28px;
+    }
+
+    .odd-pill {
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.07);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .dice-btn {
+      width: 180px;
+      height: 180px;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,0.95), rgba(255,255,255,0.04) 12%, transparent 13%),
+        radial-gradient(circle at 70% 25%, rgba(255,255,255,0.95), rgba(255,255,255,0.04) 12%, transparent 13%),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95), rgba(255,255,255,0.04) 12%, transparent 13%),
+        radial-gradient(circle at 30% 75%, rgba(255,255,255,0.95), rgba(255,255,255,0.04) 12%, transparent 13%),
+        radial-gradient(circle at 70% 75%, rgba(255,255,255,0.95), rgba(255,255,255,0.04) 12%, transparent 13%),
+        linear-gradient(135deg, #7460ff, #ff70d6);
+      border: 1px solid rgba(255,255,255,0.24);
+      box-shadow: 0 0 45px rgba(123,97,255,0.45), inset 0 0 18px rgba(255,255,255,0.17);
+      font-size: 0;
+      margin: 8px auto 24px;
+    }
+
+    .dice-btn.rolling {
+      animation: roll 0.65s ease;
+    }
+
+    @keyframes roll {
+      0% { transform: rotate(0deg) scale(1); }
+      30% { transform: rotate(16deg) scale(1.08); }
+      60% { transform: rotate(-15deg) scale(0.98); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    .result-box {
+      min-height: 70px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.24);
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.45;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 22px;
+      color: var(--muted);
+      flex-wrap: wrap;
+      font-size: 0.92rem;
+    }
+
+    .toast-area {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 20;
+      display: grid;
+      gap: 12px;
+      width: min(380px, calc(100vw - 44px));
+    }
+
+    .steam-toast {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      align-items: center;
+      gap: 14px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(27, 33, 48, 0.97), rgba(14, 18, 28, 0.97));
+      box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 35px rgba(123,97,255,0.25);
+      transform: translateY(24px);
+      opacity: 0;
+      animation: toastIn 0.35s ease forwards, toastOut 0.35s ease forwards 4.4s;
+    }
+
+    .steam-toast img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: #111;
+    }
+
+    .toast-small {
+      color: var(--good);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      margin-bottom: 5px;
+    }
+
+    .toast-title {
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+
+    .toast-desc {
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    @keyframes toastIn {
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes toastOut {
+      to { transform: translateY(18px); opacity: 0; }
+    }
+
+    @media (max-width: 800px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: relative;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      main { padding: 22px; }
+      .game-card { padding: 24px; }
+      .dice-btn { width: 150px; height: 150px; border-radius: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <section class="login-wrap" id="loginScreen">
+    <div class="login-card">
+      <div class="brand">
+        <div class="brand-mark">🎲</div>
+        <div>
+          <h1>Achievement Dice</h1>
+          <p>Create an account or log back in.</p>
+        </div>
+      </div>
+
+      <label for="username">Username</label>
+      <input id="username" autocomplete="username" placeholder="Enter username" />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="Enter password" />
+
+      <div class="btn-row">
+        <button class="primary-btn" id="loginBtn">Log In</button>
+        <button class="secondary-btn" id="createBtn">Create</button>
+      </div>
+      <p class="message" id="loginMessage"></p>
+    </div>
+  </section>
+
+  <section class="app hidden" id="appScreen">
+    <aside class="sidebar">
+      <div class="side-top">
+        <div class="user-pill" id="currentUser">Player</div>
+        <button class="logout" id="logoutBtn">Log out</button>
+      </div>
+      <h2>Achievements</h2>
+      <p class="side-note">Unlocked achievements appear here. You can replay their sound after unlocking them.</p>
+      <div class="achievement-list" id="achievementList"></div>
+    </aside>
+
+    <main>
+      <div class="game-card">
+        <h1>Roll the Dice</h1>
+        <p>Click the glowing dice. A rare sound achievement might appear like a Steam achievement popup.</p>
+
+        <div class="odds">
+          <span class="odd-pill">Heal Omori Sound: 1 in 5</span>
+          <span class="odd-pill">Giggle Monika: 1 in 10</span>
+        </div>
+
+        <button class="dice-btn" id="diceBtn" aria-label="Roll dice">Roll</button>
+
+        <div class="result-box" id="resultBox">Ready. Click the dice to roll.</div>
+
+        <div class="stats">
+          <span>Rolls: <b id="rollCount">0</b></span>
+          <span>Unlocked: <b id="unlockCount">0</b>/2</span>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <div class="toast-area" id="toastArea"></div>
+
+  <audio id="healAudio" src="omori-heal-sound.mp3" preload="auto"></audio>
+  <audio id="giggleAudio" src="giggle.mp3" preload="auto"></audio>
+
+  <script>
+    const ACCOUNTS_KEY = "achievementDiceAccounts";
+    const SESSION_KEY = "achievementDiceCurrentUser";
+
+    const achievements = [
+      {
+        id: "heal",
+        title: "Heal Omori Sound",
+        description: "You rolled the healing sound achievement.",
+        chance: 5,
+        image: "DW_ALBUM_09.png",
+        audioId: "healAudio"
+      },
+      {
+        id: "giggle",
+        title: "Giggle Monika",
+        description: "You rolled the Monika giggle achievement.",
+        chance: 10,
+        image: "Monika.png",
+        audioId: "giggleAudio"
+      }
+    ];
+
+    const loginScreen = document.getElementById("loginScreen");
+    const appScreen = document.getElementById("appScreen");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const loginMessage = document.getElementById("loginMessage");
+    const currentUser = document.getElementById("currentUser");
+    const achievementList = document.getElementById("achievementList");
+    const resultBox = document.getElementById("resultBox");
+    const rollCount = document.getElementById("rollCount");
+    const unlockCount = document.getElementById("unlockCount");
+    const toastArea = document.getElementById("toastArea");
+    const diceBtn = document.getElementById("diceBtn");
+
+    function getAccounts() {
+      return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "{}");
+    }
+
+    function saveAccounts(accounts) {
+      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    }
+
+    function getActiveUser() {
+      return localStorage.getItem(SESSION_KEY);
+    }
+
+    function getProfile() {
+      const user = getActiveUser();
+      const accounts = getAccounts();
+      return user && accounts[user] ? accounts[user] : null;
+    }
+
+    function saveProfile(profile) {
+      const user = getActiveUser();
+      const accounts = getAccounts();
+      accounts[user] = profile;
+      saveAccounts(accounts);
+    }
+
+    function showMessage(text, good = false) {
+      loginMessage.textContent = text;
+      loginMessage.style.color = good ? "var(--good)" : "var(--danger)";
+    }
+
+    function createAccount() {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      const accounts = getAccounts();
+
+      if (!username || !password) return showMessage("Enter both a username and password.");
+      if (password.length < 4) return showMessage("Password must be at least 4 characters.");
+      if (accounts[username]) return showMessage("That username already exists. Try logging in.");
+
+      accounts[username] = {
+        password,
+        rolls: 0,
+        unlocked: {}
+      };
+      saveAccounts(accounts);
+      localStorage.setItem(SESSION_KEY, username);
+      openApp();
+    }
+
+    function login() {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      const accounts = getAccounts();
+
+      if (!accounts[username]) return showMessage("No account found with that username.");
+      if (accounts[username].password !== password) return showMessage("Incorrect password.");
+
+      localStorage.setItem(SESSION_KEY, username);
+      openApp();
+    }
+
+    function logout() {
+      localStorage.removeItem(SESSION_KEY);
+      appScreen.classList.add("hidden");
+      loginScreen.classList.remove("hidden");
+      passwordInput.value = "";
+      showMessage("");
+    }
+
+    function openApp() {
+      const profile = getProfile();
+      if (!profile) return;
+      currentUser.textContent = getActiveUser();
+      loginScreen.classList.add("hidden");
+      appScreen.classList.remove("hidden");
+      renderAchievements();
+      updateStats();
+    }
+
+    function updateStats() {
+      const profile = getProfile();
+      rollCount.textContent = profile.rolls || 0;
+      unlockCount.textContent = achievements.filter(a => profile.unlocked[a.id]).length;
+    }
+
+    function renderAchievements() {
+      const profile = getProfile();
+      achievementList.innerHTML = "";
+
+      achievements.forEach(achievement => {
+        const isUnlocked = Boolean(profile.unlocked[achievement.id]);
+        const item = document.createElement("div");
+        item.className = "achievement-item" + (isUnlocked ? " unlocked" : "");
+        item.innerHTML = `
+          <img src="${achievement.image}" alt="${achievement.title}">
+          <div>
+            <div class="achievement-title">${achievement.title}</div>
+            <div class="achievement-desc">${isUnlocked ? achievement.description : "Locked — keep rolling."}</div>
+            <button class="play-sound" ${isUnlocked ? "" : "disabled"}>Play sound</button>
+          </div>
+        `;
+        item.querySelector("button").addEventListener("click", () => playAchievementSound(achievement));
+        achievementList.appendChild(item);
+      });
+    }
+
+    function playAchievementSound(achievement) {
+      const audio = document.getElementById(achievement.audioId);
+      audio.currentTime = 0;
+      audio.play().catch(() => {
+        resultBox.textContent = "Click the page once, then try playing the sound again.";
+      });
+    }
+
+    function rollAchievement(achievement) {
+      return Math.floor(Math.random() * achievement.chance) === 0;
+    }
+
+    function rollDice() {
+      const profile = getProfile();
+      if (!profile) return;
+
+      diceBtn.classList.remove("rolling");
+      void diceBtn.offsetWidth;
+      diceBtn.classList.add("rolling");
+
+      profile.rolls = (profile.rolls || 0) + 1;
+
+      const earnedThisRoll = achievements.filter(rollAchievement);
+
+      if (earnedThisRoll.length === 0) {
+        resultBox.textContent = "No achievement this roll. The dice stayed silent.";
+      } else {
+        resultBox.textContent = "Achievement unlocked: " + earnedThisRoll.map(a => a.title).join(" + ");
+        earnedThisRoll.forEach(achievement => {
+          const alreadyUnlocked = profile.unlocked[achievement.id];
+          profile.unlocked[achievement.id] = true;
+          playAchievementSound(achievement);
+          showSteamToast(achievement, alreadyUnlocked);
+        });
+      }
+
+      saveProfile(profile);
+      renderAchievements();
+      updateStats();
+    }
+
+    function showSteamToast(achievement, alreadyUnlocked) {
+      const toast = document.createElement("div");
+      toast.className = "steam-toast";
+      toast.innerHTML = `
+        <img src="${achievement.image}" alt="${achievement.title}">
+        <div>
+          <div class="toast-small">${alreadyUnlocked ? "Achievement repeated" : "Achievement unlocked"}</div>
+          <div class="toast-title">${achievement.title}</div>
+          <div class="toast-desc">${achievement.description}</div>
+        </div>
+      `;
+      toastArea.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+
+    document.getElementById("createBtn").addEventListener("click", createAccount);
+    document.getElementById("loginBtn").addEventListener("click", login);
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+    diceBtn.addEventListener("click", rollDice);
+
+    passwordInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") login();
+    });
+
+    usernameInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") passwordInput.focus();
+    });
+
+    if (getProfile()) openApp();
+  </script>
+</body>
+</html>
