@@ -11,8 +11,8 @@
       --ink:#0f172a;
       --muted:#64748b;
       --line:#e7eaf0;
-      --shadow: 0 14px 36px rgba(15, 23, 42, 0.10);
-      --radius:18px;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+      --radius:22px;
       --btn:#2563eb;
       --btn2:#0f172a;
       --scrap:#7f1d1d;
@@ -20,6 +20,8 @@
       --soft-blue:#eff6ff;
       --soft-red:#fff1f2;
       --soft-green:#f0fdf4;
+      --purple:#6d28d9;
+      --orange:#ea580c;
     }
     *{ box-sizing:border-box; }
     body{
@@ -28,9 +30,10 @@
       font-family: Arial, sans-serif;
       color:var(--ink);
       background:
-        radial-gradient(circle at 15% 0%, #ffffff 0%, transparent 35%),
-        radial-gradient(circle at 85% 15%, #e0f2fe 0%, transparent 28%),
-        linear-gradient(180deg, var(--bg), #eef2f7);
+        radial-gradient(circle at 12% 2%, rgba(37,99,235,0.20) 0%, transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(109,40,217,0.16) 0%, transparent 32%),
+        radial-gradient(circle at 50% 100%, rgba(22,101,52,0.12) 0%, transparent 35%),
+        linear-gradient(180deg, #f8fafc, #eef2f7);
     }
 
     /* === STANDARD NAVIGATION HEADER - Consistent across all pages === */
@@ -105,38 +108,55 @@
     }
 
     .wrap{
-      width:min(1050px, 100%);
+      width:min(1100px, 100%);
       margin:0 auto;
-      padding:20px;
+      padding:22px;
     }
     .hero{
       margin-bottom:18px;
-      padding:22px;
-      border:1px solid var(--line);
-      border-radius:24px;
-      background:rgba(255,255,255,0.78);
+      padding:28px;
+      border:1px solid rgba(255,255,255,0.70);
+      border-radius:28px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.82));
       box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:210px;
+      height:210px;
+      right:-80px;
+      top:-90px;
+      border-radius:999px;
+      background:rgba(37,99,235,0.12);
     }
     .page-title{
-      margin:0 0 6px;
-      font-size:36px;
-      letter-spacing:0.3px;
+      margin:0;
+      font-size:42px;
+      letter-spacing:-0.8px;
+      position:relative;
+      z-index:1;
     }
     .sub{
-      margin:0;
+      margin:8px 0 0;
       color:var(--muted);
-      font-size:14px;
+      font-size:15px;
       line-height:1.45;
+      position:relative;
+      z-index:1;
     }
     .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
-      gap:16px;
+      gap:18px;
     }
     .card{
       grid-column: span 12;
-      background:var(--card);
-      border:1px solid var(--line);
+      background:rgba(255,255,255,0.92);
+      border:1px solid rgba(226,232,240,0.95);
       border-radius:var(--radius);
       box-shadow: var(--shadow);
       padding:18px;
@@ -144,20 +164,26 @@
       overflow:hidden;
     }
     @media (min-width: 860px){
-      .card.half{ grid-column: span 6; }
+      .card.main{ grid-column: span 7; }
+      .card.side{ grid-column: span 5; }
     }
-    .card h2{
-      margin:0 0 10px;
-      font-size:18px;
+    .section-head{
       display:flex;
       align-items:center;
-      gap:8px;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:14px;
+    }
+    .card h2{
+      margin:0;
+      font-size:19px;
+      letter-spacing:-0.2px;
     }
     .badge{
       display:inline-flex;
       align-items:center;
       border-radius:999px;
-      padding:5px 9px;
+      padding:6px 10px;
       font-size:11px;
       font-weight:800;
       letter-spacing:0.2px;
@@ -173,51 +199,60 @@
       color:var(--scrap);
       border:1px solid #fecdd3;
     }
-    .item{
+    .project-list{
+      display:grid;
+      gap:12px;
+    }
+    .project-card{
       display:flex;
-      flex-direction:column;
-      gap:10px;
-      padding:14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background: linear-gradient(180deg, #ffffff, #fbfbfd);
-    }
-    .item + .item{ margin-top:12px; }
-    .item.current-item{
-      background:linear-gradient(180deg, #ffffff, var(--soft-blue));
-    }
-    .item.scrapped-item{
-      background:linear-gradient(180deg, #ffffff, #fff7f7);
-      opacity:0.95;
-    }
-    .item-top{
-      display:flex;
-      align-items:flex-start;
+      align-items:center;
       justify-content:space-between;
       gap:14px;
-      flex-wrap:wrap;
+      padding:16px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#fff;
+      transition:transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
     }
-    .item-title{
+    .project-card:hover{
+      transform:translateY(-3px);
+      box-shadow:0 18px 30px rgba(15,23,42,0.10);
+      border-color:#cbd5e1;
+    }
+    .project-info{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+    .icon{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      font-weight:900;
+      flex:0 0 auto;
+      box-shadow:0 10px 18px rgba(15,23,42,0.12);
+    }
+    .icon.blue{ background:linear-gradient(135deg, #2563eb, #38bdf8); }
+    .icon.purple{ background:linear-gradient(135deg, #6d28d9, #a855f7); }
+    .icon.orange{ background:linear-gradient(135deg, #ea580c, #f59e0b); }
+    .icon.dark{ background:linear-gradient(135deg, #111827, #475569); }
+    .icon.red{ background:linear-gradient(135deg, #7f1d1d, #ef4444); }
+    .project-title{
       margin:0;
       font-size:16px;
+      font-weight:800;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .item-desc{
-      margin:0;
+    .project-status{
+      margin:3px 0 0;
       color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
-    }
-    a.link{
-      color:var(--btn);
-      text-decoration:none;
-      font-weight:700;
-    }
-    a.link:hover{ text-decoration:underline; }
-    .btnrow{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:8px;
+      font-size:12px;
     }
     .btn{
       display:inline-flex;
@@ -227,7 +262,8 @@
       border:none;
       border-radius:12px;
       cursor:pointer;
-      font-weight:700;
+      font-weight:800;
+      font-size:13px;
       text-decoration:none;
       color:white;
       background:var(--btn);
@@ -235,7 +271,7 @@
       transition: transform 0.08s ease, filter 0.15s ease;
       white-space:nowrap;
     }
-    .btn:hover{ filter: brightness(1.03); }
+    .btn:hover{ filter: brightness(1.05); }
     .btn:active{ transform: translateY(1px); }
     .btn.alt{
       background:var(--btn2);
@@ -245,11 +281,19 @@
       background:var(--scrap);
       box-shadow: 0 10px 20px rgba(127,29,29,0.14);
     }
-    footer{
-      margin-top:18px;
-      color:var(--muted);
-      font-size:12px;
-      text-align:center;
+    .btn.shopping{
+      background:var(--orange);
+      box-shadow: 0 10px 20px rgba(234,88,12,0.18);
+    }
+    @media (max-width: 560px){
+      .wrap{ padding:14px; }
+      .hero{ padding:22px; }
+      .page-title{ font-size:34px; }
+      .project-card{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+      .btn{ width:100%; }
     }
   </style>
 </head>
@@ -270,74 +314,101 @@
     </header>
 
   <div class="page-wrapper">
-    <div class="wrap">
-      <div class="hero">
+    <main class="wrap">
+      <section class="hero">
         <h1 class="page-title">Projects</h1>
-        <p class="sub">Current work is now focused on the preview pages. Older experiments and the Roblox project have been moved into the scrapped/archive section.</p>
-      </div>
+        <p class="sub">Current builds and archived experiments.</p>
+      </section>
 
       <section class="grid">
-        <div class="card half">
-          <h2>Current Projects <span class="badge current">Current</span></h2>
+        <section class="card main">
+          <div class="section-head">
+            <h2>Current</h2>
+            <span class="badge current">Active</span>
+          </div>
 
-          <div class="item current-item">
-            <div class="item-top">
-              <div>
-                <p class="item-title"><strong>Project 1:</strong> Preview</p>
-                <p class="item-desc">Current webpage build. Click the button to open the preview page.</p>
+          <div class="project-list">
+            <a class="project-card" href="preview.html">
+              <div class="project-info">
+                <div class="icon blue">P</div>
+                <div>
+                  <p class="project-title">Preview</p>
+                  <p class="project-status">Webpage</p>
+                </div>
               </div>
-              <a class="link" href="preview.html">Open ↗</a>
-            </div>
-            <div class="btnrow">
-              <a class="btn" href="preview.html">Open Preview</a>
-            </div>
-          </div>
+              <span class="btn">Open</span>
+            </a>
 
-          <div class="item current-item">
-            <div class="item-top">
-              <div>
-                <p class="item-title"><strong>Project 2:</strong> Preview 1</p>
-                <p class="item-desc">Second current webpage build. Click the button to open the preview1 page.</p>
+            <a class="project-card" href="preview1.html">
+              <div class="project-info">
+                <div class="icon purple">P1</div>
+                <div>
+                  <p class="project-title">Preview 1</p>
+                  <p class="project-status">Webpage</p>
+                </div>
               </div>
-              <a class="link" href="preview1.html">Open ↗</a>
-            </div>
-            <div class="btnrow">
-              <a class="btn" href="preview1.html">Open Preview 1</a>
-            </div>
-          </div>
-        </div>
+              <span class="btn">Open</span>
+            </a>
 
-        <div class="card half">
-          <h2>Scrapped / Archive <span class="badge scrapped">Scrapped</span></h2>
-
-          <div class="item scrapped-item">
-            <div class="item-top">
-              <div>
-                <p class="item-title"><strong>Roblox Project:</strong> 2D FUN GAME</p>
-                <p class="item-desc">This project is now archived/scrapped instead of being listed as current.</p>
+            <a class="project-card" href="shopping.html">
+              <div class="project-info">
+                <div class="icon orange">S</div>
+                <div>
+                  <p class="project-title">Shopping</p>
+                  <p class="project-status">Webpage</p>
+                </div>
               </div>
-              <a class="link" href="https://www.roblox.com/games/138353983627796/2D-FUN-GAME" target="_blank" rel="noopener noreferrer">Open ↗</a>
-            </div>
-            <div class="btnrow">
-              <a class="btn scrap" href="https://www.roblox.com/games/138353983627796/2D-FUN-GAME" target="_blank" rel="noopener noreferrer">View Roblox Archive</a>
-            </div>
+              <span class="btn shopping">Open</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="card side">
+          <div class="section-head">
+            <h2>Scrapped</h2>
+            <span class="badge scrapped">Archive</span>
           </div>
 
-          <div class="item scrapped-item">
-            <p class="item-title"><strong>Old Webpages</strong></p>
-            <p class="item-desc">Old experiments and retired pages live here.</p>
-            <div class="btnrow">
-              <a class="btn alt" href="access1.html">Go to access1</a>
-              <a class="btn alt" href="bossfight.html">Go to bossfight</a>
-            </div>
+          <div class="project-list">
+            <a class="project-card" href="https://www.roblox.com/games/138353983627796/2D-FUN-GAME" target="_blank" rel="noopener noreferrer">
+              <div class="project-info">
+                <div class="icon red">R</div>
+                <div>
+                  <p class="project-title">2D FUN GAME</p>
+                  <p class="project-status">Roblox</p>
+                </div>
+              </div>
+              <span class="btn scrap">Open</span>
+            </a>
+
+            <a class="project-card" href="access1.html">
+              <div class="project-info">
+                <div class="icon dark">A</div>
+                <div>
+                  <p class="project-title">access1</p>
+                  <p class="project-status">Old page</p>
+                </div>
+              </div>
+              <span class="btn alt">Open</span>
+            </a>
+
+            <a class="project-card" href="bossfight.html">
+              <div class="project-info">
+                <div class="icon dark">B</div>
+                <div>
+                  <p class="project-title">bossfight</p>
+                  <p class="project-status">Old page</p>
+                </div>
+              </div>
+              <span class="btn alt">Open</span>
+            </a>
           </div>
-        </div>
+        </section>
       </section>
-      <footer>© <span id="year"></span> Projects</footer>
-    </div>
+    </main>
   </div>
+
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
     (function() {
       window.addEventListener('pageshow', function() {
         document.activeElement.blur();
