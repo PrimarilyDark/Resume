@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shared Files</title>
   <style>
     :root {
@@ -18,20 +18,51 @@
       --focus: 0 0 0 4px rgba(99,102,241,0.35);
       --accent: #6366f1;
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: system-ui, -apple-system, Arial, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(1200px 600px at 20% -10%, rgba(99,102,241,0.30), transparent 60%),
-        radial-gradient(900px 500px at 90% 10%, rgba(56,189,248,0.18), transparent 55%),
+        radial-gradient(900px 500px at 10% 0%, rgba(99,102,241,0.32), transparent 62%),
+        radial-gradient(850px 500px at 95% 12%, rgba(56,189,248,0.18), transparent 58%),
+        radial-gradient(600px 420px at 50% 100%, rgba(99,102,241,0.12), transparent 60%),
         var(--bg);
+      overflow-x: hidden;
     }
-    a { color: inherit; text-decoration: none; }
 
-    /* === STANDARD NAVIGATION HEADER - Consistent across all pages === */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 75%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* === STANDARD NAVIGATION HEADER === */
     .main-nav {
       position: fixed;
       top: 0;
@@ -45,6 +76,7 @@
       padding: 14px 20px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
+
     .nav-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -54,398 +86,627 @@
       gap: 10px;
       flex-wrap: wrap;
     }
+
     .nav-link {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       padding: 10px 16px;
       border-radius: 10px;
-      text-decoration: none;
       font-weight: 600;
       font-size: 14px;
       background: rgba(255,255,255,0.1);
       color: #fff;
-      transition: all 0.2s ease;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
       white-space: nowrap;
       border: none;
       cursor: pointer;
     }
+
     .nav-link:hover {
       transform: translateY(-2px);
       background: rgba(255,255,255,0.2);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
     }
+
     .nav-link.active {
       background: #2e7d32;
     }
+
     .nav-link.active:hover {
       background: #1b5e20;
     }
-    /* Home button always red */
+
     .nav-link[href="index.html"] {
       background: #e53935;
     }
+
     .nav-link[href="index.html"]:hover {
       background: #c62828;
     }
-    /* Prevent focus styles on page load */
-    .nav-link:focus { outline: none; }
-    .nav-link:focus-visible { outline: 2px solid #666; outline-offset: 2px; }
-    /* Page content wrapper - accounts for fixed header */
-    .page-wrapper {
-      padding-top: 90px;
-      min-height: 100vh;
+
+    .nav-link:focus {
+      outline: none;
     }
-    /* Mobile responsive */
-    @media (max-width: 768px) {
-      .main-nav { padding: 10px 12px; }
-      .nav-container { gap: 6px; }
-      .nav-link { padding: 8px 12px; font-size: 12px; }
-      .page-wrapper { padding-top: 70px; }
+
+    .nav-link:focus-visible {
+      outline: 2px solid #666;
+      outline-offset: 2px;
+    }
+
+    .page-wrapper {
+      min-height: 100vh;
+      padding-top: 92px;
     }
 
     .wrap {
-      width: min(1100px, 100%);
+      width: min(1120px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 20px;
+      padding: 28px 0 42px;
     }
-    .page-title {
-      margin: 0 0 20px;
-      font-size: 30px;
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) + 8px);
+      background:
+        linear-gradient(135deg, rgba(15,27,51,0.92), rgba(17,31,61,0.72)),
+        radial-gradient(circle at top right, rgba(99,102,241,0.28), transparent 38%);
+      box-shadow: var(--shadow);
+      padding: 34px;
+      margin-bottom: 22px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -100px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: rgba(99,102,241,0.22);
+      filter: blur(3px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: -0.2px;
+      letter-spacing: 0.2px;
     }
+
+    .page-title {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      max-width: 720px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 0.96;
+      font-weight: 850;
+      letter-spacing: -1.8px;
+    }
+
+    .hero-text {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
     .grid {
       display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-columns: 0.92fr 1.08fr;
       gap: 20px;
+      align-items: start;
     }
-    @media (max-width: 960px) {
-      .grid { grid-template-columns: 1fr; }
-    }
+
     .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
     }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent);
+    }
+
     .panel-header {
-      padding: 16px 20px;
+      padding: 18px 20px;
       border-bottom: 1px solid var(--line);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
       flex-wrap: wrap;
+      background: rgba(15,27,51,0.34);
     }
+
     .panel-header h2 {
       margin: 0;
       font-size: 18px;
-      font-weight: 600;
+      font-weight: 750;
+      letter-spacing: -0.2px;
     }
+
+    .panel-subtitle {
+      width: 100%;
+      margin: -8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
     .file-list {
-      padding: 16px 20px;
+      padding: 18px 20px 20px;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
+
     .file-card {
-      background: rgba(17,31,61,0.6);
+      background:
+        linear-gradient(135deg, rgba(17,31,61,0.86), rgba(15,27,51,0.62));
       border: 1px solid var(--line);
       border-radius: var(--radius2);
-      padding: 16px 18px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
+
+    .file-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99,102,241,0.44);
+      background:
+        linear-gradient(135deg, rgba(17,31,61,0.96), rgba(15,27,51,0.72));
+    }
+
     .file-top {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap;
     }
+
+    .file-icon-title {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      min-width: 0;
+    }
+
+    .file-icon {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: rgba(99,102,241,0.18);
+      border: 1px solid rgba(99,102,241,0.38);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+      font-size: 20px;
+    }
+
     .file-name {
-      margin: 0;
+      margin: 1px 0 5px;
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: -0.15px;
     }
+
+    .file-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
     .file-type {
+      flex: 0 0 auto;
       font-size: 12px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.9);
+      font-weight: 700;
+      color: rgba(255,255,255,0.92);
       background: rgba(99,102,241,0.16);
       border: 1px solid rgba(99,102,241,0.38);
       padding: 5px 12px;
       border-radius: 999px;
     }
+
+    .meta-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .meta-box {
+      padding: 11px 12px;
+      border-radius: 13px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid var(--line);
+    }
+
+    .meta-label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .meta-value {
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
     .actions {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
+
     .btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
+      min-height: 42px;
       padding: 10px 16px;
       border-radius: 12px;
       border: 1px solid var(--line);
       background: rgba(255,255,255,0.05);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.20);
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 750;
       font-size: 14px;
-      transition: all 0.15s ease;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
       white-space: nowrap;
       color: var(--ink);
     }
+
     .btn:hover {
       transform: translateY(-1px);
       background: rgba(255,255,255,0.08);
-      border-color: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.22);
     }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
     .btn.primary {
-      background: rgba(99,102,241,0.2);
-      border-color: rgba(99,102,241,0.48);
+      background: rgba(99,102,241,0.22);
+      border-color: rgba(99,102,241,0.52);
     }
+
     .btn.primary:hover {
-      background: rgba(99,102,241,0.26);
-      border-color: rgba(99,102,241,0.6);
+      background: rgba(99,102,241,0.30);
+      border-color: rgba(99,102,241,0.70);
     }
+
     .preview {
       padding: 20px;
     }
+
     .frame-wrap {
-      background: rgba(0,0,0,0.25);
+      background: rgba(0,0,0,0.28);
       border: 1px solid var(--line);
       border-radius: var(--radius2);
       overflow: hidden;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.30);
     }
+
+    .frame-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      height: 38px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(11,18,32,0.72);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.22);
+    }
+
+    .dot:nth-child(1) { background: rgba(229,57,53,0.85); }
+    .dot:nth-child(2) { background: rgba(99,102,241,0.85); }
+    .dot:nth-child(3) { background: rgba(46,125,50,0.85); }
+
     .ratio {
       position: relative;
       width: 100%;
       padding-top: 56.25%;
     }
+
     .ratio iframe {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       border: 0;
+      background: var(--panel);
     }
+
+    .helper-card {
+      margin-top: 16px;
+      padding: 15px 16px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
     .footer {
-      margin-top: 40px;
-      color: rgba(255,255,255,0.4);
+      margin-top: 30px;
+      color: rgba(232,238,252,0.48);
       font-size: 13px;
       text-align: center;
+    }
+
+    @media (max-width: 960px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-nav {
+        padding: 10px 12px;
+      }
+
+      .nav-container {
+        gap: 6px;
+      }
+
+      .nav-link {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+
+      .page-wrapper {
+        padding-top: 76px;
+      }
+
+      .wrap {
+        width: min(100% - 22px, 1120px);
+        padding-top: 18px;
+      }
+
+      .hero {
+        padding: 24px 20px;
+      }
+
+      .hero-actions,
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .file-top {
+        flex-direction: column;
+      }
+
+      .meta-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
     }
   </style>
 </head>
 <body>
+  <header class="main-nav">
+    <nav class="nav-container" id="mainNav" aria-label="Main navigation">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="about.html">About</a>
+      <a class="nav-link" href="education.html">Education</a>
+      <a class="nav-link" href="skills.html">Skills</a>
+      <a class="nav-link" href="projects.html">Projects</a>
+      <a class="nav-link active" href="sharedfiles.html" aria-current="page">Shared Files</a>
+      <a class="nav-link" href="licenses.html">Licenses</a>
+      <a class="nav-link" href="workexperience.html">Work Experience</a>
+    </nav>
+  </header>
 
-    <!-- STANDARD NAVIGATION HEADER - Identical on all pages -->
-    <header class="main-nav">
-      <nav class="nav-container" id="mainNav">
-        <a class="nav-link" href="index.html">Home</a>
-        <a class="nav-link" href="about.html">About</a>
-        <a class="nav-link" href="education.html">Education</a>
-        <a class="nav-link" href="skills.html">Skills</a>
-        <a class="nav-link" href="projects.html">Projects</a>
-        <a class="nav-link active" href="sharedfiles.html">Shared Files</a>
-        <a class="nav-link" href="licenses.html">Licenses</a>
-        <a class="nav-link" href="workexperience.html">Work Experience</a>
-      </nav>
-    </header>
-
-  <div class="page-wrapper">
+  <main class="page-wrapper">
     <div class="wrap">
-      <h1 class="page-title">Shared Files</h1>
+      <section class="hero">
+        <div class="eyebrow">📁 Shared Files</div>
+        <h1 class="page-title">Files, previews, and quick access in one place.</h1>
+        <p class="hero-text">
+          A clean page for important shared documents. Open the main file, copy the link, or preview it directly without leaving the page.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">↗ Open Main File</a>
+          <button class="btn" id="copyHeroLinkBtn" type="button">📋 Copy Link</button>
+        </div>
+      </section>
+
       <div class="grid">
-        <section class="panel">
+        <section class="panel" aria-labelledby="shared-items-title">
           <div class="panel-header">
-            <h2>Shared Items</h2>
-            <a class="btn primary" href="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">↗ Open Main File</a>
+            <h2 id="shared-items-title">Shared Items</h2>
+            <p class="panel-subtitle">Your available shared file is listed below with quick actions.</p>
           </div>
+
           <div class="file-list">
-            <div class="file-card">
+            <article class="file-card">
               <div class="file-top">
-                <p class="file-name">Google Slides Presentation</p>
+                <div class="file-icon-title">
+                  <div class="file-icon" aria-hidden="true">▣</div>
+                  <div>
+                    <p class="file-name">Google Slides Presentation</p>
+                    <p class="file-desc">Presentation link with an embedded preview on the right side of the page.</p>
+                  </div>
+                </div>
                 <span class="file-type">Slides</span>
               </div>
+
+              <div class="meta-row" aria-label="File details">
+                <div class="meta-box">
+                  <span class="meta-label">File Type</span>
+                  <span class="meta-value">Google Slides</span>
+                </div>
+                <div class="meta-box">
+                  <span class="meta-label">Access</span>
+                  <span class="meta-value">External Link</span>
+                </div>
+              </div>
+
               <div class="actions">
                 <a class="btn primary" href="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">↗ Open in Slides</a>
-                <button class="btn" id="copyLinkBtn">📋 Copy Link</button>
+                <button class="btn copy-link-btn" type="button">📋 Copy Link</button>
               </div>
-            </div>
+            </article>
           </div>
         </section>
-        <aside class="panel">
-          <div class="panel-header"><h2>Preview</h2></div>
+
+        <aside class="panel" aria-labelledby="preview-title">
+          <div class="panel-header">
+            <h2 id="preview-title">Live Preview</h2>
+            <p class="panel-subtitle">Preview may depend on the Google Slides sharing settings.</p>
+          </div>
+
           <div class="preview">
             <div class="frame-wrap">
-              <div class="ratio">
-                <iframe title="Presentation Preview" src="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/embed?start=false&loop=false&delayms=3000" allowfullscreen></iframe>
+              <div class="frame-toolbar" aria-hidden="true">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
               </div>
+              <div class="ratio">
+                <iframe
+                  title="Google Slides Presentation Preview"
+                  src="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/embed?start=false&loop=false&delayms=3000"
+                  allowfullscreen>
+                </iframe>
+              </div>
+            </div>
+            <div class="helper-card">
+              Tip: if the preview does not load, use <strong>Open in Slides</strong>. The embedded preview can be blocked if the file is not shared publicly enough.
             </div>
           </div>
         </aside>
       </div>
-      <div class="footer">© Shared Files</div>
+
+      <div class="footer">Shared Files</div>
     </div>
-  </div>
+  </main>
+
   <script>
     const fileLink = "https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing";
-    document.getElementById("copyLinkBtn")?.addEventListener("click", async () => {
+
+    function clearFocus() {
+      if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+      }
+      if (document.body) document.body.focus();
+    }
+
+    async function copyFileLink(button) {
+      const originalText = button.textContent;
+
       try {
         await navigator.clipboard.writeText(fileLink);
-        const btn = document.getElementById("copyLinkBtn");
-        const original = btn.textContent;
-        btn.textContent = "✅ Copied";
-        setTimeout(() => btn.textContent = original, 1400);
-      } catch {
-        alert("Copy failed.\nLink: " + fileLink);
+        button.textContent = "✅ Copied";
+      } catch (error) {
+        button.textContent = "⚠ Copy Failed";
+        alert("Copy failed. Here is the link:\n" + fileLink);
       }
+
+      setTimeout(() => {
+        button.textContent = originalText;
+      }, 1400);
+    }
+
+    document.querySelectorAll(".copy-link-btn, #copyHeroLinkBtn").forEach((button) => {
+      button.addEventListener("click", () => copyFileLink(button));
     });
-    (function() {
-      window.addEventListener('pageshow', function() {
-        document.activeElement.blur();
-        if (document.body) document.body.focus();
-      });
-      document.addEventListener('DOMContentLoaded', function() {
-        document.activeElement.blur();
-      });
-    })();
-  </script>
 
-  <script>
-    // Arrow key navigation for main nav
-    (function() {
-      const navLinks = document.querySelectorAll('#mainNav .nav-link');
-      let currentIdx = 0;
-
-      // Find current page index
-      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-      navLinks.forEach((link, idx) => {
-        if (link.getAttribute('href') === currentPage) currentIdx = idx;
+    (function setupKeyboardNav() {
+      const navLinks = Array.from(document.querySelectorAll("#mainNav .nav-link"));
+      let currentIndex = navLinks.findIndex((link) => {
+        const currentPage = window.location.pathname.split("/").pop() || "index.html";
+        return link.getAttribute("href") === currentPage;
       });
 
-      document.addEventListener('keydown', function(e) {
-        // Only handle when not in input
-        if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if (currentIndex < 0) currentIndex = 0;
 
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          currentIdx = (currentIdx + 1) % navLinks.length;
-          navLinks[currentIdx].focus();
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          currentIdx = (currentIdx - 1 + navLinks.length) % navLinks.length;
-          navLinks[currentIdx].focus();
-        } else if (e.key === 'Enter' && document.activeElement.classList.contains('nav-link')) {
-          e.preventDefault();
-          window.location.href = document.activeElement.getAttribute('href');
+      document.addEventListener("keydown", (event) => {
+        const activeTag = document.activeElement?.tagName;
+        if (["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(activeTag)) return;
+
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          currentIndex = (currentIndex + 1) % navLinks.length;
+          navLinks[currentIndex].focus();
         }
-      });
 
-      // Clear focus on page load
-      window.addEventListener('pageshow', function() {
-        document.activeElement.blur();
-        if (document.body) document.body.focus();
-      });
-      document.addEventListener('DOMContentLoaded', function() {
-        document.activeElement.blur();
-      });
-    })();
-  </script>
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          currentIndex = (currentIndex - 1 + navLinks.length) % navLinks.length;
+          navLinks[currentIndex].focus();
+        }
 
-</body>
-</html>ut(clearFocus, 50);
-      });
-
-      // Also clear immediately
-      clearFocus();
-
-      // Keyboard navigation with arrow keys (main nav only)
-      let focusedIndex = -1;
-      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-      focusedIndex = navButtons.findIndex(btn => btn.getAttribute('href') === currentPage);
-      if (focusedIndex === -1) focusedIndex = 0;
-
-      document.addEventListener('keydown', function(e) {
-        // Only handle arrow keys when no input/modal is active
-        if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
-
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          focusedIndex = (focusedIndex + 1) % navButtons.length;
-          navButtons[focusedIndex].focus();
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          focusedIndex = (focusedIndex - 1 + navButtons.length) % navButtons.length;
-          navButtons[focusedIndex].focus();
-        } else if (e.key === 'Enter' && focusedIndex >= 0 && document.activeElement === navButtons[focusedIndex]) {
-          e.preventDefault();
-          window.location.href = navButtons[focusedIndex].getAttribute('href');
+        if (event.key === "Enter" && document.activeElement?.classList.contains("nav-link")) {
+          event.preventDefault();
+          window.location.href = document.activeElement.getAttribute("href");
         }
       });
     })();
 
-    const fileLink = "https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing";
-
-    document.getElementById("copyLinkBtn")?.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(fileLink);
-        const btn = document.getElementById("copyLinkBtn");
-        const original = btn.textContent;
-        btn.textContent = "✅ Copied";
-        setTimeout(() => btn.textContent = original, 1400);
-      } catch {
-        alert("Copy failed.\nLink: " + fileLink);
-      }
-    });
+    window.addEventListener("pageshow", clearFocus);
+    document.addEventListener("DOMContentLoaded", clearFocus);
   </script>
-
-  <script>
-    // Arrow key navigation for main nav
-    (function() {
-      const navLinks = document.querySelectorAll('#mainNav .nav-link');
-      let currentIdx = 0;
-
-      // Find current page index
-      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-      navLinks.forEach((link, idx) => {
-        if (link.getAttribute('href') === currentPage) currentIdx = idx;
-      });
-
-      document.addEventListener('keydown', function(e) {
-        // Only handle when not in input
-        if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          currentIdx = (currentIdx + 1) % navLinks.length;
-          navLinks[currentIdx].focus();
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          currentIdx = (currentIdx - 1 + navLinks.length) % navLinks.length;
-          navLinks[currentIdx].focus();
-        } else if (e.key === 'Enter' && document.activeElement.classList.contains('nav-link')) {
-          e.preventDefault();
-          window.location.href = document.activeElement.getAttribute('href');
-        }
-      });
-
-      // Clear focus on page load
-      window.addEventListener('pageshow', function() {
-        document.activeElement.blur();
-        if (document.body) document.body.focus();
-      });
-      document.addEventListener('DOMContentLoaded', function() {
-        document.activeElement.blur();
-      });
-    })();
-  </script>
-
 </body>
 </html>
