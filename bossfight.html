@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cube Knight Boss Fight (Regen + Attack Debug)</title>
+  <title>Cube Knight Boss Fight</title>
   <style>
     html, body { margin:0; height:100%; background:#0b0f14; color:#e6edf3; font-family:system-ui, Arial; }
     #wrap { display:flex; align-items:center; justify-content:center; height:100%; }
@@ -81,7 +81,7 @@
   // Start regen only after you stop taking damage, 1.0s after last damage instance:
   const REGEN_DELAY = 1.0;
   // First 2 seconds of regen: 120 hp/second
-  const REGEN_BURST_DURATION = 0.1;
+  const REGEN_BURST_DURATION = 2.0;
   const REGEN_BURST_RATE = 120;  // hp/sec
   // After burst: 60 hp/second
   const REGEN_BASE_RATE = 60;    // hp/sec
@@ -205,7 +205,7 @@
 
     const sinceDamage = state.t - player.lastDamagedAt;
 
-    // regen starts only after 2.5s without taking damage
+    // regen starts only after REGEN_DELAY seconds without taking damage
     if (sinceDamage < REGEN_DELAY) {
       const wait = (REGEN_DELAY - sinceDamage);
       regenLabel.textContent = `Regen: waiting ${wait.toFixed(1)}s`;
@@ -291,7 +291,9 @@
     const dy = targetY - (boss.y + boss.h/2);
     boss.vy += clamp(dy*10, -1100, 1100) * state.dt;
 
-    if (boss.attackTimer === 0) {
+    // attackTimer is already slightly above 0 by the time this runs,
+    // so initialize by checking the saved dash values instead.
+    if (boss._dashDir === undefined) {
       boss._dashDir = (boss.x > W/2) ? -1 : 1;
       boss._dashCount = 0;
       boss._wallLatch = false;
@@ -915,7 +917,7 @@
 
   // ========= HUD / end =========
   function updateHUD() {
-    bossBar.style.width = `${(boss.hp/BOSS_MAX_HP)*100}%`;
+    bossBar.style.width = `${clamp((boss.hp/BOSS_MAX_HP)*100, 0, 100)}%`;
     pHPEl.textContent = Math.ceil(player.hp);
   }
 
@@ -982,6 +984,8 @@
     requestAnimationFrame(tick);
   }
 
+  hardReset();
+
   showCenter(
     "CUBE KNIGHT: THE RED ONE",
     `Boss HP: ${BOSS_MAX_HP} • Your shots: ${SHOT_DAMAGE} dmg • Cooldown: ${SHOT_COOLDOWN}s<br/>
@@ -989,7 +993,6 @@
   );
   setTimeout(hideCenter, 1600);
 
-  hardReset();
   tick();
 })();
 </script>
