@@ -171,6 +171,29 @@
       font-size: 0.92rem;
     }
 
+    .storage-warning {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.4;
+    }
+
+    .cooldown-note {
+      margin: -10px auto 18px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .dice-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+      transform: none;
+    }
+
     .app {
       min-height: 100vh;
       display: grid;
@@ -496,6 +519,7 @@
         <button class="secondary-btn" id="createBtn">Create</button>
       </div>
       <p class="message" id="loginMessage"></p>
+      <p class="storage-warning">⚠️ Caution: your account, rolls, and achievements are saved only on this device/browser. They will not carry over to other devices.</p>
     </div>
   </section>
 
@@ -507,6 +531,7 @@
       </div>
       <h2>Achievements</h2>
       <p class="side-note">Unlocked achievements appear here. You can replay their sound after unlocking them.</p>
+      <p class="side-note">⚠️ Saved only on this device/browser. It will not carry over to other devices.</p>
       <div class="achievement-list" id="achievementList"></div>
     </aside>
 
@@ -521,6 +546,7 @@
         </div>
 
         <button class="dice-btn" id="diceBtn" aria-label="Roll dice">Roll</button>
+        <p class="cooldown-note" id="cooldownNote">You can roll once every 2 seconds.</p>
 
         <div class="result-box" id="resultBox">Ready. Click the dice to roll.</div>
 
@@ -572,6 +598,8 @@
     const unlockCount = document.getElementById("unlockCount");
     const toastArea = document.getElementById("toastArea");
     const diceBtn = document.getElementById("diceBtn");
+    const cooldownNote = document.getElementById("cooldownNote");
+    let canRoll = true;
 
     function getAccounts() {
       return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "{}");
@@ -693,7 +721,11 @@
 
     function rollDice() {
       const profile = getProfile();
-      if (!profile) return;
+      if (!profile || !canRoll) return;
+
+      canRoll = false;
+      diceBtn.disabled = true;
+      cooldownNote.textContent = "Wait 2 seconds before rolling again...";
 
       diceBtn.classList.remove("rolling");
       void diceBtn.offsetWidth;
@@ -718,6 +750,12 @@
       saveProfile(profile);
       renderAchievements();
       updateStats();
+
+      setTimeout(() => {
+        canRoll = true;
+        diceBtn.disabled = false;
+        cooldownNote.textContent = "You can roll once every 2 seconds.";
+      }, 2000);
     }
 
     function showSteamToast(achievement, alreadyUnlocked) {
