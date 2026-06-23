@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Repository Hub</title>
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --card-bg: #1f1f1f;
+            --accent-color: #ff0000;
+            --text-color: #ffffff;
+            --text-secondary: #aaaaaa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hub-container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            max-width: 1200px;
+            gap: 20px;
+        }
+
+        /* Left Column: The Main Video Theatre */
+        .theatre-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Intercepting Play Overlay */
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: background 0.3s ease;
+        }
+
+        .play-overlay:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .play-button {
+            width: 85px;
+            height: 85px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            box-shadow: 0 4px 20px rgba(255, 0, 0, 0.4);
+        }
+
+        .play-overlay:hover .play-button {
+            transform: scale(1.1);
+            background-color: #cc0000;
+        }
+
+        .play-button::before {
+            content: "";
+            display: block;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 15px 0 15px 26px;
+            border-color: transparent transparent transparent #ffffff;
+            margin-left: 6px;
+        }
+
+        .video-info {
+            margin-top: 15px;
+        }
+
+        .video-info h1 {
+            font-size: 24px;
+            margin: 0 0 8px 0;
+        }
+
+        /* Right Column: Repository Sidebar Navigation */
+        .sidebar-section {
+            flex: 1;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-section h2 {
+            font-size: 18px;
+            margin: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+            color: var(--text-secondary);
+        }
+
+        .repo-item {
+            display: flex;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .repo-item:hover, .repo-item.active {
+            background-color: #2a2a2a;
+        }
+
+        .thumbnail-placeholder {
+            width: 120px;
+            aspect-ratio: 16 / 9;
+            background: #2a4d69;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: var(--text-color);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .item-title {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-author {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 850px) {
+            .hub-container {
+                flex-direction: column;
+            }
+            .sidebar-section {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hub-container">
+        
+        <!-- Left Section: Video Display Theatre -->
+        <div class="theatre-section">
+            <div class="video-container">
+                <div class="play-overlay" id="playOverlay" onclick="triggerPlayback()">
+                    <div class="play-button"></div>
+                </div>
+                <iframe 
+                    id="mainTheatrePlayer"
+                    src="https://www.youtube.com/embed/p5x6m91CzDA?enablejsapi=1&rel=0" 
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+            <div class="video-info">
+                <h1 id="mainVideoTitle">Loading Video Title...</h1>
+            </div>
+        </div>
+
+        <!-- Right Section: Video Index Library -->
+        <div class="sidebar-section">
+            <h2>Repository Index</h2>
+            
+            <div class="repo-item active" onclick="switchVideo('p5x6m91CzDA', 'The Elegance of Silence - Relaxing French Songs 🇫🇷', this)">
+                <div class="thumbnail-placeholder" style="background-color: #2a4d69;">MUSIC</div>
+                <div class="item-details">
+                    <div class="item-title">The Elegance of Silence - Relaxing French Songs 🇫🇷</div>
+                    <div class="item-author">
+Musical Salon de la France</div>
+                </div>
+            </div>
+
+            <div class="repo-item" onclick="switchVideo('TXZSvCj-czk', '&quot;Rhiannon sings Roar&quot; from Sweetpea', this)">
+                <div class="thumbnail-placeholder" style="background-color: #44355b;">TV CLIP</div>
+                <div class="item-details">
+                    <div class="item-title">"Rhiannon sings Roar" from Sweetpea</div>
+                    <div class="item-author">MT-V Channel</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // Set the initial title on page load based on the active item
+        document.getElementById('mainVideoTitle').innerText = document.querySelector('.repo-item.active .item-title').innerText;
+
+        function triggerPlayback() {
+            const overlay = document.getElementById('playOverlay');
+            const player = document.getElementById('mainTheatrePlayer');
+            
+            overlay.style.display = 'none';
+            
+            if (!player.src.includes('&autoplay=1')) {
+                player.src += "&autoplay=1";
+            }
+        }
+
+        function switchVideo(videoId, videoTitle, element) {
+            const player = document.getElementById('mainTheatrePlayer');
+            const overlay = document.getElementById('playOverlay');
+            const titleHeader = document.getElementById('mainVideoTitle');
+            
+            document.querySelectorAll('.repo-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+
+            titleHeader.innerText = videoTitle;
+            overlay.style.display = 'flex';
+
+            player.src = "https://www.youtube.com/embed/" + videoId + "?enablejsapi=1&rel=0";
+        }
+    </script>
+
+</body>
+</html>
