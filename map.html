@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Four Islands Map Editor - Tool Conflict Fixed</title>
+  <style>
+    :root {
+      --bg: #06111d;
+      --panel: rgba(8,18,29,.93);
+      --panel2: rgba(13,29,47,.97);
+      --line: rgba(255,255,255,.14);
+      --text: #edf7ff;
+      --muted: #9cb5c9;
+      --accent: #65d2ff;
+      --good: #6ee7a8;
+      --warn: #f7c95d;
+      --bad: #ff6978;
+      --road: #202b37;
+      --roadLine: rgba(255,255,255,.68);
+      --bridge: #80664b;
+      --bridgeLine: #d8c29e;
+      --selected: #fff176;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(101,210,255,.15), transparent 30%),
+        radial-gradient(circle at 84% 78%, rgba(110,231,168,.12), transparent 32%),
+        linear-gradient(145deg, #06111d 0%, #092237 54%, #07364e 100%);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 370px 1fr;
+      height: 100vh;
+    }
+
+    aside {
+      z-index: 30;
+      overflow-y: auto;
+      padding: 20px;
+      background: linear-gradient(180deg, rgba(4,10,18,.98), rgba(8,18,29,.93));
+      border-right: 1px solid var(--line);
+      box-shadow: 20px 0 55px rgba(0,0,0,.32);
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.45rem;
+      letter-spacing: -.04em;
+    }
+
+    .subtitle {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.42;
+      font-size: .93rem;
+    }
+
+    .card {
+      padding: 14px;
+      margin-bottom: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(14px);
+    }
+
+    .card-title {
+      margin: 0 0 11px;
+      font-size: .74rem;
+      text-transform: uppercase;
+      letter-spacing: .11em;
+      font-weight: 900;
+      color: #dceeff;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .grid-dense {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 10px 11px;
+      cursor: pointer;
+      font-weight: 700;
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      transition: transform .14s ease, filter .14s ease, background .14s ease;
+    }
+
+    button:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; filter: none !important; }
+
+    button.btn-small {
+      padding: 7px 8px;
+      font-size: 0.76rem;
+      border-radius: 10px;
+    }
+
+    button.primary {
+      color: #06111d;
+      background: #dceeff;
+      border-color: transparent;
+    }
+
+    button.good {
+      color: #06111d;
+      background: var(--good);
+      border-color: transparent;
+    }
+
+    button.warn {
+      color: #06111d;
+      background: var(--warn);
+      border-color: transparent;
+    }
+
+    button.bad {
+      color: #fff;
+      background: rgba(255,105,120,.82);
+      border-color: rgba(255,255,255,.18);
+    }
+
+    button.active {
+      color: #06111d;
+      background: var(--accent);
+      border-color: transparent;
+      box-shadow: 0 0 0 3px rgba(101,210,255,.18);
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(101,210,255,.1);
+      border: 1px solid rgba(101,210,255,.22);
+      color: #c6efff;
+      font-size: .87rem;
+      line-height: 1.42;
+      margin-top: 10px;
+    }
+
+    .info {
+      min-height: 150px;
+      background: linear-gradient(180deg, rgba(15,32,50,.96), rgba(8,18,29,.96));
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(101,210,255,.13);
+      border: 1px solid rgba(101,210,255,.28);
+      color: #b9ecff;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .7rem;
+      font-weight: 900;
+    }
+
+    .info h2 {
+      margin: 0 0 7px;
+      font-size: 1.22rem;
+      letter-spacing: -.035em;
+    }
+
+    .info p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.42;
+    }
+
+    label {
+      display: block;
+      margin: 11px 0 5px;
+      color: #dceeff;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 11px;
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      outline: none;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    input[type="color"] {
+      height: 42px;
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.35;
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+      max-height: 230px;
+      overflow-y: auto;
+      padding-right: 3px;
+    }
+
+    .list button {
+      text-align: left;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .pill {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.12);
+      font-size: .78rem;
+    }
+
+    main {
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    main.dragging { cursor: grabbing; }
+
+    .chips {
+      position: absolute;
+      top: 18px;
+      left: 22px;
+      z-index: 8;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .chip, .zoom {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(8,18,29,.7);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      color: rgba(238,247,255,.92);
+      font-weight: 700;
+      font-size: .84rem;
+      box-shadow: 0 14px 34px rgba(0,0,0,.2);
+    }
+
+    .zoom {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      z-index: 8;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .tooltip {
+      display: none;
+      position: absolute;
+      z-index: 12;
+      max-width: 260px;
+      transform: translate(-50%, calc(-100% - 16px));
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(5,14,23,.95);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 42px rgba(0,0,0,.32);
+      pointer-events: none;
+      backdrop-filter: blur(14px);
+    }
+
+    .tooltip strong {
+      display: block;
+      margin-bottom: 2px;
+      font-size: .92rem;
+    }
+
+    .tooltip span {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: .82rem;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      user-select: none;
+    }
+
+    .ocean-current {
+      fill: none;
+      stroke: rgba(255,255,255,.12);
+      stroke-width: 2.4;
+      stroke-linecap: round;
+    }
+
+    .road.is-bridge {
+      stroke: var(--bridge);
+      stroke-width: 28;
+      filter: drop-shadow(0 9px 8px rgba(0,0,0,.26));
+    }
+
+    .road.is-bridge.selected {
+      stroke: var(--selected);
+      stroke-width: 32;
+    }
+
+    .road-line.is-bridge {
+      stroke: var(--bridgeLine);
+      stroke-width: 3;
+      stroke-dasharray: 18 14;
+      opacity: .9;
+    }
+
+    .island {
+      stroke: rgba(255,255,255,.55);
+      stroke-width: 3.4;
+      cursor: pointer;
+      filter: drop-shadow(0 22px 20px rgba(0,0,0,.34));
+      transition: stroke .14s ease, stroke-width .14s ease;
+    }
+
+    .island:hover { stroke: rgba(255,255,255,.96); }
+
+    .island.selected {
+      stroke: var(--selected);
+      stroke-width: 5;
+    }
+
+    .island-border {
+      fill: none;
+      stroke: rgba(244,218,157,.43);
+      stroke-width: 9;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .island-title {
+      fill: rgba(5,17,29,.86);
+      font-size: 27px;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      paint-order: stroke;
+      stroke: rgba(255,255,255,.72);
+      stroke-width: 5;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .road-hit {
+      fill: none;
+      stroke: transparent;
+      stroke-width: 36;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      cursor: pointer;
+    }
+
+    .road {
+      fill: none;
+      stroke: var(--road);
+      stroke-width: 18;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+      filter: drop-shadow(0 5px 5px rgba(0,0,0,.13));
+    }
+
+    .road-line {
+      fill: none;
+      stroke: var(--roadLine);
+      stroke-width: 2.2;
+      stroke-dasharray: 12 13;
+      stroke-linecap: round;
+      pointer-events: none;
+      opacity: .78;
+    }
+
+    .road.selected {
+      stroke: #f5d85e;
+      stroke-width: 22;
+    }
+
+    .building {
+      cursor: pointer;
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: filter .15s ease;
+    }
+
+    .building:hover,
+    .building.selected {
+      filter: drop-shadow(0 0 17px rgba(255,255,255,.62));
+    }
+
+    .building.selected .building-base,
+    .building.selected .symbol-bg {
+      stroke: var(--selected);
+      stroke-width: 4;
+    }
+
+    .building-base {
+      stroke: rgba(255,255,255,.48);
+      stroke-width: 2.2;
+    }
+
+    .roof-line {
+      stroke: rgba(4,14,23,.38);
+      stroke-width: 3;
+      stroke-linecap: round;
+      pointer-events: none;
+    }
+
+    .symbol-bg {
+      fill: rgba(255,255,255,.94);
+      stroke: rgba(4,14,23,.65);
+      stroke-width: 2;
+    }
+
+    .icon {
+      fill: #081724;
+      pointer-events: none;
+    }
+
+    .label {
+      fill: #f7fbff;
+      font-size: 12px;
+      font-weight: 900;
+      text-anchor: middle;
+      paint-order: stroke;
+      stroke: rgba(3,10,18,.72);
+      stroke-width: 4;
+      stroke-linejoin: round;
+      pointer-events: none;
+      transition: opacity .14s ease;
+    }
+
+    body.labels-off .label { opacity: 0; }
+
+    .handle {
+      fill: #fff176;
+      stroke: #06111d;
+      stroke-width: 2.5;
+      cursor: grab;
+      filter: drop-shadow(0 4px 5px rgba(0,0,0,.25));
+    }
+
+    .handle:active { cursor: grabbing; }
+
+    .draft-line {
+      fill: none;
+      stroke: #fff176;
+      stroke-width: 4;
+      stroke-dasharray: 10 8;
+      pointer-events: none;
+    }
+
+    .draft-point {
+      fill: #fff176;
+      stroke: #06111d;
+      stroke-width: 2;
+      pointer-events: none;
+    }
+
+    .draw-preview {
+      fill: rgba(111,231,168,.28);
+      stroke: #fff176;
+      stroke-width: 4;
+      stroke-dasharray: 10 8;
+      pointer-events: none;
+    }
+
+    .hidden-file { display: none; }
+
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .app { display: block; height: auto; min-height: 100vh; }
+      aside { border-right: 0; border-bottom: 1px solid var(--line); }
+      main { height: 75vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <h1>Four Islands Map Editor</h1>
+      <p class="subtitle">Fixed editor: move buildings, edit islands, add/edit/delete roads, draw islands, duplicate buildings, and auto-save.</p>
+
+      <div class="card">
+        <p class="card-title">Editor Mode</p>
+        <div class="grid2">
+          <button id="modeMove" class="active">Move Buildings</button>
+          <button id="modeRoad">Add Road</button>
+          <button id="modeEditRoad">Edit Roads</button>
+          <button id="modeIsland">Draw Island</button>
+          <button id="modeEditIsland">Edit Islands</button>
+          <button id="modePan">Pan Map</button>
+        </div>
+        <div class="grid2" style="margin-top:8px;">
+          <button id="finishBtn" class="good">Finish Drawing</button>
+          <button id="cancelBtn" class="warn">Cancel</button>
+        </div>
+        <div class="status" id="status">Move mode: drag buildings. Right-click a building to duplicate it.</div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Add Buildings Palette</p>
+        
+        <label style="margin-top:0;">Islands Specials</label>
+        <div class="grid-dense">
+          <button id="addBtn-airport" class="btn-small good">Airport</button>
+          <button id="addBtn-desert" class="btn-small good">Desert</button>
+          <button id="addBtn-prison" class="btn-small good">Prison</button>
+        </div>
+
+        <label>City Destinations</label>
+        <div class="grid-dense">
+          <button id="addBtn-bank" class="btn-small primary">Bank</button>
+          <button id="addBtn-resort" class="btn-small primary">Resort</button>
+          <button id="addBtn-jewellery" class="btn-small primary">Jewellery</button>
+          <button id="addBtn-mall" class="btn-small primary">Mall</button>
+          <button id="addBtn-casino" class="btn-small primary">Casino</button>
+        </div>
+
+        <label>Commercial & Industrial</label>
+        <div class="grid-dense">
+          <button id="addBtn-warehouse" class="btn-small warn">Warehouse</button>
+          <button id="addBtn-nightclub" class="btn-small warn">Night Club</button>
+          <button id="addBtn-dealership" class="btn-small warn">Dealership</button>
+          <button id="addBtn-power-plant" class="btn-small warn">Power Plant</button>
+          <button id="addBtn-cargo-port" class="btn-small warn">Cargo Port</button>
+        </div>
+
+        <label>Development Tools</label>
+        <div class="grid2">
+          <button id="addBtn-placeholder" class="btn-small">Add Placeholder</button>
+        </div>
+        <p class="small" style="margin-top:6px; margin-bottom:0;">New placements default near the active view zone. Use "Move Buildings" tool to arrange.</p>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Map Controls</p>
+        <div class="grid2">
+          <button id="zoomIn" class="primary">Zoom In</button>
+          <button id="zoomOut" class="primary">Zoom Out</button>
+          <button id="resetView">Reset View</button>
+          <button id="toggleLabels">Labels</button>
+        </div>
+        <div class="grid2" style="margin-top:8px;">
+          <button id="undoBtn" class="warn" disabled style="grid-column: span 2;">Undo Action (Ctrl+Z)</button>
+        </div>
+      </div>
+
+      <div class="card info" id="info">
+        <span class="badge">Selection</span>
+        <h2>Nothing selected</h2>
+        <p>Click a building, road, or island to edit it here.</p>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Selected Item</p>
+        <label>Name</label>
+        <input id="editName" placeholder="Name" />
+        <label>Description</label>
+        <textarea id="editDesc" placeholder="Description"></textarea>
+        <label>Fill / Road Color</label>
+        <input id="editColor" type="color" value="#6fd38d" />
+        <div class="grid2" style="margin-top:8px;">
+          <button id="applyEdit" class="good">Apply Edit</button>
+          <button id="deleteSelected" class="bad">Delete Selected</button>
+        </div>
+        <p class="small">Backspace/Delete removes the selected item. For buildings, select it first, then press Backspace.</p>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Save / Load</p>
+        <div class="grid2">
+          <button id="saveNow" class="good">Save Now</button>
+          <button id="exportJson">Export JSON</button>
+          <button id="importJson">Import JSON</button>
+          <button id="resetData" class="bad">Reset Data</button>
+        </div>
+        <input class="hidden-file" id="importFile" type="file" accept="application/json" />
+        <p class="small" style="margin-bottom:0;">Saves automatically using browser localStorage. Export JSON if you want to move it to another computer.</p>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Buildings</p>
+        <div class="list" id="placeList"></div>
+      </div>
+    </aside>
+
+    <main id="mapWrap">
+      <div class="chips">
+        <div class="chip" id="modeChip">Mode: Move Buildings</div>
+        <div class="chip">Auto-save on</div>
+        <div class="chip">Right-click duplicate</div>
+      </div>
+      <div class="tooltip" id="tooltip"></div>
+      <div class="zoom" id="zoomChip">100%</div>
+
+      <svg id="mapSvg" viewBox="0 0 1600 980" role="img" aria-label="Editable four island map">
+        <defs>
+          <linearGradient id="ocean" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0a344f"/>
+            <stop offset="50%" stop-color="#0b607d"/>
+            <stop offset="100%" stop-color="#08283f"/>
+          </linearGradient>
+
+          <pattern id="waterPattern" width="44" height="44" patternUnits="userSpaceOnUse">
+            <circle cx="4" cy="4" r="1.1" fill="rgba(255,255,255,0.14)" />
+          </pattern>
+
+          <symbol id="icon-plane" viewBox="0 0 24 24"><path class="icon" d="M21 15.3 13.2 12l7.8-3.3V6.5L10.2 9.3 6.5 5.6H4.1l2.4 4.8-3.5.9-1.2-1.4H.5L1.3 12l-.8 2.1h1.3l1.2-1.4 3.5.9-2.4 4.8h2.4l3.7-3.7L21 17.5v-2.2Z"/></symbol>
+          <symbol id="icon-building" viewBox="0 0 24 24"><path class="icon" d="M5 21V4.7C5 3.8 5.8 3 6.7 3h10.6c.9 0 1.7.8 1.7 1.7V21h-5v-4h-4v4H5Zm3-14v2h2V7H8Zm0 4v2h2v-2H8Zm6-4v2h2V7h-2Zm0 4v2h2v-2h-2Z"/></symbol>
+          <symbol id="icon-lock" viewBox="0 0 24 24"><path class="icon" d="M6 22V10h2V7a4 4 0 0 1 8 0v3h2v12H6Zm4-12h4V7a2 2 0 0 0-4 0v3Zm1 7.7h2v-3.1a2 2 0 1 0-2 0v3.1Z"/></symbol>
+          <symbol id="icon-sun" viewBox="0 0 24 24"><path class="icon" d="M11 2h2v4h-2V2Zm0 16h2v4h-2v-4ZM2 11h4v2H2v-2Zm16 0h4v2h-4v-2ZM4.2 5.6 5.6 4.2 8.4 7 7 8.4 4.2 5.6Zm11.4 11.4 1.4-1.4 2.8 2.8-1.4 1.4-2.8-2.8Zm2.8-12.8 1.4 1.4L17 8.4 15.6 7l2.8-2.8ZM7 15.6 8.4 17l-2.8 2.8-1.4-1.4L7 15.6ZM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z"/></symbol>
+          <symbol id="icon-gem" viewBox="0 0 24 24"><path class="icon" d="m12 22-9-11 4-7h10l4 7-9 11Zm0-4.3L16.8 11H7.2L12 17.7ZM7.3 6 5.6 9h4.1L8.7 6H7.3Zm4.2 0 1 3h3.2l-1-3h-3.2Z"/></symbol>
+          <symbol id="icon-box" viewBox="0 0 24 24"><path class="icon" d="m12 2 9 4.5v11L12 22l-9-4.5v-11L12 2Zm0 2.2L6.6 6.9 12 9.6l5.4-2.7L12 4.2Zm-7 5v7.1l6 3v-7.1l-6-3Zm14 0-6 3v7.1l6-3V9.2Z"/></symbol>
+          <symbol id="icon-car" viewBox="0 0 24 24"><path class="icon" d="M5 16h14v-4.1L17.4 8A2 2 0 0 0 15.6 7H8.4a2 2 0 0 0-1.8 1L5 11.9V16Zm2.3-5 1-2h7.4l1 2H7.3ZM7 20a2 2 0 0 1-2-2v-1h4v1a2 2 0 0 1-2 2Zm10 0a2 2 0 0 1-2-2v-1h4v1a2 2 0 0 1-2 2Z"/></symbol>
+          <symbol id="icon-music" viewBox="0 0 24 24"><path class="icon" d="M10 18a3 3 0 1 1-2-2.83V5l11-2v12a3 3 0 1 1-2-2.83V6.4l-7 1.27V18Z"/></symbol>
+          <symbol id="icon-bolt" viewBox="0 0 24 24"><path class="icon" d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"/></symbol>
+          <symbol id="icon-placeholder" viewBox="0 0 24 24"><path class="icon" d="M11 17h2v2h-2v-2Zm1-14a5 5 0 0 0-5 5h2a3 3 0 1 1 4.6 2.5c-1.6 1-2.6 2.1-2.6 4.5h2c0-1.5.5-2.1 1.7-2.9A5 5 0 0 0 12 3Z"/></symbol>
+        </defs>
+
+        <rect id="oceanBg" width="1600" height="980" fill="url(#ocean)" />
+        <rect width="1600" height="980" fill="url(#waterPattern)" opacity=".75" pointer-events="none" />
+        <path class="ocean-current" d="M64 168 C140 125, 205 202, 282 161 S431 126, 505 170"/>
+        <path class="ocean-current" d="M985 104 C1061 61, 1126 138, 1203 97 S1352 62, 1426 106"/>
+        <path class="ocean-current" d="M84 818 C160 775, 225 852, 302 811 S451 776, 525 820"/>
+        <path class="ocean-current" d="M880 842 C956 799, 1021 876, 1098 835 S1247 800, 1321 844"/>
+        <path class="ocean-current" d="M555 470 C631 427, 696 504, 773 463 S922 428, 996 472"/>
+
+        <g id="mapLayer">
+          <g id="islandLayer"></g>
+          <g id="roadLayer"></g>
+          <g id="buildingLayer"></g>
+          <g id="draftLayer"></g>
+          <g id="handleLayer"></g>
+        </g>
+      </svg>
+    </main>
+  </div>
+
+  <script>
+    const SAVE_KEY = "four-islands-map-editor-fixed-v2";
+
+    const BUILDING_TEMPLATES = {
+      airport: { id: "airport", name: "Airport", type: "Airport Island", description: "The only location on Airport Island.", icon: "plane", color: "#e9f9ff", w: 62, h: 62, shape: "circle", x: 300, y: 250 },
+      desert: { id: "desert", name: "Desert Oasis", type: "Desert Island", description: "The only location on Desert Island.", icon: "sun", color: "#ffe4ab", w: 62, h: 62, shape: "circle", x: 220, y: 650 },
+      prison: { id: "prison", name: "Prison", type: "Prison Island", description: "The only location on Prison Island.", icon: "lock", color: "#eef3f8", w: 62, h: 62, shape: "circle", x: 770, y: 280 },
+      bank: { id: "bank", name: "Bank", type: "City Island", description: "A city destination connected to the main loop road.", icon: "building", color: "#3fc374", w: 72, h: 60, shape: "rect", x: 1080, y: 520 },
+      resort: { id: "resort", name: "Resort", type: "City Island", description: "A coastal resort connected to the upper city road.", icon: "building", color: "#56cfff", w: 80, h: 62, shape: "rect", x: 1270, y: 425 },
+      jewellery: { id: "jewellery", name: "Jewellery Store", type: "City Island", description: "A valuable city store placed along the east road.", icon: "gem", color: "#f4c84f", w: 76, h: 60, shape: "rect", x: 1440, y: 560 },
+      warehouse: { id: "warehouse", name: "Delivery Warehouse", type: "City Island", description: "A warehouse connected by a side road for delivery vehicles.", icon: "box", color: "#9d7cff", w: 92, h: 62, shape: "rect", x: 1018, y: 710 },
+      mall: { id: "mall", name: "Mall", type: "City Island", description: "A large mall on the main city loop.", icon: "building", color: "#f0a455", w: 84, h: 62, shape: "rect", x: 1215, y: 620 },
+      casino: { id: "casino", name: "Casino", type: "City Island", description: "A nightlife destination connected to the right side of the city loop.", icon: "building", color: "#ff5d6c", w: 80, h: 62, shape: "rect", x: 1395, y: 620 },
+      nightclub: { id: "nightclub", name: "Night Club", type: "City Island", description: "A night club placed on the lower city road.", icon: "music", color: "#566dff", w: 80, h: 62, shape: "rect", x: 1110, y: 792 },
+      dealership: { id: "dealership", name: "Car Dealership", type: "City Island", description: "A vehicle destination connected by the lower road branch.", icon: "car", color: "#f2e067", w: 96, h: 62, shape: "rect", x: 1360, y: 850 },
+      "power-plant": { id: "power-plant", name: "Power Plant", type: "City Island", description: "A utility building that supplies power to the islands.", icon: "bolt", color: "#9fe870", w: 92, h: 64, shape: "rect", x: 1328, y: 728 },
+      "cargo-port": { id: "cargo-port", name: "Cargo Port", type: "City Island", description: "A shipping harbor infrastructure that processes overseas container cargo lines.", icon: "box", color: "#cca070", w: 98, h: 66, shape: "rect", x: 1000, y: 880 },
+      placeholder: { id: "placeholder", name: "Placeholder Building", type: "City Island", description: "A blank building slot that can be renamed and edited.", icon: "placeholder", color: "#c6ccd6", w: 88, h: 62, shape: "rect", x: 1340, y: 735 }
+    };
+
+    const DEFAULT_DATA = {
+      islands: [
+        { id:"airport-island", name:"Airport Island", type:"Airport Only", description:"This island only contains the airport.", color:"#69cfff", points:[[99,181],[179,70],[358,62],[461,163],[544,244],[506,378],[385,434],[241,501],[80,426],[58,294],[66,214]] },
+        { id:"desert-island", name:"Desert Island", type:"Desert Only", description:"This island only contains the desert.", color:"#d6a34a", points:[[93,547],[180,429],[366,432],[468,543],[570,654],[437,836],[250,824],[95,814],[20,663]] },
+        { id:"prison-island", name:"Prison Island", type:"Prison Only", description:"This island only contains the prison.", color:"#aeb8c6", points:[[641,99],[756,32],[930,90],[972,231],[1010,361],[892,472],[726,443],[584,418],[514,261],[576,160]] },
+        { id:"city-island", name:"City Island", type:"Main City", description:"This island has the bank, resort, jewellery store, delivery warehouse, mall, casino, night club, car dealership, power plant, and placeholder building.", color:"#6fd38d", points:[[1113,317],[1277,225],[1507,315],[1564,496],[1621,676],[1464,897],[1219,905],[1008,912],[846,792],[817,619],[791,464],[932,418]] }
+      ],
+      roads: [
+        { id:"bridge-1", name:"North-West Bridge", description:"Connects Airport Island and Prison Island.", points:[[454,284],[542,263],[615,272],[688,305]], isBridge: true },
+        { id:"bridge-2", name:"South-West Bridge", description:"Connects Desert Island and City Island loop networks.", points:[[428,642],[536,649],[623,603],[717,533]], isBridge: true },
+        { id:"bridge-3", name:"North City Bridge", description:"Connects Prison Island to the upper corner city highway.", points:[[868,331],[988,351],[1081,410],[1160,492]], isBridge: true },
+        { id:"bridge-4", name:"Central City Bridge", description:"Connects central components directly into the crossroad intersection.", points:[[882,535],[993,558],[1067,561],[1165,535]], isBridge: true },
+        { id:"bridge-5", name:"Prison Access Bridge", description:"Internal connection route heading down to the gate access road.", points:[[761,374],[771,430],[782,473],[800,516]], isBridge: true },
+
+        { id:"road-airport-main", name:"Airport Road", description:"Main road connecting the runway to the bridge.", color:"#202b37", points:[[163,308],[302,296],[454,284]] },
+        { id:"road-airport-runway", name:"Runway Service Road", description:"Airport service route.", color:"#202b37", points:[[302,388],[302,296],[286,139]] },
+        { id:"road-desert-main", name:"Desert Road", description:"Road from the desert area to the bridge.", color:"#202b37", points:[[225,673],[282,641],[350,631],[428,642]] },
+        { id:"road-prison-main", name:"Prison Connector", description:"Road connecting the prison island bridges.", color:"#202b37", points:[[688,305],[735,316],[794,326],[868,331]] },
+        { id:"road-prison-gate", name:"Prison Gate Road", description:"Road from bridge network to the prison gate.", color:"#202b37", points:[[761,374],[778,296]] },
+        { id:"road-city-loop", name:"City Loop Road", description:"Main loop connecting city destinations.", color:"#202b37", points:[[1160,492],[1235,435],[1360,452],[1442,548],[1530,651],[1433,792],[1292,816],[1138,843],[987,765],[949,641],[925,562],[1011,514],[1160,492]] },
+        { id:"road-city-cross", name:"City Cross Road", description:"Cross-road through the main city.", color:"#202b37", points:[[1165,535],[1223,563],[1301,589],[1395,620]] },
+        { id:"road-city-northsouth", name:"North-South City Road", description:"Vertical city road.", color:"#202b37", points:[[1215,417],[1227,513],[1225,640],[1211,808]] },
+        { id:"road-city-east", name:"East City Road", description:"Eastern city route.", color:"#202b37", points:[[1390,402],[1355,511],[1307,650],[1260,824]] },
+        { id:"road-warehouse", name:"Warehouse Branch", description:"Side road to the delivery warehouse.", color:"#202b37", points:[[1018,710],[1110,690]] },
+        { id:"road-casino", name:"Casino Branch", description:"Side road to the casino.", color:"#202b37", points:[[1395,620],[1472,620]] },
+        { id:"road-dealer", name:"Dealership Branch", description:"Side road to the car dealership.", color:"#202b37", points:[[1292,816],[1360,850]] },
+        { id:"road-power", name:"Power Plant Road", description:"Branch road to the power plant.", color:"#202b37", points:[[1307,650],[1328,728]] },
+        { id:"road-placeholder", name:"Placeholder Road", description:"Branch road to the placeholder building.", color:"#202b37", points:[[1433,792],[1468,720]] }
+      ],
+      buildings: [
+        { id:"airport", name:"Airport", type:"Airport Island", description:"The only location on Airport Island.", icon:"plane", color:"#e9f9ff", x:302, y:296, w:62, h:62, shape:"circle" },
+        { id:"desert", name:"Desert", type:"Desert Island", description:"The only location on Desert Island.", icon:"sun", color:"#ffe4ab", x:225, y:673, w:62, h:62, shape:"circle" },
+        { id:"prison", name:"Prison", type:"Prison Island", description:"The only location on Prison Island.", icon:"lock", color:"#eef3f8", x:778, y:296, w:62, h:62, shape:"circle" },
+        { id:"bank", name:"Bank", type:"City Island", description:"A city destination connected to the main loop road.", icon:"building", color:"#3fc374", x:1080, y:520, w:72, h:60, shape:"rect" },
+        { id:"resort", name:"Resort", type:"City Island", description:"A coastal resort connected to the upper city road.", icon:"building", color:"#56cfff", x:1270, y:425, w:80, h:62, shape:"rect" },
+        { id:"jewellery", name:"Jewellery Store", type:"City Island", description:"A valuable city store placed along the east road.", icon:"gem", color:"#f4c84f", x:1440, y:560, w:76, h:60, shape:"rect" },
+        { id:"warehouse", name:"Delivery Warehouse", type:"City Island", description:"A warehouse connected by a side road for delivery vehicles.", icon:"box", color:"#9d7cff", x:1018, y:710, w:92, h:62, shape:"rect" },
+        { id:"mall", name:"Mall", type:"City Island", description:"A large mall on the main city loop.", icon:"building", color:"#f0a455", x:1215, y:620, w:84, h:62, shape:"rect" },
+        { id:"casino", name:"Casino", type:"City Island", description:"A nightlife destination connected to the right side of the city loop.", icon:"building", color:"#ff5d6c", x:1395, y:620, w:80, h:62, shape:"rect" },
+        { id:"nightclub", name:"Night Club", type:"City Island", description:"A night club placed on the lower city road.", icon:"music", color:"#566dff", x:1110, y:792, w:80, h:62, shape:"rect" },
+        { id:"dealership", name:"Car Dealership", type:"City Island", description:"A vehicle destination connected by the lower road branch.", icon:"car", color:"#f2e067", x:1360, y:850, w:96, h:62, shape:"rect" },
+        { id:"power-plant", name:"Power Plant", type:"City Island", description:"A utility building that supplies power to the islands.", icon:"bolt", color:"#9fe870", x:1328, y:728, w:92, h:64, shape:"rect" },
+        { id:"placeholder-building", name:"Placeholder Building", type:"City Island", description:"A blank building slot that can be renamed and edited.", icon:"placeholder", color:"#c6ccd6", x:1468, y:720, w:88, h:62, shape:"rect" }
+      ]
+    };
+
+    const svg = document.getElementById("mapSvg");
+    const wrap = document.getElementById("mapWrap");
+    const mapLayer = document.getElementById("mapLayer");
+    const islandLayer = document.getElementById("islandLayer");
+    const roadLayer = document.getElementById("roadLayer");
+    const buildingLayer = document.getElementById("buildingLayer");
+    const draftLayer = document.getElementById("draftLayer");
+    const handleLayer = document.getElementById("handleLayer");
+    const tooltip = document.getElementById("tooltip");
+    const zoomChip = document.getElementById("zoomChip");
+    const statusEl = document.getElementById("status");
+    const modeChip = document.getElementById("modeChip");
+    const info = document.getElementById("info");
+    const placeList = document.getElementById("placeList");
+    const editName = document.getElementById("editName");
+    const editDesc = document.getElementById("editDesc");
+    const editColor = document.getElementById("editColor");
+    const undoBtn = document.getElementById("undoBtn");
+
+    let data = loadData();
+
+    let state = {
+      mode: "move",
+      selected: null,
+      scale: 1,
+      x: 0,
+      y: 0,
+      panning: false,
+      draggingBuildingId: null,
+      draggingHandle: null,
+      pointerStart: [0,0],
+      panStart: [0,0],
+      dragOffset: [0,0],
+      draftPoints: [],
+      suppressClick: false,
+      history: []
+    };
+
+    function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+    function clearContainer(element) {
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      }
+    }
+
+    function pushHistory() {
+      state.history.push(clone(data));
+      if (state.history.length > 40) {
+        state.history.shift();
+      }
+      updateUndoButtonState();
+    }
+
+    function triggerUndo() {
+      if (!state.history.length) return;
+      data = state.history.pop();
+      saveData("Action undone.");
+      state.selected = null;
+      fillEditor();
+      renderAll();
+      updateUndoButtonState();
+    }
+
+    function updateUndoButtonState() {
+      undoBtn.disabled = state.history.length === 0;
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return clone(DEFAULT_DATA);
+        const saved = JSON.parse(raw);
+        if (!saved.islands || !saved.roads || !saved.buildings) return clone(DEFAULT_DATA);
+        return saved;
+      } catch {
+        return clone(DEFAULT_DATA);
+      }
+    }
+
+    function saveData(message) {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+      if (message) setStatus(message);
+    }
+
+    function uid(prefix) {
+      return prefix + "-" + Math.random().toString(36).slice(2, 9);
+    }
+
+    function makeEl(tag, attrs) {
+      const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      Object.entries(attrs || {}).forEach(([key, value]) => el.setAttribute(key, value));
+      return el;
+    }
+
+    function pointsToD(points, close) {
+      if (!points.length) return "";
+      return `M ${points[0][0]} ${points[0][1]} ` + points.slice(1).map(p => `L ${p[0]} ${p[1]}`).join(" ") + (close ? " Z" : "");
+    }
+
+    function centroid(points) {
+      const total = points.reduce((a,p) => [a[0] + p[0], a[1] + p[1]], [0,0]);
+      return [total[0] / points.length, total[1] / points.length];
+    }
+
+    function screenToMap(evt) {
+      const pt = svg.createSVGPoint();
+      pt.x = evt.clientX;
+      pt.y = evt.clientY;
+      const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+      return [(svgP.x - state.x) / state.scale, (svgP.y - state.y) / state.scale];
+    }
+
+    function applyTransform() {
+      mapLayer.setAttribute("transform", `translate(${state.x} ${state.y}) scale(${state.scale})`);
+      zoomChip.textContent = `${Math.round(state.scale * 100)}%`;
+    }
+
+    function setStatus(text) {
+      statusEl.textContent = text;
+    }
+
+    // Swaps back cleanly into primary placement tool modes
+    function selectBuildingAction(buildingId, evt) {
+      // Clean target swap back to movement configurations
+      setMode("move"); 
+      setSelected({kind:"building", id:buildingId});
+
+      const p = screenToMap(evt);
+      state.draggingBuildingId = buildingId;
+      const b = data.buildings.find(item => item.id === buildingId);
+      if (b) {
+        state.dragOffset = [b.x - p[0], b.y - p[1]];
+      }
+      state.suppressClick = true;
+      pushHistory();
+    }
+
+    function itemForSelection() {
+      if (!state.selected) return null;
+      const group = state.selected.kind + "s";
+      return data[group]?.find(item => item.id === state.selected.id) || null;
+    }
+
+    function setSelected(sel) {
+      state.selected = sel;
+      fillEditor();
+      renderAll();
+    }
+
+    function fillEditor() {
+      const item = itemForSelection();
+      if (!item) {
+        info.innerHTML = `<span class="badge">Selection</span><h2>Nothing selected</h2><p>Click a building, road, or island to edit it here.</p>`;
+        editName.value = "";
+        editDesc.value = "";
+        editColor.value = "#6fd38d";
+        return;
+      }
+
+      const type = state.selected.kind === "building" ? item.type : state.selected.kind === "road" ? (item.isBridge ? "Bridge" : "Road") : item.type || "Island";
+      info.innerHTML = `<span class="badge">${type}</span><h2>${item.name}</h2><p>${item.description || "No description yet."}</p>`;
+      editName.value = item.name || "";
+      editDesc.value = item.description || "";
+      editColor.value = item.color || "#202b37";
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      state.draftPoints = [];
+      state.draggingBuildingId = null;
+      state.draggingHandle = null;
+      state.panning = false;
+      wrap.classList.remove("dragging");
+      renderAll();
+
+      const configs = {
+        move: ["modeMove", "Move Buildings", "Move mode: drag buildings. Right-click a building to duplicate it."],
+        road: ["modeRoad", "Add Road", "Add-road mode: click anywhere on the map to place road points, then press Finish Drawing."],
+        editRoad: ["modeEditRoad", "Edit Roads", "Edit-road mode: click a road or bridge, then drag the yellow points. Backspace/Delete removes it."],
+        island: ["modeIsland", "Draw Island", "Draw-island mode: click around the island shape, then press Finish Drawing."],
+        editIsland: ["modeEditIsland", "Edit Islands", "Edit-island mode: click an island, then drag its yellow points to reshape it."],
+        pan: ["modePan", "Pan Map", "Pan mode: drag empty map space to move around."]
+      };
+
+      document.querySelectorAll("#modeMove,#modeRoad,#modeEditRoad,#modeIsland,#modeEditIsland,#modePan").forEach(btn => btn.classList.remove("active"));
+      const [btnId, label, status] = configs[mode];
+      document.getElementById(btnId).classList.add("active");
+      modeChip.textContent = `Mode: ${label}`;
+      setStatus(status);
+    }
+
+    function showTooltip(evt, title, type) {
+      const rect = wrap.getBoundingClientRect();
+      tooltip.style.left = `${evt.clientX - rect.left}px`;
+      tooltip.style.top = `${evt.clientY - rect.top}px`;
+      tooltip.innerHTML = `<strong>${title}</strong><span>${type}</span>`;
+      tooltip.style.display = "block";
+    }
+
+    function hideTooltip() {
+      tooltip.style.display = "none";
+    }
+
+    function renderAll() {
+      renderIslands();
+      renderRoads();
+      renderBuildings();
+      renderHandles();
+      renderDraft();
+    }
+
+    function renderIslands() {
+      clearContainer(islandLayer);
+      const frag = document.createDocumentFragment();
+      data.islands.forEach(island => {
+        const d = pointsToD(island.points, true);
+        const g = makeEl("g", {});
+        g.appendChild(makeEl("path", { class:"island-border", d }));
+        
+        const isSelected = state.selected?.kind === "island" && state.selected.id === island.id;
+        const path = makeEl("path", {
+          class: `island ${isSelected ? "selected" : ""}`,
+          d,
+          fill: island.color || "#6fd38d"
+        });
+
+        path.addEventListener("pointerdown", evt => {
+          if (state.mode === "road" || state.mode === "island") return;
+          evt.stopPropagation();
+          setSelected({kind:"island", id:island.id});
+          if (state.mode === "editIsland") setStatus("Drag the yellow island points to reshape it.");
+        });
+
+        path.addEventListener("pointermove", evt => showTooltip(evt, island.name, island.type || "Island"));
+        path.addEventListener("pointerleave", hideTooltip);
+
+        const [cx,cy] = centroid(island.points);
+        const text = makeEl("text", { class:"island-title", x:cx - Math.min(150, island.name.length * 5.6), y:cy - 80 });
+        text.textContent = island.name;
+
+        g.appendChild(path);
+        g.appendChild(text);
+        frag.appendChild(g);
+      });
+      islandLayer.appendChild(frag);
+    }
+
+    function renderRoads() {
+      clearContainer(roadLayer);
+      const frag = document.createDocumentFragment();
+      data.roads.forEach(road => {
+        const d = pointsToD(road.points, false);
+        const g = makeEl("g", {});
+        
+        const hitWidth = road.isBridge ? 48 : 36;
+        const hit = makeEl("path", { class:"road-hit", d, "stroke-width": hitWidth });
+        
+        hit.addEventListener("pointerdown", evt => {
+          if (state.mode === "road" || state.mode === "island") return;
+          evt.stopPropagation();
+          setSelected({kind:"road", id:road.id});
+          if (state.mode !== "editRoad") setMode("editRoad");
+        });
+        hit.addEventListener("pointermove", evt => showTooltip(evt, road.name, road.isBridge ? "Bridge" : "Road"));
+        hit.addEventListener("pointerleave", hideTooltip);
+
+        const isSelected = state.selected?.kind === "road" && state.selected.id === road.id;
+        const roadEl = makeEl("path", {
+          class: `road ${road.isBridge ? "is-bridge" : ""} ${isSelected ? "selected" : ""}`,
+          d,
+          stroke: road.isBridge ? undefined : (road.color || "#202b37")
+        });
+        const line = makeEl("path", { class:`road-line ${road.isBridge ? "is-bridge" : ""}`, d });
+
+        g.appendChild(hit);
+        g.appendChild(roadEl);
+        g.appendChild(line);
+        frag.appendChild(g);
+      });
+      roadLayer.appendChild(frag);
+    }
+
+    function iconHref(icon) {
+      return {
+        plane:"#icon-plane",
+        building:"#icon-building",
+        lock:"#icon-lock",
+        sun:"#icon-sun",
+        gem:"#icon-gem",
+        box:"#icon-box",
+        car:"#icon-car",
+        music:"#icon-music",
+        bolt:"#icon-bolt",
+        placeholder:"#icon-placeholder"
+      }[icon] || "#icon-building";
+    }
+
+    function renderBuildings() {
+      clearContainer(buildingLayer);
+      clearContainer(placeList);
+      
+      const svgFrag = document.createDocumentFragment();
+      const listFrag = document.createDocumentFragment();
+
+      data.buildings.forEach(building => {
+        const selected = state.selected?.kind === "building" && state.selected.id === building.id;
+        const g = makeEl("g", {
+          class:`building ${selected ? "selected" : ""}`,
+          transform:`translate(${building.x} ${building.y})`,
+          "data-id":building.id
+        });
+
+        if (building.shape === "circle") {
+          g.appendChild(makeEl("circle", {
+            class:"symbol-bg",
+            r: Math.max(building.w, building.h) / 2,
+            fill: building.color || "#fff"
+          }));
+        } else {
+          g.appendChild(makeEl("rect", {
+            class:"building-base",
+            x:-building.w/2,
+            y:-building.h/2,
+            width:building.w,
+            height:building.h,
+            rx:10,
+            fill: building.color || "#fff"
+          }));
+          g.appendChild(makeEl("path", { class:"roof-line", d:`M ${-building.w/2+16} -10 L ${building.w/2-16} -10` }));
+          g.appendChild(makeEl("path", { class:"roof-line", d:`M ${-building.w/2+16} 10 L ${building.w/2-16} 10` }));
+        }
+
+        g.appendChild(makeEl("use", { href:iconHref(building.icon), x:-14, y:-14, width:28, height:28 }));
+
+        const label = makeEl("text", { class:"label", x:0, y:Math.max(building.h/2 + 25, 56) });
+        label.textContent = building.name;
+        g.appendChild(label);
+
+        // Fixed: Buildings intercept pointer events aggressively, shifting modes instantly if needed
+        g.addEventListener("pointerdown", evt => {
+          if (evt.button !== 0) return;
+          evt.preventDefault();
+          evt.stopPropagation(); // Block road placement layers below building bounds
+          selectBuildingAction(building.id, evt);
+        });
+
+        g.addEventListener("contextmenu", evt => {
+          evt.preventDefault();
+          evt.stopPropagation();
+          duplicateBuilding(building.id);
+        });
+
+        g.addEventListener("pointermove", evt => showTooltip(evt, building.name, building.type));
+        g.addEventListener("pointerleave", hideTooltip);
+
+        svgFrag.appendChild(g);
+
+        const btn = document.createElement("button");
+        btn.innerHTML = `<span class="pill">${building.name.slice(0,1)}</span><span>${building.name}</span>`;
+        btn.addEventListener("click", () => {
+          setMode("move"); // Swap mode to let details render seamlessly
+          setSelected({kind:"building", id:building.id});
+        });
+        listFrag.appendChild(btn);
+      });
+
+      buildingLayer.appendChild(svgFrag);
+      placeList.appendChild(listFrag);
+    }
+
+    function renderHandles() {
+      clearContainer(handleLayer);
+
+      const canEditRoad = state.mode === "editRoad" && state.selected?.kind === "road";
+      const canEditIsland = state.mode === "editIsland" && state.selected?.kind === "island";
+      if (!canEditRoad && !canEditIsland) return;
+
+      const item = itemForSelection();
+      if (!item || !item.points) return;
+
+      const frag = document.createDocumentFragment();
+      item.points.forEach((p, index) => {
+        const handle = makeEl("circle", { class:"handle", cx:p[0], cy:p[1], r:9, "data-index":index });
+        handle.addEventListener("pointerdown", evt => {
+          if (evt.button !== 0) return;
+          evt.preventDefault();
+          evt.stopPropagation();
+          pushHistory();
+          state.draggingHandle = { kind:state.selected.kind, id:item.id, index };
+        });
+        frag.appendChild(handle);
+      });
+      handleLayer.appendChild(frag);
+    }
+
+    function renderDraft() {
+      clearContainer(draftLayer);
+      if (!state.draftPoints.length) return;
+      const isIsland = state.mode === "island";
+      const d = pointsToD(state.draftPoints, isIsland && state.draftPoints.length >= 3);
+      
+      const frag = document.createDocumentFragment();
+      frag.appendChild(makeEl("path", { class:isIsland ? "draw-preview" : "draft-line", d }));
+      state.draftPoints.forEach(p => frag.appendChild(makeEl("circle", { class:"draft-point", cx:p[0], cy:p[1], r:7 })));
+      draftLayer.appendChild(frag);
+    }
+
+    function finishDrawing() {
+      if (state.mode === "road") {
+        if (state.draftPoints.length < 2) {
+          setStatus("A road needs at least two points.");
+          return;
+        }
+        pushHistory();
+        const road = {
+          id: uid("road"),
+          name: `Custom Road ${data.roads.length + 1}`,
+          description: "Custom road.",
+          color:"#202b37",
+          points: clone(state.draftPoints)
+        };
+        data.roads.push(road);
+        state.draftPoints = [];
+        saveData("Road added and saved.");
+        setSelected({kind:"road", id:road.id});
+        setMode("editRoad");
+        return;
+      }
+
+      if (state.mode === "island") {
+        if (state.draftPoints.length < 3) {
+          setStatus("An island needs at least three points.");
+          return;
+        }
+        pushHistory();
+        const island = {
+          id: uid("island"),
+          name:`Custom Island ${data.islands.length + 1}`,
+          type:"Custom Island",
+          description:"A custom island drawn by the user.",
+          color:"#72d88f",
+          points: clone(state.draftPoints)
+        };
+        data.islands.push(island);
+        state.draftPoints = [];
+        saveData("Island added and saved.");
+        setSelected({kind:"island", id:island.id});
+        setMode("editIsland");
+      }
+    }
+
+    function cancelDrawing() {
+      state.draftPoints = [];
+      state.draggingBuildingId = null;
+      state.draggingHandle = null;
+      state.panning = false;
+      wrap.classList.remove("dragging");
+      renderAll();
+      setStatus("Cancelled current drawing or drag.");
+    }
+
+    function addBuilding(template) {
+      pushHistory();
+      const b = {
+        id: uid(template.id),
+        name: template.name,
+        type: template.type || "City Island",
+        description: template.description || "New building.",
+        icon: template.icon || "building",
+        color: template.color || "#c6ccd6",
+        x: template.x || 1240,
+        y: template.y || 700,
+        w: template.w || 86,
+        h: template.h || 62,
+        shape: template.shape || "rect"
+      };
+      data.buildings.push(b);
+      saveData(`${b.name} added and saved.`);
+      setSelected({kind:"building", id:b.id});
+      setMode("move");
+    }
+
+    function duplicateBuilding(id) {
+      const base = data.buildings.find(b => b.id === id);
+      if (!base) return;
+      pushHistory();
+      const copy = clone(base);
+      copy.id = uid(base.id + "-copy");
+      copy.name = base.name + " Copy";
+      copy.x += 35;
+      copy.y += 35;
+      data.buildings.push(copy);
+      saveData("Building duplicated and saved.");
+      setSelected({kind:"building", id:copy.id});
+      setMode("move");
+    }
+
+    function deleteSelected() {
+      if (!state.selected) {
+        setStatus("Select something first.");
+        return;
+      }
+
+      const {kind, id} = state.selected;
+      const group = kind + "s";
+      const before = data[group].length;
+      
+      pushHistory();
+      data[group] = data[group].filter(item => item.id !== id);
+
+      if (data[group].length === before) {
+        state.history.pop();
+        updateUndoButtonState();
+        return;
+      }
+      state.selected = null;
+      saveData(`${kind.charAt(0).toUpperCase() + kind.slice(1)} deleted and saved.`);
+      fillEditor();
+      renderAll();
+    }
+
+    function applyEdit() {
+      const item = itemForSelection();
+      if (!item) {
+        setStatus("Select an item first.");
+        return;
+      }
+      pushHistory();
+      item.name = editName.value.trim() || item.name;
+      item.description = editDesc.value.trim();
+      
+      if (!item.isBridge) {
+        item.color = editColor.value;
+      }
+      
+      saveData("Edits applied and saved.");
+      fillEditor();
+      renderAll();
+    }
+
+    svg.addEventListener("pointerdown", evt => {
+      if (evt.button !== 0) return;
+
+      if (state.mode === "road" || state.mode === "island") {
+        evt.preventDefault();
+        const p = screenToMap(evt);
+        state.draftPoints.push([Math.round(p[0]), Math.round(p[1])]);
+        renderDraft();
+        setStatus(state.mode === "road"
+          ? "Road point added. Add more points or press Finish Drawing."
+          : "Island point added. Keep clicking around the island, then press Finish Drawing.");
+        return;
+      }
+
+      if (state.mode === "pan" || evt.target.id === "oceanBg") {
+        state.panning = true;
+        state.pointerStart = [evt.clientX, evt.clientY];
+        state.panStart = [state.x, state.y];
+        wrap.classList.add("dragging");
+      }
+    });
+
+    window.addEventListener("pointermove", evt => {
+      if (state.draggingBuildingId) {
+        const b = data.buildings.find(item => item.id === state.draggingBuildingId);
+        if (!b) return;
+        const p = screenToMap(evt);
+        b.x = Math.round(p[0] + state.dragOffset[0]);
+        b.y = Math.round(p[1] + state.dragOffset[1]);
+
+        const el = buildingLayer.querySelector(`[data-id="${CSS.escape(b.id)}"]`);
+        if (el) el.setAttribute("transform", `translate(${b.x} ${b.y})`);
+        return;
+      }
+
+      if (state.draggingHandle) {
+        const {kind, id, index} = state.draggingHandle;
+        const group = kind + "s";
+        const item = data[group].find(x => x.id === id);
+        if (!item) return;
+        const p = screenToMap(evt);
+        item.points[index] = [Math.round(p[0]), Math.round(p[1])];
+        renderAll();
+        return;
+      }
+
+      if (state.panning) {
+        state.x = state.panStart[0] + (evt.clientX - state.pointerStart[0]);
+        state.y = state.panStart[1] + (evt.clientY - state.pointerStart[1]);
+        applyTransform();
+      }
+    });
+
+    window.addEventListener("pointerup", () => {
+      if (state.draggingBuildingId) {
+        saveData("Building moved and saved.");
+        state.draggingBuildingId = null;
+      }
+      if (state.draggingHandle) {
+        saveData("Shape edited and saved.");
+        state.draggingHandle = null;
+      }
+      state.panning = false;
+      wrap.classList.remove("dragging");
+    });
+
+    svg.addEventListener("contextmenu", evt => evt.preventDefault());
+
+    svg.addEventListener("wheel", evt => {
+      evt.preventDefault();
+      state.scale = Math.min(2.4, Math.max(.6, state.scale + (evt.deltaY < 0 ? .08 : -.08)));
+      applyTransform();
+    }, { passive:false });
+
+    document.getElementById("modeMove").addEventListener("click", () => setMode("move"));
+    document.getElementById("modeRoad").addEventListener("click", () => setMode("road"));
+    document.getElementById("modeEditRoad").addEventListener("click", () => setMode("editRoad"));
+    document.getElementById("modeIsland").addEventListener("click", () => setMode("island"));
+    document.getElementById("modeEditIsland").addEventListener("click", () => setMode("editIsland"));
+    document.getElementById("modePan").addEventListener("click", () => setMode("pan"));
+    document.getElementById("finishBtn").addEventListener("click", finishDrawing);
+    document.getElementById("cancelBtn").addEventListener("click", cancelDrawing);
+    document.getElementById("undoBtn").addEventListener("click", triggerUndo);
+
+    document.getElementById("zoomIn").addEventListener("click", () => {
+      state.scale = Math.min(2.4, state.scale + .13);
+      applyTransform();
+    });
+
+    document.getElementById("zoomOut").addEventListener("click", () => {
+      state.scale = Math.max(.6, state.scale - .13);
+      applyTransform();
+    });
+
+    document.getElementById("resetView").addEventListener("click", () => {
+      state.scale = 1;
+      state.x = 0;
+      state.y = 0;
+      applyTransform();
+      setStatus("View reset. Data was not changed.");
+    });
+
+    document.getElementById("toggleLabels").addEventListener("click", () => document.body.classList.toggle("labels-off"));
+    document.getElementById("applyEdit").addEventListener("click", applyEdit);
+    document.getElementById("deleteSelected").addEventListener("click", deleteSelected);
+    document.getElementById("saveNow").addEventListener("click", () => saveData("Saved manually."));
+
+    Object.keys(BUILDING_TEMPLATES).forEach(key => {
+      const btn = document.getElementById(`addBtn-${key}`);
+      if (btn) {
+        btn.addEventListener("click", () => addBuilding(BUILDING_TEMPLATES[key]));
+      }
+    });
+
+    document.getElementById("resetData").addEventListener("click", () => {
+      if (!confirm("Reset all saved map data back to the default version?")) return;
+      pushHistory();
+      localStorage.removeItem(SAVE_KEY);
+      data = clone(DEFAULT_DATA);
+      state.selected = null;
+      state.draftPoints = [];
+      fillEditor();
+      renderAll();
+      setMode("move");
+      setStatus("Map reset to default.");
+    });
+
+    document.getElementById("exportJson").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "four-islands-map-data.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setStatus("Map data exported as JSON.");
+    });
+
+    document.getElementById("importJson").addEventListener("click", () => document.getElementById("importFile").click());
+
+    document.getElementById("importFile").addEventListener("change", evt => {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const imported = JSON.parse(reader.result);
+          if (!imported.islands || !imported.roads || !imported.buildings) throw new Error("Invalid format");
+          pushHistory();
+          data = imported;
+          saveData("Imported JSON and saved.");
+          state.selected = null;
+          fillEditor();
+          renderAll();
+        } catch {
+          setStatus("Import failed. JSON must contain islands, roads, and buildings.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    window.addEventListener("keydown", evt => {
+      if ((evt.ctrlKey || evt.metaKey) && evt.key.toLowerCase() === "z") {
+        const active = document.activeElement;
+        if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) return;
+        evt.preventDefault();
+        triggerUndo();
+        return;
+      }
+
+      if (evt.key === "Escape") {
+        cancelDrawing();
+        return;
+      }
+
+      if (evt.key === "Enter" && (state.mode === "road" || state.mode === "island")) {
+        finishDrawing();
+        return;
+      }
+
+      if (evt.key === "Backspace" || evt.key === "Delete") {
+        const active = document.activeElement;
+        if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) return;
+        evt.preventDefault();
+        deleteSelected();
+      }
+    });
+
+    renderAll();
+    fillEditor();
+    applyTransform();
+    setMode("move");
+  </script>
+</body>
+</html>
