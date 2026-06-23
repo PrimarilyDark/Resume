@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Profile Page</title>
+
   <style>
     * {
       box-sizing: border-box;
@@ -89,8 +90,101 @@
       margin: 0 auto;
     }
 
+    .creator-controls {
+      margin: 15px 40px 30px;
+      padding: 20px;
+      border-radius: 18px;
+      background:
+        linear-gradient(145deg, rgba(31, 34, 46, 0.96), rgba(12, 13, 20, 0.98));
+      border: 1px solid rgba(218, 165, 32, 0.35);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .creator-controls h2 {
+      text-align: center;
+      color: #d9aa3c;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 20px;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .control-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .control-box label {
+      display: block;
+      margin-bottom: 8px;
+      color: #fff0c2;
+      font-size: 15px;
+    }
+
+    .control-box select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(218, 165, 32, 0.4);
+      background: #11131b;
+      color: white;
+      outline: none;
+    }
+
+    .toggle-label {
+      display: flex !important;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .toggle-label input {
+      width: 18px;
+      height: 18px;
+      accent-color: #d9aa3c;
+    }
+
+    .randomize-button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: #d9aa3c;
+      color: #111;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: 0.2s;
+    }
+
+    .randomize-button:hover {
+      background: #f1c85c;
+      transform: translateY(-1px);
+    }
+
     .posts {
       padding: 10px 40px 40px;
+    }
+
+    .posts-header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .live-date-time {
+      font-size: 15px;
+      color: #cfcfcf;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
     }
 
     .posts h2 {
@@ -141,9 +235,7 @@
       }
 
       .profile-section {
-        flex-direction: column;
         padding: 24px;
-        gap: 16px;
       }
 
       .profile-picture {
@@ -155,12 +247,22 @@
         font-size: 28px;
       }
 
+      .creator-controls {
+        margin: 15px 24px 30px;
+        padding: 20px;
+      }
+
       .posts {
         padding: 10px 24px 32px;
+      }
+
+      .control-row {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
+
 <body>
   <main class="page">
     <section class="header-banner" id="headerBanner"></section>
@@ -176,14 +278,53 @@
       <div class="profile-info">
         <h1>DAVE C PERSAUD</h1>
         <p>
-          This is the person&apos;s description. Write a short bio here about who they are,
+          This is the person's description. Write a short bio here about who they are,
           what they do, or what their page is about.
         </p>
       </div>
     </section>
 
+    <section class="creator-controls">
+      <h2>Profile Page Creator</h2>
+
+      <div class="control-row">
+        <div class="control-box">
+          <label class="toggle-label">
+            <input type="checkbox" id="profileRandomToggle" />
+            Randomize profile photo
+          </label>
+        </div>
+
+        <div class="control-box">
+          <label class="toggle-label">
+            <input type="checkbox" id="bannerRandomToggle" />
+            Randomize banner
+          </label>
+        </div>
+      </div>
+
+      <div class="control-row">
+        <div class="control-box">
+          <label for="profileSelect">Favourite profile photo</label>
+          <select id="profileSelect"></select>
+        </div>
+
+        <div class="control-box">
+          <label for="bannerSelect">Favourite banner</label>
+          <select id="bannerSelect"></select>
+        </div>
+      </div>
+
+      <button class="randomize-button" id="randomizeNowButton">
+        Randomize Now
+      </button>
+    </section>
+
     <section class="posts">
-      <h2>Posts</h2>
+      <div class="posts-header">
+        <div class="live-date-time" id="liveDateTime"></div>
+        <h2 id="postsTitle">Posts</h2>
+      </div>
 
       <article class="post-box">
         <h3>what I bank with</h3>
@@ -197,8 +338,7 @@
         <h3>Second Post Title</h3>
         <div class="date">Posted on May 21, 2026</div>
         <p>
-          This is another post inside a rounded box. The text is left aligned and
-          lines up with the profile section on the left.
+          This is another post inside a rounded box.
         </p>
       </article>
 
@@ -211,44 +351,231 @@
       </article>
     </section>
   </main>
+
   <script>
     const profileImages = [
-      "UBNXTRrc_400x400.jpg",      // Princess Bubblegum profile image
-      "7B7kzkgG_400x400.jpg"       // Couple profile image
+      {
+        name: "Princess Bubblegum",
+        file: "UBNXTRrc_400x400.jpg"
+      },
+      {
+        name: "Couple Profile",
+        file: "7B7kzkgG_400x400.jpg"
+      },
+      {
+        name: "Rhiannon Office",
+        file: "images (23)(1).jpg"
+      },
+      {
+        name: "Rhiannon Store",
+        file: "Rhiannon(1).webp"
+      },
+      {
+        name: "Monika Switch",
+        file: "images (22)(1).jpg"
+      },
+      {
+        name: "Omori Mirror",
+        file: "artworks-IGehuJxVEf4EbHhO-qPtmpQ-t1080x1080(1).jpg"
+      },
+      {
+        name: "Picnic Basket Girl",
+        file: "dWJXihWV_400x400(1).jpg"
+      },
+      {
+        name: "Purple Flower Girl",
+        file: "FWMoJpLWAAEtO_l(1).jpg"
+      },
+      {
+        name: "Polaroid Group",
+        file: "DW_ALBUM_09(1).webp"
+      }
     ];
 
     const bannerImages = [
-      "1680807254.jpg",            // Candy kingdom banner
-      "1732470490.jpg"             // Quote banner
+      {
+        name: "Candy Kingdom Banner",
+        file: "1680807254.jpg",
+        position: "center"
+      },
+      {
+        name: "Quote Banner",
+        file: "1732470490.jpg",
+        position: "center"
+      },
+      {
+        name: "Reception Banner",
+        file: "images (24)(1).jpg",
+        position: "center"
+      },
+      {
+        name: "Dark Bathroom Banner",
+        file: "TL_07_Sweetpea_S01(1).jpg",
+        position: "center"
+      },
+      {
+        name: "Ferris Wheel Banner",
+        file: "552093338_18292013548249356_7558814782439137014_n(1).jpg",
+        position: "center"
+      },
+      {
+        name: "Monika Classroom Banner",
+        file: "opinion-monika-isnt-evil-she-simply-thought-of-the-girls-as-v0-251v0lg9cdec1(1).webp",
+        position: "center"
+      },
+      {
+        name: "Omori Friends Banner",
+        file: "MV5BNWVlMGNmYjUtOGZhNy00YWRlLTlkOTktYzdhNDE4ZjIxZGVmXkEyXkFqcGc@._V1_(1).jpg",
+        position: "center"
+      }
     ];
 
     const profilePicture = document.getElementById("profilePicture");
     const headerBanner = document.getElementById("headerBanner");
     const todayDate = document.getElementById("todayDate");
+    const liveDateTime = document.getElementById("liveDateTime");
+    const postsTitle = document.getElementById("postsTitle");
 
-    // 50% chance for each profile image
-    const chosenProfile = profileImages[Math.floor(Math.random() * profileImages.length)];
-    profilePicture.src = chosenProfile;
+    const profileRandomToggle = document.getElementById("profileRandomToggle");
+    const bannerRandomToggle = document.getElementById("bannerRandomToggle");
+    const profileSelect = document.getElementById("profileSelect");
+    const bannerSelect = document.getElementById("bannerSelect");
+    const randomizeNowButton = document.getElementById("randomizeNowButton");
 
-    // Banner: 40% candy kingdom, 40% quote, 20% default banner
-    const bannerRoll = Math.random();
-
-    if (bannerRoll < 0.4) {
-      headerBanner.style.backgroundImage =
-        `linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.72)), url('${bannerImages[0]}')`;
-    } else if (bannerRoll < 0.8) {
-      headerBanner.style.backgroundImage =
-        `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.78)), url('${bannerImages[1]}')`;
+    function getRandomIndex(array) {
+      return Math.floor(Math.random() * array.length);
     }
 
-    const now = new Date();
-    const formattedDate = now.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
+    function fillDropdowns() {
+      profileImages.forEach((image, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = image.name;
+        profileSelect.appendChild(option);
+      });
+
+      bannerImages.forEach((image, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = image.name;
+        bannerSelect.appendChild(option);
+      });
+    }
+
+    function setProfileImage(image) {
+      profilePicture.src = image.file;
+    }
+
+    function setBannerImage(image) {
+      headerBanner.style.backgroundImage =
+        `linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.78)), url("${image.file}")`;
+
+      headerBanner.style.backgroundPosition = image.position;
+    }
+
+    function saveSettings() {
+      localStorage.setItem("profileRandomizer", profileRandomToggle.checked);
+      localStorage.setItem("bannerRandomizer", bannerRandomToggle.checked);
+      localStorage.setItem("favoriteProfileIndex", profileSelect.value);
+      localStorage.setItem("favoriteBannerIndex", bannerSelect.value);
+    }
+
+    function loadSettings() {
+      const savedProfileRandomizer = localStorage.getItem("profileRandomizer");
+      const savedBannerRandomizer = localStorage.getItem("bannerRandomizer");
+      const savedProfileIndex = localStorage.getItem("favoriteProfileIndex");
+      const savedBannerIndex = localStorage.getItem("favoriteBannerIndex");
+
+      profileRandomToggle.checked =
+        savedProfileRandomizer === null ? true : savedProfileRandomizer === "true";
+
+      bannerRandomToggle.checked =
+        savedBannerRandomizer === null ? true : savedBannerRandomizer === "true";
+
+      profileSelect.value = savedProfileIndex === null ? 0 : savedProfileIndex;
+      bannerSelect.value = savedBannerIndex === null ? 0 : savedBannerIndex;
+    }
+
+    function applyProfileChoice() {
+      if (profileRandomToggle.checked) {
+        const randomProfileIndex = getRandomIndex(profileImages);
+        setProfileImage(profileImages[randomProfileIndex]);
+      } else {
+        setProfileImage(profileImages[profileSelect.value]);
+      }
+    }
+
+    function applyBannerChoice() {
+      if (bannerRandomToggle.checked) {
+        const randomBannerIndex = getRandomIndex(bannerImages);
+        setBannerImage(bannerImages[randomBannerIndex]);
+      } else {
+        setBannerImage(bannerImages[bannerSelect.value]);
+      }
+    }
+
+    function applyAllChoices() {
+      applyProfileChoice();
+      applyBannerChoice();
+      saveSettings();
+    }
+
+    function updateLiveDateTime() {
+      const now = new Date();
+
+      const formattedDateTime = now.toLocaleString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+      });
+
+      liveDateTime.textContent = formattedDateTime;
+    }
+
+    function updatePostCount() {
+      const totalPosts = document.querySelectorAll(".post-box").length;
+      postsTitle.textContent = `Posts (${totalPosts})`;
+    }
+
+    function setTodayPostDate() {
+      const now = new Date();
+
+      const formattedDate = now.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+      todayDate.textContent = `Posted on ${formattedDate}`;
+    }
+
+    fillDropdowns();
+    loadSettings();
+    applyAllChoices();
+
+    profileRandomToggle.addEventListener("change", applyAllChoices);
+    bannerRandomToggle.addEventListener("change", applyAllChoices);
+    profileSelect.addEventListener("change", applyAllChoices);
+    bannerSelect.addEventListener("change", applyAllChoices);
+
+    randomizeNowButton.addEventListener("click", () => {
+      const randomProfileIndex = getRandomIndex(profileImages);
+      const randomBannerIndex = getRandomIndex(bannerImages);
+
+      setProfileImage(profileImages[randomProfileIndex]);
+      setBannerImage(bannerImages[randomBannerIndex]);
     });
 
-    todayDate.textContent = `Posted on ${formattedDate}`;
+    updateLiveDateTime();
+    updatePostCount();
+    setTodayPostDate();
+
+    setInterval(updateLiveDateTime, 1000);
   </script>
 </body>
 </html>
