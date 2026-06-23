@@ -1,158 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vehicle Gallery</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Gallery</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f5f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      color: #222;
-    }
+        header {
+            padding: 2rem;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+        }
 
-    header {
-      max-width: 1100px;
-      margin: auto;
-      padding: 30px 18px 10px;
-    }
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
 
-    h1 {
-      margin: 0 0 8px;
-      font-size: 2rem;
-    }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
 
-    header p {
-      margin: 0;
-      color: #555;
-    }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
 
-    main {
-      max-width: 1100px;
-      margin: auto;
-      padding: 20px 18px 40px;
-    }
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding-bottom: 1.5rem;
+        }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 18px;
-    }
+        .image-container {
+            width: 100%;
+            height: 220px;
+            background-color: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 10px;
+        }
 
-    .card {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      overflow: hidden;
-    }
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
 
-    img {
-      width: 100%;
-      height: 180px;
-      display: block;
-      object-fit: cover;
-    }
-
-    .card h2 {
-      margin: 14px 14px 6px;
-      font-size: 1.1rem;
-    }
-
-    .card p {
-      margin: 0 14px 16px;
-      color: #555;
-      line-height: 1.4;
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: #666;
-      font-size: 0.9rem;
-    }
-  </style>
+        .card-title {
+            font-size: 1.25rem;
+            margin: 1.5rem 0 0 0;
+            font-weight: 600;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>Vehicle Gallery</h1>
-    <p>Simple gallery for the 8 vehicle images.</p>
-  </header>
 
-  <main>
-    <section class="grid">
-      <article class="card">
-        <a href="images/01-watercar-amphibious.webp" target="_blank">
-          <img src="images/01-watercar-amphibious.webp" alt="WaterCar Amphibious">
-        </a>
-        <h2>WaterCar Amphibious</h2>
-        <p>Amphibious · Land and water vehicle.</p>
-      </article>
+    <header>
+        <h1>Vehicle Showcase</h1>
+    </header>
 
-      <article class="card">
-        <a href="images/02-yangwang-u8.jpg" target="_blank">
-          <img src="images/02-yangwang-u8.jpg" alt="Yangwang U8">
-        </a>
-        <h2>Yangwang U8</h2>
-        <p>SUV · Large off-road SUV.</p>
-      </article>
+    <div class="container">
+        <div class="grid">
 
-      <article class="card">
-        <a href="images/03-im-ls9.webp" target="_blank">
-          <img src="images/03-im-ls9.webp" alt="IM LS9">
-        </a>
-        <h2>IM LS9</h2>
-        <p>SUV · Three-row SUV.</p>
-      </article>
+            <div class="card">
+                <div class="image-container">
+                    <img src="IM-LS9-hesucar-2-1.webp" alt="IM LS9">
+                </div>
+                <h3 class="card-title">IM LS9</h3>
+            </div>
 
-      <article class="card">
-        <a href="images/04-maxus-eterron-9.jpg" target="_blank">
-          <img src="images/04-maxus-eterron-9.jpg" alt="MAXUS eTERRON 9">
-        </a>
-        <h2>MAXUS eTERRON 9</h2>
-        <p>Pickup · Pickup truck.</p>
-      </article>
+            <div class="card">
+                <div class="image-container">
+                    <img src="MAXUS eTERRON 9_007_Offroad-Front.jpg" alt="MAXUS eTERRON 9">
+                </div>
+                <h3 class="card-title">MAXUS eTERRON 9</h3>
+            </div>
 
-      <article class="card">
-        <a href="images/05-voyah-dreamer.jpg" target="_blank">
-          <img src="images/05-voyah-dreamer.jpg" alt="Voyah Dreamer">
-        </a>
-        <h2>Voyah Dreamer</h2>
-        <p>MPV · Large passenger van.</p>
-      </article>
+            <div class="card">
+                <div class="image-container">
+                    <img src="New-Voyah-Dreamer-3.jpg" alt="Voyah Dreamer">
+                </div>
+                <h3 class="card-title">Voyah Dreamer</h3>
+            </div>
 
-      <article class="card">
-        <a href="images/06-xpeng-x9.jpg" target="_blank">
-          <img src="images/06-xpeng-x9.jpg" alt="XPeng X9">
-        </a>
-        <h2>XPeng X9</h2>
-        <p>MPV · MPV with a sharp body shape.</p>
-      </article>
+            <div class="card">
+                <div class="image-container">
+                    <img src="xpeng-x9-china-2023-01-min.jpg" alt="XPENG X9">
+                </div>
+                <h3 class="card-title">XPENG X9</h3>
+            </div>
 
-      <article class="card">
-        <a href="images/07-zeekr-009.jpg" target="_blank">
-          <img src="images/07-zeekr-009.jpg" alt="Zeekr 009">
-        </a>
-        <h2>Zeekr 009</h2>
-        <p>MPV · Boxy passenger van.</p>
-      </article>
+            <div class="card">
+                <div class="image-container">
+                    <img src="1730354237-car-space-m.avif" alt="Zeekr 009">
+                </div>
+                <h3 class="card-title">Zeekr 009</h3>
+            </div>
 
-      <article class="card">
-        <a href="images/08-li-auto-mega.jpg" target="_blank">
-          <img src="images/08-li-auto-mega.jpg" alt="Li Auto Mega">
-        </a>
-        <h2>Li Auto Mega</h2>
-        <p>MPV · Large family MPV.</p>
-      </article>
-    </section>
-  </main>
+            <div class="card">
+                <div class="image-container">
+                    <img src="DSC00398.jpg" alt="Li Auto Mega">
+                </div>
+                <h3 class="card-title">Li Auto Mega</h3>
+            </div>
 
-  <footer>
-    Click any image to open it larger.
-  </footer>
+            <div class="card">
+                <div class="image-container">
+                    <img src="KU1A3499.webp" alt="WaterCar EV">
+                </div>
+                <h3 class="card-title">WaterCar EV</h3>
+            </div>
+
+            <div class="card">
+                <div class="image-container">
+                    <img src="2024_Yangwang_U8_(front).jpg" alt="Yangwang U8">
+                </div>
+                <h3 class="card-title">Yangwang U8</h3>
+            </div>
+
+        </div>
+    </div>
+
 </body>
 </html>
