@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dave Persaud - Portfolio</title>
+    <title>Old Version - Portfolio</title>
     <style>
         /* Unified Global CSS Variables mapped across all sections */
         :root {
@@ -17,7 +17,7 @@
             --radius2: 14px;
             --green: #16a34a;
             --green-muted: #2e7d32;
-            --accent: #0070f3;
+            --accent: #b91c1c;
             --nav-bg: rgba(255, 255, 255, 0.95);
             --nav-border: rgba(0, 0, 0, 0.08);
             --button-bg: #f0f2f5;
@@ -25,7 +25,7 @@
             --global-font: Arial, sans-serif; /* Dynamic Font Context Variable */
 
             /* Project Specific Visual Accents */
-            --btn-blue: #2563eb;
+            --btn-blue: #b91c1c;
             --btn-dark: #0f172a;
             --scrap-red: #7f1d1d;
             --current-green: #166534;
@@ -52,7 +52,7 @@
             --nav-border: rgba(255, 255, 255, 0.1);
             --button-bg: #334155;
             --button-text: #cbd5e1;
-            --accent: #38bdf8;
+            --accent: #ef4444;
         }
 
         /* Base Styles and Smooth Scrolling */
@@ -733,7 +733,7 @@
             font-size: 14px;
             box-shadow: 0 6px 12px rgba(15,23,42,0.1);
         }
-        .project-vector-icon.color-blue { background: linear-gradient(135deg, #2563eb, #38bdf8); }
+        .project-vector-icon.color-blue { background: linear-gradient(135deg, #7f1d1d, #ef4444); }
         .project-vector-icon.color-purple { background: linear-gradient(135deg, #6d28d9, #a855f7); }
         .project-vector-icon.color-orange { background: linear-gradient(135deg, #ea580c, #f59e0b); }
         .project-vector-icon.color-dark { background: linear-gradient(135deg, #111827, #475569); }
@@ -759,7 +759,7 @@
             font-size: 13px;
             color: #ffffff;
             background: var(--btn-blue);
-            box-shadow: 0 6px 12px rgba(37,99,235,0.15);
+            box-shadow: 0 6px 12px rgba(185,28,28,0.18);
             white-space: nowrap;
             width: 100%;
             max-width: 120px; 
@@ -933,8 +933,8 @@
             display: grid;
             place-items: center;
             border-radius: 14px;
-            background: rgba(0, 112, 243, 0.08);
-            border: 1px solid rgba(0, 112, 243, 0.2);
+            background: rgba(185, 28, 28, 0.08);
+            border: 1px solid rgba(185, 28, 28, 0.22);
             font-size: 22px;
         }
         .file-name-txt {
@@ -952,8 +952,8 @@
             font-size: 11px;
             font-weight: 700;
             color: var(--accent);
-            background: rgba(0, 112, 243, 0.08);
-            border: 1px solid rgba(0, 112, 243, 0.15);
+            background: rgba(185, 28, 28, 0.08);
+            border: 1px solid rgba(185, 28, 28, 0.16);
             padding: 4px 12px;
             border-radius: 999px;
             text-transform: uppercase;
@@ -1103,16 +1103,45 @@
             color: var(--muted);
             font-size: 0.9rem;
         }
+
+
+        /* --- HIGH-REALISM BLOOD RAIN CANVAS OVERLAY --- */
+        #bloodRainCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        /* Keep the rain behind the actual website content. */
+        header, .container, footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        #bloodRainCanvas.is-disabled {
+            display: none;
+            opacity: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #bloodRainCanvas { display: none; }
+        }
     </style>
 </head>
 <body>
+    <canvas id="bloodRainCanvas" aria-hidden="true"></canvas>
 
     <header>
-        <h1>Dave Persaud</h1>
+        <h1>Old Version</h1>
     </header>
 
     <nav>
         <div class="nav-container" id="mainNav">
+            <a href="index.html">Home</a>
             <a href="#about">About</a>
             <a href="#education">Education</a>
             <a href="#skills">Skills</a>
@@ -1136,6 +1165,7 @@
                     <button class="font-option" style="font-family: 'Comic Sans MS', cursive;" onclick="changeGlobalFont('\'Comic Sans MS\', cursive')">Comic Sans</button>
                 </div>
             </div>
+            <button id="bloodRainToggleBtn" type="button" aria-pressed="false">Disable Blood Rain</button>
         </div>
     </nav>
 
@@ -1143,11 +1173,11 @@
 
         <section id="about">
             <h2>About</h2>
-            <p>Hello, my name is Dave Persaud. I consider myself to be a working-class person though I would love to do nothing for the rest of my life if that was an option. I am currently obtaining an education, and learning my capabilities.</p>
+            <p>Hello, my name is Old Version. I consider myself to be a working-class person though I would love to do nothing for the rest of my life if that was an option. I am currently obtaining an education, and learning my capabilities.</p>
             
             <div class="about-subsection">
                 <h3>About Webpage</h3>
-                <p>Website rebuilt by Gemini</p>
+                <p>Website rebuilt by Gemini, ChatGPT and Kimi</p>
             </div>
         </section>
 
@@ -1521,10 +1551,219 @@
     </div>
 
     <footer>
-        <p>&copy; 2026 Dave Persaud. All rights reserved.</p>
+        <p>&copy; 2026 Old Version. All rights reserved.</p>
     </footer>
 
     <script>
+        // High-Realism Physics Blood Rain Simulation System
+        class PhotorealisticBloodRain {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                if (!this.canvas) return;
+                this.ctx = this.canvas.getContext('2d');
+                this.drops = [];
+                this.splashes = [];
+                this.isAnimationActive = true;
+                this.dropDensity = 110; // Number of active blood drops
+                this.wind = 0.8;
+                
+                this.initCanvasSize();
+                this.spawnInitialDrops();
+                window.addEventListener('resize', () => this.initCanvasSize());
+            }
+
+            initCanvasSize() {
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                this.canvas.width = this.width * window.devicePixelRatio;
+                this.canvas.height = this.height * window.devicePixelRatio;
+                this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            }
+
+            spawnInitialDrops() {
+                this.drops = [];
+                for (let i = 0; i < this.dropDensity; i++) {
+                    this.drops.push(this.createDrop(true));
+                }
+            }
+
+            createDrop(randomY = false) {
+                const depth = Math.random(); // 0 (far) to 1 (close foreground)
+                const length = 18 + depth * 55;
+                const width = 1.2 + depth * 2.8;
+                const speed = 12 + depth * 28;
+                
+                return {
+                    x: Math.random() * (this.width + 200) - 100,
+                    y: randomY ? Math.random() * (this.height + 200) - 100 : -length - 20,
+                    length: length,
+                    width: width,
+                    speed: speed,
+                    depth: depth,
+                    opacity: 0.35 + depth * 0.55,
+                    swayOffset: Math.random() * Math.PI * 2,
+                    viscosity: 0.8 + Math.random() * 0.4
+                };
+            }
+
+            createSplash(x, y, depth) {
+                const particleCount = Math.floor(3 + depth * 5);
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = -Math.PI * (0.1 + Math.random() * 0.8);
+                    const speed = (1.5 + Math.random() * 3.5) * (0.5 + depth * 0.5);
+                    this.splashes.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        radius: (0.8 + Math.random() * 1.8) * (0.6 + depth * 0.5),
+                        alpha: 0.8,
+                        decay: 0.04 + Math.random() * 0.03
+                    });
+                }
+            }
+
+            update() {
+                if (!this.isAnimationActive) return;
+
+                // Update Droplets
+                for (let i = 0; i < this.drops.length; i++) {
+                    const d = this.drops[i];
+                    d.y += d.speed;
+                    d.swayOffset += 0.03;
+                    d.x += Math.sin(d.swayOffset) * 0.4 + this.wind * (0.5 + d.depth * 0.5);
+
+                    // Reached the ground / bottom viewport
+                    if (d.y >= this.height - 4) {
+                        if (Math.random() > 0.45) {
+                            this.createSplash(d.x, this.height - 2, d.depth);
+                        }
+                        this.drops[i] = this.createDrop(false);
+                    }
+                }
+
+                // Update Micro-Splashes
+                for (let i = this.splashes.length - 1; i >= 0; i--) {
+                    const s = this.splashes[i];
+                    s.x += s.vx;
+                    s.y += s.vy;
+                    s.vy += 0.18; // Splash gravity
+                    s.alpha -= s.decay;
+
+                    if (s.alpha <= 0 || s.y >= this.height) {
+                        this.splashes.splice(i, 1);
+                    }
+                }
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                // Render Blood Drops
+                for (let i = 0; i < this.drops.length; i++) {
+                    const d = this.drops[i];
+                    
+                    const headX = d.x;
+                    const headY = d.y;
+                    const tailX = d.x - this.wind * (d.length * 0.12);
+                    const tailY = d.y - d.length;
+
+                    // Deep Blood Coagulated Fluid Gradient
+                    const grad = this.ctx.createLinearGradient(tailX, tailY, headX, headY);
+                    grad.addColorStop(0, 'rgba(120, 0, 0, 0)');
+                    grad.addColorStop(0.3, `rgba(160, 10, 15, ${d.opacity * 0.6})`);
+                    grad.addColorStop(0.8, `rgba(120, 0, 0, ${d.opacity * 0.95})`);
+                    grad.addColorStop(1, `rgba(50, 0, 0, ${d.opacity})`);
+
+                    this.ctx.save();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(tailX, tailY);
+                    this.ctx.lineTo(headX, headY);
+                    this.ctx.strokeStyle = grad;
+                    this.ctx.lineWidth = d.width;
+                    this.ctx.lineCap = 'round';
+                    this.ctx.stroke();
+
+                    // Bulbed Viscous Teardrop Tip with Specular Highlight
+                    if (d.depth > 0.3) {
+                        this.ctx.beginPath();
+                        this.ctx.arc(headX, headY, d.width * 0.85, 0, Math.PI * 2);
+                        this.ctx.fillStyle = `rgba(140, 0, 0, ${d.opacity})`;
+                        this.ctx.fill();
+
+                        // Liquid Specular Gloss Point
+                        this.ctx.beginPath();
+                        this.ctx.arc(headX - d.width * 0.25, headY - d.width * 0.25, d.width * 0.3, 0, Math.PI * 2);
+                        this.ctx.fillStyle = `rgba(255, 180, 180, ${d.opacity * 0.65})`;
+                        this.ctx.fill();
+                    }
+                    this.ctx.restore();
+                }
+
+                // Render Splashes
+                for (let i = 0; i < this.splashes.length; i++) {
+                    const s = this.splashes[i];
+                    this.ctx.beginPath();
+                    this.ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+                    this.ctx.fillStyle = `rgba(150, 0, 0, ${s.alpha})`;
+                    this.ctx.fill();
+                }
+            }
+
+            loop() {
+                if (this.isAnimationActive) {
+                    this.update();
+                    this.render();
+                }
+                requestAnimationFrame(() => this.loop());
+            }
+
+            stop() {
+                this.isAnimationActive = false;
+                this.ctx.clearRect(0, 0, this.width, this.height);
+            }
+
+            start() {
+                if (!this.isAnimationActive) {
+                    this.isAnimationActive = true;
+                }
+            }
+        }
+
+        // Initialize blood rain canvas context
+        let bloodRainEngine = null;
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            bloodRainEngine = new PhotorealisticBloodRain("bloodRainCanvas");
+            bloodRainEngine.loop();
+        }
+
+        // Blood-rain visibility toggle with LocalStorage caching
+        const bloodRainToggleButton = document.getElementById("bloodRainToggleBtn");
+        const bloodRainCanvasElement = document.getElementById("bloodRainCanvas");
+
+        function applyBloodRainState(enabled) {
+            if (!bloodRainCanvasElement || !bloodRainToggleButton) return;
+            
+            if (enabled) {
+                bloodRainCanvasElement.classList.remove("is-disabled");
+                if (bloodRainEngine) bloodRainEngine.start();
+                bloodRainToggleButton.textContent = "Disable Blood Rain";
+                bloodRainToggleButton.setAttribute("aria-pressed", "false");
+            } else {
+                bloodRainCanvasElement.classList.add("is-disabled");
+                if (bloodRainEngine) bloodRainEngine.stop();
+                bloodRainToggleButton.textContent = "Enable Blood Rain";
+                bloodRainToggleButton.setAttribute("aria-pressed", "true");
+            }
+        }
+
+        bloodRainToggleButton.addEventListener("click", () => {
+            const currentlyDisabled = bloodRainCanvasElement.classList.contains("is-disabled");
+            const nextEnabled = currentlyDisabled; // If currently disabled, enable it next
+            applyBloodRainState(nextEnabled);
+            localStorage.setItem("portfolio-blood-rain", nextEnabled ? "enabled" : "disabled");
+        });
+
         const assetTargetUrl = "https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing";
 
         function purgeActiveWindowFocusContext() {
@@ -1630,6 +1869,10 @@
             if (savedFont) {
                 document.documentElement.style.setProperty('--global-font', savedFont);
             }
+
+            // Restore blood-rain visibility (enabled by default).
+            const savedBloodRainState = localStorage.getItem("portfolio-blood-rain");
+            applyBloodRainState(savedBloodRainState !== "disabled");
             
             document.querySelectorAll(".copy-asset-link-btn").forEach((interfaceButtonNode) => {
                 interfaceButtonNode.addEventListener("click", () => captureLinkToSystemClipboard(interfaceButtonNode));
