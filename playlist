@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Content Repository</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top, rgba(120, 20, 20, 0.35), transparent 32%),
+        linear-gradient(180deg, #06070a 0%, #10131b 45%, #050608 100%);
+      color: #f5f5f5;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 32px;
+      color: #fff4d2;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 18px rgba(218, 165, 32, 0.35);
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: #cfcfcf;
+      font-size: 16px;
+    }
+
+    .section-card {
+      background: linear-gradient(145deg, rgba(31, 34, 46, 0.96), rgba(12, 13, 20, 0.98));
+      border: 1px solid rgba(218, 165, 32, 0.35);
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 30px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .section-card h2 {
+      color: #d9aa3c;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 22px;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(218, 165, 32, 0.2);
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .repo-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .repo-item h4 {
+      color: #fff0c2;
+      font-size: 16px;
+    }
+
+    .file-path {
+      font-family: monospace;
+      font-size: 13px;
+      color: #9d9d9d;
+      word-break: break-all;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .category-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    .tag-profile { background: #2a4d69; color: #a5d8ff; }
+    .tag-banner { background: #4a2e5a; color: #f0c3ff; }
+
+    /* Video Player Embed */
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid rgba(218, 165, 32, 0.3);
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    /* Bubbles Style for Usernames/Banking */
+    .bubble-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .bubble {
+      background: rgba(218, 165, 32, 0.15);
+      border: 1px solid rgba(218, 165, 32, 0.5);
+      color: #fff4d2;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .username-badge {
+      font-family: monospace;
+      font-size: 18px;
+      color: #d9aa3c;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 10px 16px;
+      border-radius: 8px;
+      border-left: 4px solid #d9aa3c;
+      width: fit-content;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Content Repository</h1>
+      <p>Asset, media, and profile index</p>
+    </header>
+
+    <!-- SECTION 1: IMAGES -->
+    <section class="section-card">
+      <h2>1. Images Repository</h2>
+      <div class="grid-container" id="imagesGrid"></div>
+    </section>
+
+    <!-- SECTION 2: VIDEOS -->
+    <section class="section-card">
+      <h2>2. Videos Repository</h2>
+      <div class="repo-item" style="margin-bottom: 15px;">
+        <h4>Playlist: Games</h4>
+        <div class="file-path">Link: https://youtu.be/RkC0l4iekYo</div>
+      </div>
+      <div class="video-container">
+        <iframe 
+          src="https://www.youtube.com/embed/RkC0l4iekYo" 
+          title="Games Video" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
+      </div>
+    </section>
+
+    <!-- SECTION 3: USERNAMES -->
+    <section class="section-card">
+      <h2>3. Usernames & Accounts Repository</h2>
+      
+      <!-- Banking File -->
+      <div class="repo-item" style="margin-bottom: 20px;">
+        <h4>File: Banking</h4>
+        <div class="bubble-list">
+          <span class="bubble">CIBC</span>
+          <span class="bubble">WealthSimple</span>
+          <span class="bubble">Questrade</span>
+          <span class="bubble">Interactive Brokers</span>
+        </div>
+      </div>
+
+      <!-- Roblox File -->
+      <div class="repo-item">
+        <h4>File: Roblox</h4>
+        <div class="username-badge">VisionaryAngel</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Extracted Profile Images from provided code
+    const profileImages = [
+      { name: "Princess Bubblegum", file: "UBNXTRrc_400x400.jpg" },
+      { name: "Couple Profile", file: "7B7kzkgG_400x400.jpg" },
+      { name: "Rhiannon Office", file: "images (23).jpg" },
+      { name: "Rhiannon Store", file: "Rhiannon.webp" },
+      { name: "Monika Switch", file: "images (22).jpg" },
+      { name: "Omori Mirror", file: "artworks-IGehuJxVEf4EbHhO-qPtmpQ-t1080x1080.jpg" },
+      { name: "Picnic Basket Girl", file: "dWJXihWV_400x400.jpg" },
+      { name: "Purple Flower Girl", file: "FWMoJpLWAAEtO_l.jpg" },
+      { name: "Polaroid Group", file: "DW_ALBUM_09.webp" }
+    ];
+
+    // Extracted Banner Images from provided code
+    const bannerImages = [
+      { name: "Candy Kingdom Banner", file: "1680807254.jpg" },
+      { name: "Quote Banner", file: "1732470490.jpg" },
+      { name: "Reception Banner", file: "images (24).jpg" },
+      { name: "Dark Bathroom Banner", file: "TL_07_Sweetpea_S01.jpg" },
+      { name: "Ferris Wheel Banner", file: "552093338_18292013548249356_7558814782439137014_n.jpg" },
+      { name: "Monika Classroom Banner", file: "opinion-monika-isnt-evil-she-simply-thought-of-the-girls-as-v0-251v0lg9cdec1.webp" },
+      { name: "Omori Friends Banner", file: "MV5BNWVlMGNmYjUtOGZhNy00YWRlLTlkOTktYzdhNDE4ZjIxZGVmXkEyXkFqcGc@._V1_.jpg" }
+    ];
+
+    // Populate Images Section
+    const imagesGrid = document.getElementById("imagesGrid");
+
+    function renderImages() {
+      profileImages.forEach(img => {
+        const item = document.createElement("div");
+        item.className = "repo-item";
+        item.innerHTML = `
+          <span class="category-tag tag-profile">Profile Photo</span>
+          <h4>${img.name}</h4>
+          <div class="file-path">${img.file}</div>
+        `;
+        imagesGrid.appendChild(item);
+      });
+
+      bannerImages.forEach(img => {
+        const item = document.createElement("div");
+        item.className = "repo-item";
+        item.innerHTML = `
+          <span class="category-tag tag-banner">Banner Image</span>
+          <h4>${img.name}</h4>
+          <div class="file-path">${img.file}</div>
+        `;
+        imagesGrid.appendChild(item);
+      });
+    }
+
+    renderImages();
+  </script>
+
+</body>
+</html>
