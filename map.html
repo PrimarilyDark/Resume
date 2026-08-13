@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Four Islands Map Editor - Tool Conflict Fixed</title>
+  <title>Four Islands Map Editor</title>
   <style>
     :root {
       --bg: #06111d;
@@ -219,6 +219,11 @@
       cursor: pointer;
     }
 
+    input[type="color"]:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
     .small {
       color: var(--muted);
       font-size: .82rem;
@@ -260,6 +265,17 @@
     }
 
     main.dragging { cursor: grabbing; }
+    main[data-mode="road"],
+    main[data-mode="island"] { cursor: crosshair; }
+    main[data-mode="pan"] { cursor: grab; }
+    main[data-mode="pan"].dragging { cursor: grabbing; }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid rgba(101,210,255,.55);
+      outline-offset: 2px;
+    }
 
     .chips {
       position: absolute;
@@ -385,6 +401,7 @@
       stroke-width: 5;
       stroke-linejoin: round;
       pointer-events: none;
+      text-anchor: middle;
     }
 
     .road-hit {
@@ -524,7 +541,7 @@
   <div class="app">
     <aside>
       <h1>Four Islands Map Editor</h1>
-      <p class="subtitle">Fixed editor: move buildings, edit islands, add/edit/delete roads, draw islands, duplicate buildings, and auto-save.</p>
+      <p class="subtitle">Build and edit your island map with safer tools, smoother navigation, undo/redo, drawing controls, and automatic saving.</p>
 
       <div class="card">
         <p class="card-title">Editor Mode</p>
@@ -537,8 +554,9 @@
           <button id="modePan">Pan Map</button>
         </div>
         <div class="grid2" style="margin-top:8px;">
-          <button id="finishBtn" class="good">Finish Drawing</button>
-          <button id="cancelBtn" class="warn">Cancel</button>
+          <button id="finishBtn" class="good" disabled>Finish Drawing</button>
+          <button id="undoPointBtn" class="warn" disabled>Undo Point</button>
+          <button id="cancelBtn" style="grid-column: span 2;">Cancel Current Action</button>
         </div>
         <div class="status" id="status">Move mode: drag buildings. Right-click a building to duplicate it.</div>
       </div>
@@ -583,11 +601,13 @@
         <div class="grid2">
           <button id="zoomIn" class="primary">Zoom In</button>
           <button id="zoomOut" class="primary">Zoom Out</button>
-          <button id="resetView">Reset View</button>
-          <button id="toggleLabels">Labels</button>
+          <button id="resetView">Fit Map</button>
+          <button id="centerSelected">Center Selected</button>
+          <button id="toggleLabels" style="grid-column: span 2;">Toggle Labels</button>
         </div>
         <div class="grid2" style="margin-top:8px;">
-          <button id="undoBtn" class="warn" disabled style="grid-column: span 2;">Undo Action (Ctrl+Z)</button>
+          <button id="undoBtn" class="warn" disabled>Undo (Ctrl+Z)</button>
+          <button id="redoBtn" disabled>Redo (Ctrl+Y)</button>
         </div>
       </div>
 
@@ -633,7 +653,7 @@
     <main id="mapWrap">
       <div class="chips">
         <div class="chip" id="modeChip">Mode: Move Buildings</div>
-        <div class="chip">Auto-save on</div>
+        <div class="chip" id="saveChip">Auto-save on</div>
         <div class="chip">Right-click duplicate</div>
       </div>
       <div class="tooltip" id="tooltip"></div>
@@ -707,7 +727,7 @@
         { id:"airport-island", name:"Airport Island", type:"Airport Only", description:"This island only contains the airport.", color:"#69cfff", points:[[99,181],[179,70],[358,62],[461,163],[544,244],[506,378],[385,434],[241,501],[80,426],[58,294],[66,214]] },
         { id:"desert-island", name:"Desert Island", type:"Desert Only", description:"This island only contains the desert.", color:"#d6a34a", points:[[93,547],[180,429],[366,432],[468,543],[570,654],[437,836],[250,824],[95,814],[20,663]] },
         { id:"prison-island", name:"Prison Island", type:"Prison Only", description:"This island only contains the prison.", color:"#aeb8c6", points:[[641,99],[756,32],[930,90],[972,231],[1010,361],[892,472],[726,443],[584,418],[514,261],[576,160]] },
-        { id:"city-island", name:"City Island", type:"Main City", description:"This island has the bank, resort, jewellery store, delivery warehouse, mall, casino, night club, car dealership, power plant, and placeholder building.", color:"#6fd38d", points:[[1113,317],[1277,225],[1507,315],[1564,496],[1621,676],[1464,897],[1219,905],[1008,912],[846,792],[817,619],[791,464],[932,418]] }
+        { id:"city-island", name:"City Island", type:"Main City", description:"This island has the bank, resort, jewellery store, delivery warehouse, mall, casino, night club, car dealership, power plant, and placeholder building.", color:"#6fd38d", points:[[1113,317],[1277,225],[1507,315],[1564,496],[1588,676],[1464,897],[1219,905],[1008,912],[846,792],[817,619],[791,464],[932,418]] }
       ],
       roads: [
         { id:"bridge-1", name:"North-West Bridge", description:"Connects Airport Island and Prison Island.", points:[[454,284],[542,263],[615,272],[688,305]], isBridge: true },
@@ -766,6 +786,10 @@
     const editDesc = document.getElementById("editDesc");
     const editColor = document.getElementById("editColor");
     const undoBtn = document.getElementById("undoBtn");
+    const redoBtn = document.getElementById("redoBtn");
+    const undoPointBtn = document.getElementById("undoPointBtn");
+    const finishBtn = document.getElementById("finishBtn");
+    const saveChip = document.getElementById("saveChip");
 
     let data = loadData();
 
@@ -782,8 +806,10 @@
       panStart: [0,0],
       dragOffset: [0,0],
       draftPoints: [],
-      suppressClick: false,
-      history: []
+      dragSnapshot: null,
+      dragMoved: false,
+      history: [],
+      future: []
     };
 
     function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
@@ -794,26 +820,75 @@
       }
     }
 
-    function pushHistory() {
-      state.history.push(clone(data));
-      if (state.history.length > 40) {
-        state.history.shift();
-      }
+    function pushHistorySnapshot(snapshot, clearFuture = true) {
+      state.history.push(clone(snapshot));
+      if (state.history.length > 60) state.history.shift();
+      if (clearFuture) state.future = [];
       updateUndoButtonState();
+    }
+
+    function pushHistory() {
+      pushHistorySnapshot(data);
     }
 
     function triggerUndo() {
       if (!state.history.length) return;
+      state.future.push(clone(data));
       data = state.history.pop();
-      saveData("Action undone.");
       state.selected = null;
+      state.draftPoints = [];
+      saveData("Action undone.");
       fillEditor();
       renderAll();
       updateUndoButtonState();
+      updateModeControls();
+    }
+
+    function triggerRedo() {
+      if (!state.future.length) return;
+      state.history.push(clone(data));
+      data = state.future.pop();
+      state.selected = null;
+      state.draftPoints = [];
+      saveData("Action redone.");
+      fillEditor();
+      renderAll();
+      updateUndoButtonState();
+      updateModeControls();
     }
 
     function updateUndoButtonState() {
       undoBtn.disabled = state.history.length === 0;
+      redoBtn.disabled = state.future.length === 0;
+    }
+
+    function validPoint(point) {
+      return Array.isArray(point) &&
+        point.length >= 2 &&
+        Number.isFinite(Number(point[0])) &&
+        Number.isFinite(Number(point[1]));
+    }
+
+    function validateData(candidate) {
+      return !!candidate &&
+        Array.isArray(candidate.islands) &&
+        Array.isArray(candidate.roads) &&
+        Array.isArray(candidate.buildings) &&
+        candidate.islands.every(item =>
+          item && typeof item.id === "string" &&
+          Array.isArray(item.points) && item.points.length >= 3 &&
+          item.points.every(validPoint)
+        ) &&
+        candidate.roads.every(item =>
+          item && typeof item.id === "string" &&
+          Array.isArray(item.points) && item.points.length >= 2 &&
+          item.points.every(validPoint)
+        ) &&
+        candidate.buildings.every(item =>
+          item && typeof item.id === "string" &&
+          Number.isFinite(Number(item.x)) &&
+          Number.isFinite(Number(item.y))
+        );
     }
 
     function loadData() {
@@ -821,16 +896,21 @@
         const raw = localStorage.getItem(SAVE_KEY);
         if (!raw) return clone(DEFAULT_DATA);
         const saved = JSON.parse(raw);
-        if (!saved.islands || !saved.roads || !saved.buildings) return clone(DEFAULT_DATA);
-        return saved;
+        return validateData(saved) ? saved : clone(DEFAULT_DATA);
       } catch {
         return clone(DEFAULT_DATA);
       }
     }
 
     function saveData(message) {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-      if (message) setStatus(message);
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+        saveChip.textContent = "Auto-save on • saved";
+        if (message) setStatus(message);
+      } catch {
+        saveChip.textContent = "Auto-save failed";
+        setStatus("Could not save in this browser. Export JSON to keep your changes.");
+      }
     }
 
     function uid(prefix) {
@@ -839,7 +919,9 @@
 
     function makeEl(tag, attrs) {
       const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-      Object.entries(attrs || {}).forEach(([key, value]) => el.setAttribute(key, value));
+      Object.entries(attrs || {}).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) el.setAttribute(key, value);
+      });
       return el;
     }
 
@@ -853,11 +935,15 @@
       return [total[0] / points.length, total[1] / points.length];
     }
 
-    function screenToMap(evt) {
+    function clientToSvg(clientX, clientY) {
       const pt = svg.createSVGPoint();
-      pt.x = evt.clientX;
-      pt.y = evt.clientY;
-      const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+      pt.x = clientX;
+      pt.y = clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    function screenToMap(evt) {
+      const svgP = clientToSvg(evt.clientX, evt.clientY);
       return [(svgP.x - state.x) / state.scale, (svgP.y - state.y) / state.scale];
     }
 
@@ -866,25 +952,25 @@
       zoomChip.textContent = `${Math.round(state.scale * 100)}%`;
     }
 
+    function zoomAt(clientX, clientY, nextScale) {
+      const svgP = clientToSvg(clientX, clientY);
+      const mapX = (svgP.x - state.x) / state.scale;
+      const mapY = (svgP.y - state.y) / state.scale;
+      state.scale = Math.min(3, Math.max(.5, nextScale));
+      state.x = svgP.x - mapX * state.scale;
+      state.y = svgP.y - mapY * state.scale;
+      applyTransform();
+    }
+
+    function zoomAtCenter(delta) {
+      const rect = wrap.getBoundingClientRect();
+      zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, state.scale + delta);
+    }
+
     function setStatus(text) {
       statusEl.textContent = text;
     }
 
-    // Swaps back cleanly into primary placement tool modes
-    function selectBuildingAction(buildingId, evt) {
-      // Clean target swap back to movement configurations
-      setMode("move"); 
-      setSelected({kind:"building", id:buildingId});
-
-      const p = screenToMap(evt);
-      state.draggingBuildingId = buildingId;
-      const b = data.buildings.find(item => item.id === buildingId);
-      if (b) {
-        state.dragOffset = [b.x - p[0], b.y - p[1]];
-      }
-      state.suppressClick = true;
-      pushHistory();
-    }
 
     function itemForSelection() {
       if (!state.selected) return null;
@@ -899,29 +985,53 @@
     }
 
     function fillEditor() {
+      clearContainer(info);
+
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      const title = document.createElement("h2");
+      const desc = document.createElement("p");
+
       const item = itemForSelection();
       if (!item) {
-        info.innerHTML = `<span class="badge">Selection</span><h2>Nothing selected</h2><p>Click a building, road, or island to edit it here.</p>`;
+        badge.textContent = "Selection";
+        title.textContent = "Nothing selected";
+        desc.textContent = "Click a building, road, or island to edit it here.";
+        info.append(badge, title, desc);
         editName.value = "";
         editDesc.value = "";
         editColor.value = "#6fd38d";
+        editColor.disabled = false;
         return;
       }
 
-      const type = state.selected.kind === "building" ? item.type : state.selected.kind === "road" ? (item.isBridge ? "Bridge" : "Road") : item.type || "Island";
-      info.innerHTML = `<span class="badge">${type}</span><h2>${item.name}</h2><p>${item.description || "No description yet."}</p>`;
+      const type = state.selected.kind === "building"
+        ? item.type
+        : state.selected.kind === "road"
+          ? (item.isBridge ? "Bridge" : "Road")
+          : item.type || "Island";
+
+      badge.textContent = type || "Item";
+      title.textContent = item.name || "Unnamed item";
+      desc.textContent = item.description || "No description yet.";
+      info.append(badge, title, desc);
+
       editName.value = item.name || "";
       editDesc.value = item.description || "";
-      editColor.value = item.color || "#202b37";
+      editColor.value = item.color || (item.isBridge ? "#80664b" : "#202b37");
+      editColor.disabled = !!item.isBridge;
     }
 
-    function setMode(mode) {
+    function setMode(mode, { preserveDraft = false } = {}) {
       state.mode = mode;
-      state.draftPoints = [];
+      if (!preserveDraft) state.draftPoints = [];
       state.draggingBuildingId = null;
       state.draggingHandle = null;
+      state.dragSnapshot = null;
+      state.dragMoved = false;
       state.panning = false;
       wrap.classList.remove("dragging");
+      wrap.dataset.mode = mode;
       renderAll();
 
       const configs = {
@@ -938,13 +1048,25 @@
       document.getElementById(btnId).classList.add("active");
       modeChip.textContent = `Mode: ${label}`;
       setStatus(status);
+      updateModeControls();
+    }
+
+    function updateModeControls() {
+      const drawing = state.mode === "road" || state.mode === "island";
+      finishBtn.disabled = !drawing;
+      undoPointBtn.disabled = !drawing || state.draftPoints.length === 0;
     }
 
     function showTooltip(evt, title, type) {
       const rect = wrap.getBoundingClientRect();
       tooltip.style.left = `${evt.clientX - rect.left}px`;
       tooltip.style.top = `${evt.clientY - rect.top}px`;
-      tooltip.innerHTML = `<strong>${title}</strong><span>${type}</span>`;
+      clearContainer(tooltip);
+      const strong = document.createElement("strong");
+      const span = document.createElement("span");
+      strong.textContent = title || "Unnamed item";
+      span.textContent = type || "Map item";
+      tooltip.append(strong, span);
       tooltip.style.display = "block";
     }
 
@@ -986,7 +1108,7 @@
         path.addEventListener("pointerleave", hideTooltip);
 
         const [cx,cy] = centroid(island.points);
-        const text = makeEl("text", { class:"island-title", x:cx - Math.min(150, island.name.length * 5.6), y:cy - 80 });
+        const text = makeEl("text", { class:"island-title", x:cx, y:cy - 80 });
         text.textContent = island.name;
 
         g.appendChild(path);
@@ -1087,15 +1209,30 @@
         label.textContent = building.name;
         g.appendChild(label);
 
-        // Fixed: Buildings intercept pointer events aggressively, shifting modes instantly if needed
         g.addEventListener("pointerdown", evt => {
           if (evt.button !== 0) return;
+
+          // Drawing tools are allowed to place points over buildings.
+          if (state.mode === "road" || state.mode === "island") return;
+
           evt.preventDefault();
-          evt.stopPropagation(); // Block road placement layers below building bounds
-          selectBuildingAction(building.id, evt);
+          evt.stopPropagation();
+          setSelected({kind:"building", id:building.id});
+
+          if (state.mode !== "move") {
+            setStatus("Building selected. Switch to Move Buildings to drag it.");
+            return;
+          }
+
+          const p = screenToMap(evt);
+          state.draggingBuildingId = building.id;
+          state.dragOffset = [building.x - p[0], building.y - p[1]];
+          state.dragSnapshot = clone(data);
+          state.dragMoved = false;
         });
 
         g.addEventListener("contextmenu", evt => {
+          if (state.mode === "road" || state.mode === "island") return;
           evt.preventDefault();
           evt.stopPropagation();
           duplicateBuilding(building.id);
@@ -1107,9 +1244,14 @@
         svgFrag.appendChild(g);
 
         const btn = document.createElement("button");
-        btn.innerHTML = `<span class="pill">${building.name.slice(0,1)}</span><span>${building.name}</span>`;
+        const pill = document.createElement("span");
+        const name = document.createElement("span");
+        pill.className = "pill";
+        pill.textContent = (building.name || "?").slice(0, 1);
+        name.textContent = building.name || "Unnamed building";
+        btn.append(pill, name);
         btn.addEventListener("click", () => {
-          setMode("move"); // Swap mode to let details render seamlessly
+          setMode("move");
           setSelected({kind:"building", id:building.id});
         });
         listFrag.appendChild(btn);
@@ -1136,7 +1278,8 @@
           if (evt.button !== 0) return;
           evt.preventDefault();
           evt.stopPropagation();
-          pushHistory();
+          state.dragSnapshot = clone(data);
+          state.dragMoved = false;
           state.draggingHandle = { kind:state.selected.kind, id:item.id, index };
         });
         frag.appendChild(handle);
@@ -1172,6 +1315,7 @@
         };
         data.roads.push(road);
         state.draftPoints = [];
+        updateModeControls();
         saveData("Road added and saved.");
         setSelected({kind:"road", id:road.id});
         setMode("editRoad");
@@ -1194,20 +1338,36 @@
         };
         data.islands.push(island);
         state.draftPoints = [];
+        updateModeControls();
         saveData("Island added and saved.");
         setSelected({kind:"island", id:island.id});
         setMode("editIsland");
       }
     }
 
+    function undoDraftPoint() {
+      if (!state.draftPoints.length) return;
+      state.draftPoints.pop();
+      renderDraft();
+      updateModeControls();
+      setStatus(state.draftPoints.length ? "Last drawing point removed." : "Drawing cleared.");
+    }
+
     function cancelDrawing() {
+      if ((state.draggingBuildingId || state.draggingHandle) && state.dragSnapshot) {
+        data = state.dragSnapshot;
+      }
       state.draftPoints = [];
       state.draggingBuildingId = null;
       state.draggingHandle = null;
+      state.dragSnapshot = null;
+      state.dragMoved = false;
       state.panning = false;
       wrap.classList.remove("dragging");
       renderAll();
-      setStatus("Cancelled current drawing or drag.");
+      fillEditor();
+      updateModeControls();
+      setStatus("Current drawing or drag cancelled.");
     }
 
     function addBuilding(template) {
@@ -1237,7 +1397,9 @@
       pushHistory();
       const copy = clone(base);
       copy.id = uid(base.id + "-copy");
-      copy.name = base.name + " Copy";
+      // Keep duplicated buildings under the same display name.
+      // Also clean up legacy names such as "Desert Copy Copy" when they are duplicated.
+      copy.name = (base.name || "Building").replace(/(?:\s+Copy)+$/i, "");
       copy.x += 35;
       copy.y += 35;
       data.buildings.push(copy);
@@ -1254,6 +1416,7 @@
 
       const {kind, id} = state.selected;
       const group = kind + "s";
+      if (!Array.isArray(data[group])) return;
       const before = data[group].length;
       
       pushHistory();
@@ -1297,15 +1460,17 @@
         const p = screenToMap(evt);
         state.draftPoints.push([Math.round(p[0]), Math.round(p[1])]);
         renderDraft();
+        updateModeControls();
         setStatus(state.mode === "road"
-          ? "Road point added. Add more points or press Finish Drawing."
-          : "Island point added. Keep clicking around the island, then press Finish Drawing.");
+          ? "Road point added. Add more points, right-click/Undo Point to remove one, or finish the road."
+          : "Island point added. Keep clicking around the shape, then finish the island.");
         return;
       }
 
       if (state.mode === "pan" || evt.target.id === "oceanBg") {
+        const p = clientToSvg(evt.clientX, evt.clientY);
         state.panning = true;
-        state.pointerStart = [evt.clientX, evt.clientY];
+        state.pointerStart = [p.x, p.y];
         state.panStart = [state.x, state.y];
         wrap.classList.add("dragging");
       }
@@ -1316,10 +1481,14 @@
         const b = data.buildings.find(item => item.id === state.draggingBuildingId);
         if (!b) return;
         const p = screenToMap(evt);
-        b.x = Math.round(p[0] + state.dragOffset[0]);
-        b.y = Math.round(p[1] + state.dragOffset[1]);
+        const nextX = Math.round(p[0] + state.dragOffset[0]);
+        const nextY = Math.round(p[1] + state.dragOffset[1]);
+        if (nextX !== b.x || nextY !== b.y) state.dragMoved = true;
+        b.x = nextX;
+        b.y = nextY;
 
-        const el = buildingLayer.querySelector(`[data-id="${CSS.escape(b.id)}"]`);
+        const escapedId = window.CSS && CSS.escape ? CSS.escape(b.id) : b.id.replace(/"/g, '\\"');
+        const el = buildingLayer.querySelector(`[data-id="${escapedId}"]`);
         if (el) el.setAttribute("transform", `translate(${b.x} ${b.y})`);
         return;
       }
@@ -1330,37 +1499,53 @@
         const item = data[group].find(x => x.id === id);
         if (!item) return;
         const p = screenToMap(evt);
-        item.points[index] = [Math.round(p[0]), Math.round(p[1])];
-        renderAll();
+        const next = [Math.round(p[0]), Math.round(p[1])];
+        if (item.points[index][0] !== next[0] || item.points[index][1] !== next[1]) {
+          state.dragMoved = true;
+          item.points[index] = next;
+          renderAll();
+        }
         return;
       }
 
       if (state.panning) {
-        state.x = state.panStart[0] + (evt.clientX - state.pointerStart[0]);
-        state.y = state.panStart[1] + (evt.clientY - state.pointerStart[1]);
+        const p = clientToSvg(evt.clientX, evt.clientY);
+        state.x = state.panStart[0] + (p.x - state.pointerStart[0]);
+        state.y = state.panStart[1] + (p.y - state.pointerStart[1]);
         applyTransform();
       }
     });
 
     window.addEventListener("pointerup", () => {
       if (state.draggingBuildingId) {
-        saveData("Building moved and saved.");
+        if (state.dragMoved && state.dragSnapshot) {
+          pushHistorySnapshot(state.dragSnapshot);
+          saveData("Building moved and saved.");
+        }
         state.draggingBuildingId = null;
       }
       if (state.draggingHandle) {
-        saveData("Shape edited and saved.");
+        if (state.dragMoved && state.dragSnapshot) {
+          pushHistorySnapshot(state.dragSnapshot);
+          saveData("Shape edited and saved.");
+        }
         state.draggingHandle = null;
       }
+      state.dragSnapshot = null;
+      state.dragMoved = false;
       state.panning = false;
       wrap.classList.remove("dragging");
     });
 
-    svg.addEventListener("contextmenu", evt => evt.preventDefault());
+    svg.addEventListener("contextmenu", evt => {
+      evt.preventDefault();
+      if (state.mode === "road" || state.mode === "island") undoDraftPoint();
+    });
 
     svg.addEventListener("wheel", evt => {
       evt.preventDefault();
-      state.scale = Math.min(2.4, Math.max(.6, state.scale + (evt.deltaY < 0 ? .08 : -.08)));
-      applyTransform();
+      const factor = evt.deltaY < 0 ? 1.1 : 0.9;
+      zoomAt(evt.clientX, evt.clientY, state.scale * factor);
     }, { passive:false });
 
     document.getElementById("modeMove").addEventListener("click", () => setMode("move"));
@@ -1370,28 +1555,44 @@
     document.getElementById("modeEditIsland").addEventListener("click", () => setMode("editIsland"));
     document.getElementById("modePan").addEventListener("click", () => setMode("pan"));
     document.getElementById("finishBtn").addEventListener("click", finishDrawing);
+    document.getElementById("undoPointBtn").addEventListener("click", undoDraftPoint);
     document.getElementById("cancelBtn").addEventListener("click", cancelDrawing);
     document.getElementById("undoBtn").addEventListener("click", triggerUndo);
+    document.getElementById("redoBtn").addEventListener("click", triggerRedo);
 
-    document.getElementById("zoomIn").addEventListener("click", () => {
-      state.scale = Math.min(2.4, state.scale + .13);
-      applyTransform();
-    });
-
-    document.getElementById("zoomOut").addEventListener("click", () => {
-      state.scale = Math.max(.6, state.scale - .13);
-      applyTransform();
-    });
+    document.getElementById("zoomIn").addEventListener("click", () => zoomAtCenter(.15));
+    document.getElementById("zoomOut").addEventListener("click", () => zoomAtCenter(-.15));
 
     document.getElementById("resetView").addEventListener("click", () => {
       state.scale = 1;
       state.x = 0;
       state.y = 0;
       applyTransform();
-      setStatus("View reset. Data was not changed.");
+      setStatus("Map fitted to the default view. Data was not changed.");
     });
 
-    document.getElementById("toggleLabels").addEventListener("click", () => document.body.classList.toggle("labels-off"));
+    document.getElementById("centerSelected").addEventListener("click", () => {
+      const item = itemForSelection();
+      if (!item) {
+        setStatus("Select a building, road, or island first.");
+        return;
+      }
+
+      let center;
+      if (state.selected.kind === "building") center = [Number(item.x), Number(item.y)];
+      else center = centroid(item.points || []);
+
+      const viewCenter = { x: 800, y: 490 };
+      state.x = viewCenter.x - center[0] * state.scale;
+      state.y = viewCenter.y - center[1] * state.scale;
+      applyTransform();
+      setStatus(`Centered on ${item.name || "selected item"}.`);
+    });
+
+    document.getElementById("toggleLabels").addEventListener("click", () => {
+      document.body.classList.toggle("labels-off");
+      setStatus(document.body.classList.contains("labels-off") ? "Building labels hidden." : "Building labels shown.");
+    });
     document.getElementById("applyEdit").addEventListener("click", applyEdit);
     document.getElementById("deleteSelected").addEventListener("click", deleteSelected);
     document.getElementById("saveNow").addEventListener("click", () => saveData("Saved manually."));
@@ -1438,7 +1639,7 @@
       reader.onload = () => {
         try {
           const imported = JSON.parse(reader.result);
-          if (!imported.islands || !imported.roads || !imported.buildings) throw new Error("Invalid format");
+          if (!validateData(imported)) throw new Error("Invalid format");
           pushHistory();
           data = imported;
           saveData("Imported JSON and saved.");
@@ -1453,11 +1654,21 @@
     });
 
     window.addEventListener("keydown", evt => {
-      if ((evt.ctrlKey || evt.metaKey) && evt.key.toLowerCase() === "z") {
-        const active = document.activeElement;
-        if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) return;
+      const active = document.activeElement;
+      const editingText = active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA");
+
+      if ((evt.ctrlKey || evt.metaKey) && evt.key.toLowerCase() === "z" && !evt.shiftKey) {
+        if (editingText) return;
         evt.preventDefault();
         triggerUndo();
+        return;
+      }
+
+      if (((evt.ctrlKey || evt.metaKey) && evt.key.toLowerCase() === "y") ||
+          ((evt.ctrlKey || evt.metaKey) && evt.shiftKey && evt.key.toLowerCase() === "z")) {
+        if (editingText) return;
+        evt.preventDefault();
+        triggerRedo();
         return;
       }
 
@@ -1472,8 +1683,7 @@
       }
 
       if (evt.key === "Backspace" || evt.key === "Delete") {
-        const active = document.activeElement;
-        if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) return;
+        if (editingText) return;
         evt.preventDefault();
         deleteSelected();
       }
@@ -1482,6 +1692,7 @@
     renderAll();
     fillEditor();
     applyTransform();
+    updateUndoButtonState();
     setMode("move");
   </script>
 </body>
