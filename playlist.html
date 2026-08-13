@@ -77,7 +77,67 @@
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+    }
+
+    /* Clickable Image Wrapper */
+    .img-download-link {
+      position: relative;
+      display: block;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .preview-img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: #0b0c10;
+      transition: transform 0.25s ease, filter 0.25s ease;
+    }
+
+    .img-download-link:hover .preview-img {
+      transform: scale(1.04);
+      filter: brightness(0.75);
+    }
+
+    .download-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff4d2;
+      font-size: 13px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .img-download-link:hover .download-overlay {
+      opacity: 1;
+    }
+
+    .img-fallback {
+      display: none;
+      width: 100%;
+      height: 140px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px dashed rgba(218, 165, 32, 0.4);
+      border-radius: 8px;
+      color: #888;
+      font-size: 12px;
+      text-align: center;
+      padding: 12px;
+      align-items: center;
+      justify-content: center;
     }
 
     .repo-item h4 {
@@ -87,7 +147,7 @@
 
     .file-path {
       font-family: monospace;
-      font-size: 13px;
+      font-size: 12px;
       color: #9d9d9d;
       word-break: break-all;
       background: rgba(0, 0, 0, 0.3);
@@ -107,6 +167,29 @@
 
     .tag-profile { background: #2a4d69; color: #a5d8ff; }
     .tag-banner { background: #4a2e5a; color: #f0c3ff; }
+
+    /* Download Button Styling */
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(218, 165, 32, 0.15);
+      border: 1px solid rgba(218, 165, 32, 0.5);
+      color: #d9aa3c;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      margin-top: 4px;
+    }
+
+    .download-btn:hover {
+      background: #d9aa3c;
+      color: #111;
+    }
 
     /* Video Player Embed */
     .video-container {
@@ -213,7 +296,6 @@
   </div>
 
   <script>
-    // Extracted Profile Images from provided code
     const profileImages = [
       { name: "Princess Bubblegum", file: "UBNXTRrc_400x400.jpg" },
       { name: "Couple Profile", file: "7B7kzkgG_400x400.jpg" },
@@ -226,7 +308,6 @@
       { name: "Polaroid Group", file: "DW_ALBUM_09.webp" }
     ];
 
-    // Extracted Banner Images from provided code
     const bannerImages = [
       { name: "Candy Kingdom Banner", file: "1680807254.jpg" },
       { name: "Quote Banner", file: "1732470490.jpg" },
@@ -237,30 +318,32 @@
       { name: "Omori Friends Banner", file: "MV5BNWVlMGNmYjUtOGZhNy00YWRlLTlkOTktYzdhNDE4ZjIxZGVmXkEyXkFqcGc@._V1_.jpg" }
     ];
 
-    // Populate Images Section
     const imagesGrid = document.getElementById("imagesGrid");
 
     function renderImages() {
-      profileImages.forEach(img => {
+      function createCard(img, tagClass, tagName) {
         const item = document.createElement("div");
         item.className = "repo-item";
         item.innerHTML = `
-          <span class="category-tag tag-profile">Profile Photo</span>
+          <a class="img-download-link" href="${img.file}" download="${img.file}" title="Click to download ${img.name}">
+            <img class="preview-img" src="${img.file}" alt="${img.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <div class="img-fallback">Missing file in folder<br>(${img.file})</div>
+            <div class="download-overlay">⬇ Click to Download</div>
+          </a>
+          <span class="category-tag ${tagClass}">${tagName}</span>
           <h4>${img.name}</h4>
           <div class="file-path">${img.file}</div>
+          <a class="download-btn" href="${img.file}" download="${img.file}">⬇ Download File</a>
         `;
-        imagesGrid.appendChild(item);
+        return item;
+      }
+
+      profileImages.forEach(img => {
+        imagesGrid.appendChild(createCard(img, "tag-profile", "Profile Photo"));
       });
 
       bannerImages.forEach(img => {
-        const item = document.createElement("div");
-        item.className = "repo-item";
-        item.innerHTML = `
-          <span class="category-tag tag-banner">Banner Image</span>
-          <h4>${img.name}</h4>
-          <div class="file-path">${img.file}</div>
-        `;
-        imagesGrid.appendChild(item);
+        imagesGrid.appendChild(createCard(img, "tag-banner", "Banner Image"));
       });
     }
 
