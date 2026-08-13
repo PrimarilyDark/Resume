@@ -476,17 +476,15 @@
             left: 0;
             right: 0;
             z-index: 10;
-            height: 132px;
-            background: linear-gradient(0deg, rgba(5, 7, 13, 0.98) 0%, rgba(9, 13, 22, 0.82) 66%, rgba(9, 13, 22, 0) 100%);
-            padding: 30px 18px 16px;
+            background: linear-gradient(0deg, rgba(5, 7, 13, 0.98) 0%, rgba(9, 13, 22, 0.82) 75%, rgba(9, 13, 22, 0) 100%);
+            padding: 26px 12px 12px;
             box-sizing: border-box;
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            transition: height 0.24s ease, padding 0.24s ease, background 0.24s ease, backdrop-filter 0.24s ease;
+            transition: all 0.24s ease;
         }
         .visualizer-overlay.collapsed {
-            height: 34px;
-            padding: 0;
+            padding: 4px 12px 6px;
             background: linear-gradient(0deg, rgba(5, 7, 13, 0.92), rgba(9, 13, 22, 0.40));
             backdrop-filter: blur(2px);
             -webkit-backdrop-filter: blur(2px);
@@ -496,8 +494,8 @@
             top: 4px;
             left: 50%;
             z-index: 3;
-            width: 30px;
-            height: 22px;
+            width: 28px;
+            height: 20px;
             padding: 0;
             border: 1px solid rgba(125, 211, 252, 0.32);
             border-radius: 999px;
@@ -505,7 +503,7 @@
             color: #bae6fd;
             display: grid;
             place-items: center;
-            font-size: 19px;
+            font-size: 16px;
             line-height: 1;
             cursor: pointer;
             transform: translateX(-50%);
@@ -525,26 +523,25 @@
             transform: translateX(-50%) rotate(180deg);
         }
         .visualizer-player-content {
-            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            gap: 9px;
+            gap: 8px;
             opacity: 1;
+            max-height: 200px;
             visibility: visible;
-            transform: translateY(0);
-            transition: opacity 0.16s ease, transform 0.20s ease, visibility 0s linear 0s;
+            overflow: hidden;
+            transition: opacity 0.2s ease, max-height 0.24s ease, visibility 0.2s ease;
         }
         .visualizer-overlay.collapsed .visualizer-player-content {
             opacity: 0;
+            max-height: 0;
             visibility: hidden;
             pointer-events: none;
-            transform: translateY(10px);
-            transition: opacity 0.12s ease, transform 0.18s ease, visibility 0s linear 0.18s;
         }
         .visualizer-title-bar {
             color: #f8fafc;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
             letter-spacing: 0.35px;
             height: 18px;
@@ -554,38 +551,39 @@
             text-overflow: ellipsis;
             text-align: center;
             text-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
-            flex: 0 0 18px;
+            width: 100%;
         }
         .visualizer-controls-row {
-            display: grid;
-            grid-template-columns: 128px 86px minmax(80px, 1fr) 82px;
+            display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
-            min-height: 38px;
+            box-sizing: border-box;
         }
         .viz-btn {
             background: linear-gradient(135deg, #2563eb, #38bdf8);
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.12);
-            min-height: 38px;
-            padding: 8px 14px;
-            border-radius: 12px;
-            font-size: 12px;
+            min-height: 34px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 11px;
             font-weight: 800;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-            box-shadow: 0 5px 18px rgba(56, 189, 248, 0.24);
+            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.24);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             white-space: nowrap;
+            flex: 1 1 auto;
         }
         .viz-btn:hover:not(:disabled) {
             transform: translateY(-1px);
-            box-shadow: 0 7px 22px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 6px 18px rgba(56, 189, 248, 0.4);
         }
         .viz-btn:focus-visible,
         .viz-seek-bar:focus-visible {
@@ -599,68 +597,80 @@
             box-shadow: none;
         }
         .viz-seek-bar {
-            flex: 1 1 120px;
-            min-width: 80px;
-            height: 6px;
+            flex: 1 1 80px;
+            min-width: 60px;
+            height: 5px;
             border-radius: 999px;
             accent-color: #38bdf8;
             cursor: pointer;
             background: rgba(255, 255, 255, 0.16);
         }
         .viz-time {
-            width: 82px;
-            min-width: 82px;
+            flex: 0 0 auto;
             color: #cbd5e1;
-            font: 700 11px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font: 700 10px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
             text-align: right;
             font-variant-numeric: tabular-nums;
+            white-space: nowrap;
         }
         .viz-hint {
-            height: 14px;
-            line-height: 14px;
-            overflow: hidden;
+            line-height: 1.3;
             color: rgba(203, 213, 225, 0.72);
-            font-size: 10px;
+            font-size: 9.5px;
             text-align: center;
             letter-spacing: 0.2px;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            flex: 0 0 14px;
+            word-break: break-word;
+            width: 100%;
         }
         #vizUploadBtn {
-            width: 128px;
+            flex: 1 1 100px;
+            max-width: 130px;
         }
         #vizPlayBtn {
-            width: 86px;
+            flex: 0 0 68px;
         }
         @media (max-width: 560px) {
-            .visualizer-overlay:not(.collapsed) {
-                height: 166px;
-                padding: 31px 14px 14px;
-            }
             .visualizer-controls-row {
-                grid-template-columns: 1fr 86px;
-                grid-template-areas:
-                    "upload play"
-                    "seek time";
-                gap: 9px;
-            }
-            #vizUploadBtn {
-                grid-area: upload;
-                width: 100%;
-            }
-            #vizPlayBtn {
-                grid-area: play;
-                width: 86px;
+                gap: 6px;
             }
             .viz-seek-bar {
-                grid-area: seek;
                 width: 100%;
-                min-width: 0;
+                flex: 1 1 100%;
             }
-            .viz-time {
-                grid-area: time;
-            }
+        }
+
+        #vizModeBtn,
+        #vizFullscreenBtn {
+            flex: 0 0 auto;
+        }
+        .viz-volume-wrap {
+            flex: 0 1 104px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #bae6fd;
+            font-size: 12px;
+            min-width: 72px;
+            box-sizing: border-box;
+        }
+        .viz-volume-slider {
+            width: 100%;
+            min-width: 52px;
+            height: 5px;
+            border-radius: 999px;
+            accent-color: #38bdf8;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.16);
+        }
+        .viz-volume-slider:focus-visible {
+            outline: 2px solid #7dd3fc;
+            outline-offset: 2px;
+        }
+        /* Fullscreen keeps the stage dark-themed and lets it fill the screen. */
+        .artwork-stage:fullscreen {
+            height: 100%;
+            border-radius: 0;
+            border: none;
         }
 
         /* --- PROJECTS SUB-STYLES --- */
@@ -1138,6 +1148,7 @@
             font-size: 0.9rem;
         }
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -1181,7 +1192,7 @@
             
             <div class="about-subsection">
                 <h3>About Webpage</h3>
-                <p>Website rebuilt by Gemini</p>
+                <p>Website rebuilt by Gemini, ChatGPT and Kimi</p>
             </div>
         </section>
 
@@ -1300,10 +1311,15 @@
                             <div class="visualizer-controls-row">
                                 <button class="viz-btn" id="vizUploadBtn" type="button">📁 Choose Audio</button>
                                 <button class="viz-btn" id="vizPlayBtn" type="button" disabled>▶ Play</button>
+                                <button class="viz-btn" id="vizModeBtn" type="button" aria-label="Cycle visualization mode">◎ Circular</button>
+                                <label class="viz-volume-wrap" for="vizVolume" title="Volume">🔊
+                                    <input type="range" class="viz-volume-slider" id="vizVolume" value="80" min="0" max="100" step="1" aria-label="Volume" />
+                                </label>
+                                <button class="viz-btn" id="vizFullscreenBtn" type="button" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
                                 <input type="range" class="viz-seek-bar" id="vizSeekBar" value="0" min="0" max="100" step="0.1" aria-label="Seek through audio" disabled />
                                 <span class="viz-time" id="vizTimeLabel">0:00 / 0:00</span>
                             </div>
-                            <div class="viz-hint">MP3, WAV, M4A, OGG and other browser-supported audio • drag & drop supported</div>
+                            <div class="viz-hint">MP3, WAV, M4A, OGG and other browser-supported audio • drag & drop supported • Space play/pause • M mute • V mode</div>
                         </div>
                     </div>
                 </div>
@@ -1572,6 +1588,9 @@
             const fileInput = document.getElementById('audioFileInput');
             const uploadBtn = document.getElementById('vizUploadBtn');
             const playBtn = document.getElementById('vizPlayBtn');
+            const modeBtn = document.getElementById('vizModeBtn');
+            const volumeSlider = document.getElementById('vizVolume');
+            const fullscreenBtn = document.getElementById('vizFullscreenBtn');
             const seekBar = document.getElementById('vizSeekBar');
             const trackTitle = document.getElementById('vizTrackTitle');
             const timeLabel = document.getElementById('vizTimeLabel');
@@ -1582,16 +1601,55 @@
             let analyser = null;
             let source = null;
             let frequencyData = null;
+            let smoothedData = null;
             let timeData = null;
             let currentObjectUrl = null;
             let particles = [];
-            let lastBassPulse = 0;
+            let shockwaves = [];
+            let bassHistory = [];
+            let lastBeatTime = 0;
             let cssWidth = 1;
             let cssHeight = 1;
             let dpr = 1;
+            let rafId = null;
+            let isLoopRunning = false;
+            let isStageVisible = true;
+            let lastFrameTime = 0;
+            let orbitRotation = 0;
+            let barsGradient = null;
 
             const BAR_COUNT = 84;
             const MAX_PARTICLES = 140;
+            const HUE_BUCKETS = 6;
+            const BEAT_MIN_INTERVAL_MS = 140;
+            const BASS_HISTORY_WINDOW_MS = 1000;
+            const barPeaks = new Float32Array(BAR_COUNT);
+
+            const VIS_MODES = [
+                { id: 'circular', icon: '◎', label: 'Circular' },
+                { id: 'bars', icon: '▮', label: 'Bars' },
+                { id: 'wave', icon: '〜', label: 'Wave' },
+                { id: 'orbit', icon: '◍', label: 'Orbit' }
+            ];
+
+            let currentModeIndex = (() => {
+                const savedMode = localStorage.getItem('viz-mode');
+                const savedIndex = VIS_MODES.findIndex((mode) => mode.id === savedMode);
+                return savedIndex >= 0 ? savedIndex : 0;
+            })();
+
+            // Respect the user's reduced-motion preference: no particles/shockwave, slower ambient motion.
+            const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+            let prefersReducedMotion = reducedMotionQuery.matches;
+            if (typeof reducedMotionQuery.addEventListener === 'function') {
+                reducedMotionQuery.addEventListener('change', (event) => {
+                    prefersReducedMotion = event.matches;
+                });
+            }
+
+            function motionScale() {
+                return prefersReducedMotion ? 0.35 : 1;
+            }
 
             function clamp(value, min, max) {
                 return Math.min(max, Math.max(min, value));
@@ -1602,6 +1660,14 @@
                 const mins = Math.floor(seconds / 60);
                 const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
                 return `${mins}:${secs}`;
+            }
+
+            // Gradients that only depend on canvas size are rebuilt here, not per frame.
+            function rebuildCachedGradients() {
+                barsGradient = ctx.createLinearGradient(0, cssHeight, 0, cssHeight * 0.22);
+                barsGradient.addColorStop(0, '#38bdf8');
+                barsGradient.addColorStop(0.55, '#818cf8');
+                barsGradient.addColorStop(1, '#c084fc');
             }
 
             // Render at device-pixel resolution so the visualizer stays sharp on Retina/HiDPI displays.
@@ -1618,6 +1684,7 @@
 
                 // Draw using CSS-pixel coordinates even though the backing bitmap is higher resolution.
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                rebuildCachedGradients();
             }
 
             const resizeObserver = new ResizeObserver(resizeCanvas);
@@ -1676,6 +1743,7 @@
                     analyser.connect(audioCtx.destination);
 
                     frequencyData = new Uint8Array(analyser.frequencyBinCount);
+                    smoothedData = new Float32Array(analyser.frequencyBinCount);
                     timeData = new Uint8Array(analyser.fftSize);
                 }
 
@@ -1689,25 +1757,37 @@
                 return true;
             }
 
+            // Envelope smoothing: fast attack (~0.5), slow release (~0.08) per frame so bars
+            // rise instantly but decay gracefully when playback pauses or the track goes quiet.
+            function updateSmoothedFrequencyData(isPlaying) {
+                analyser.getByteFrequencyData(frequencyData);
+                analyser.getByteTimeDomainData(timeData);
+                for (let i = 0; i < frequencyData.length; i++) {
+                    const raw = isPlaying ? frequencyData[i] : 0;
+                    const current = smoothedData[i];
+                    smoothedData[i] = current + (raw - current) * (raw > current ? 0.5 : 0.08);
+                }
+            }
+
             function getAverageForRange(minHz, maxHz) {
-                if (!analyser || !frequencyData || !audioCtx) return 0;
+                if (!analyser || !smoothedData || !audioCtx) return 0;
                 const nyquist = audioCtx.sampleRate / 2;
-                const start = clamp(Math.floor((minHz / nyquist) * frequencyData.length), 0, frequencyData.length - 1);
-                const end = clamp(Math.ceil((maxHz / nyquist) * frequencyData.length), start + 1, frequencyData.length);
+                const start = clamp(Math.floor((minHz / nyquist) * smoothedData.length), 0, smoothedData.length - 1);
+                const end = clamp(Math.ceil((maxHz / nyquist) * smoothedData.length), start + 1, smoothedData.length);
                 let sum = 0;
-                for (let i = start; i < end; i++) sum += frequencyData[i];
+                for (let i = start; i < end; i++) sum += smoothedData[i];
                 return (sum / Math.max(1, end - start)) / 255;
             }
 
             function getLogFrequencyValue(normalizedPosition) {
-                if (!analyser || !frequencyData || !audioCtx) return 0;
+                if (!analyser || !smoothedData || !audioCtx) return 0;
                 const minHz = 35;
                 const maxHz = Math.min(16000, audioCtx.sampleRate / 2);
                 const frequency = minHz * Math.pow(maxHz / minHz, clamp(normalizedPosition, 0, 1));
                 const index = clamp(
-                    Math.round((frequency / (audioCtx.sampleRate / 2)) * frequencyData.length),
+                    Math.round((frequency / (audioCtx.sampleRate / 2)) * smoothedData.length),
                     0,
-                    frequencyData.length - 1
+                    smoothedData.length - 1
                 );
 
                 // Blend neighboring bins to reduce flicker.
@@ -1715,15 +1795,30 @@
                 let count = 0;
                 for (let offset = -2; offset <= 2; offset++) {
                     const sampleIndex = index + offset;
-                    if (sampleIndex >= 0 && sampleIndex < frequencyData.length) {
-                        sum += frequencyData[sampleIndex];
+                    if (sampleIndex >= 0 && sampleIndex < smoothedData.length) {
+                        sum += smoothedData[sampleIndex];
                         count++;
                     }
                 }
                 return (sum / Math.max(1, count)) / 255;
             }
 
-            function drawBackground(width, height, energy, now) {
+            // Peak-hold level per bar: jumps up instantly, then decays slowly.
+            function getPeakLevel(index, value) {
+                const decayed = barPeaks[index] - 0.0075;
+                barPeaks[index] = value >= barPeaks[index] ? value : Math.max(value, decayed);
+                return barPeaks[index];
+            }
+
+            function drawBackground(width, height, energy, now, useTrailFade) {
+                if (useTrailFade) {
+                    // Wave mode: fade the previous frame instead of clearing so the
+                    // oscilloscope leaves a soft glow trail behind it.
+                    ctx.fillStyle = 'rgba(5, 7, 13, 0.3)';
+                    ctx.fillRect(0, 0, width, height);
+                    return;
+                }
+
                 ctx.clearRect(0, 0, width, height);
 
                 const glow = ctx.createRadialGradient(
@@ -1776,39 +1871,6 @@
                 ctx.restore();
             }
 
-            function drawSpectrum(centerX, centerY, radius, maxBarLength) {
-                ctx.save();
-                ctx.lineCap = 'round';
-                ctx.globalCompositeOperation = 'lighter';
-
-                for (let i = 0; i < BAR_COUNT; i++) {
-                    const halfPosition = i <= BAR_COUNT / 2
-                        ? i / (BAR_COUNT / 2)
-                        : (BAR_COUNT - i) / (BAR_COUNT / 2);
-                    const value = getLogFrequencyValue(halfPosition);
-                    const shaped = Math.pow(value, 1.38);
-                    const barLength = 4 + shaped * maxBarLength;
-                    const angle = (i / BAR_COUNT) * Math.PI * 2 - Math.PI / 2;
-                    const inner = radius + 7;
-                    const outer = inner + barLength;
-                    const x1 = centerX + Math.cos(angle) * inner;
-                    const y1 = centerY + Math.sin(angle) * inner;
-                    const x2 = centerX + Math.cos(angle) * outer;
-                    const y2 = centerY + Math.sin(angle) * outer;
-
-                    const hue = 195 + halfPosition * 86;
-                    ctx.strokeStyle = `hsla(${hue}, 96%, ${60 + shaped * 12}%, ${0.38 + shaped * 0.62})`;
-                    ctx.lineWidth = 1.6 + shaped * 2.4;
-                    ctx.shadowBlur = 4 + shaped * 11;
-                    ctx.shadowColor = `hsl(${hue}, 96%, 62%)`;
-                    ctx.beginPath();
-                    ctx.moveTo(x1, y1);
-                    ctx.lineTo(x2, y2);
-                    ctx.stroke();
-                }
-                ctx.restore();
-            }
-
             function drawCore(centerX, centerY, radius, bass, mids, treble, now) {
                 const pulse = radius * (0.04 + bass * 0.14);
                 const coreRadius = radius + pulse;
@@ -1836,6 +1898,227 @@
                 ctx.restore();
             }
 
+            // Mode 1 — circular: radial spectrum with peak-hold caps and a mirrored inner reflection.
+            // Bars are batched into a handful of hue buckets so glow (shadowBlur) is applied per bucket,
+            // not per bar.
+            function drawCircularMode(centerX, centerY, radius, maxBarLength) {
+                const buckets = [];
+                for (let b = 0; b < HUE_BUCKETS; b++) buckets.push({ path: new Path2D(), hueSum: 0, count: 0 });
+                const reflectionPath = new Path2D();
+                const peakPath = new Path2D();
+
+                for (let i = 0; i < BAR_COUNT; i++) {
+                    const halfPosition = i <= BAR_COUNT / 2
+                        ? i / (BAR_COUNT / 2)
+                        : (BAR_COUNT - i) / (BAR_COUNT / 2);
+                    const value = getLogFrequencyValue(halfPosition);
+                    const shaped = Math.pow(value, 1.38);
+                    const barLength = 4 + shaped * maxBarLength;
+                    const angle = (i / BAR_COUNT) * Math.PI * 2 - Math.PI / 2;
+                    const cos = Math.cos(angle);
+                    const sin = Math.sin(angle);
+                    const inner = radius + 7;
+                    const outer = inner + barLength;
+
+                    const bucket = buckets[Math.min(HUE_BUCKETS - 1, Math.floor(halfPosition * HUE_BUCKETS))];
+                    bucket.path.moveTo(centerX + cos * inner, centerY + sin * inner);
+                    bucket.path.lineTo(centerX + cos * outer, centerY + sin * outer);
+                    bucket.hueSum += 195 + halfPosition * 86;
+                    bucket.count++;
+
+                    // Mirrored inner reflection of each bar, drawn much softer.
+                    const reflectionOuter = radius - 5;
+                    const reflectionInner = reflectionOuter - barLength * 0.42;
+                    reflectionPath.moveTo(centerX + cos * reflectionOuter, centerY + sin * reflectionOuter);
+                    reflectionPath.lineTo(centerX + cos * reflectionInner, centerY + sin * reflectionInner);
+
+                    // Peak-hold cap: a short tick perpendicular to the bar at its decaying high-water mark.
+                    const peak = getPeakLevel(i, shaped);
+                    const peakRadius = inner + 4 + peak * maxBarLength;
+                    const tangentX = Math.cos(angle + Math.PI / 2) * 2.4;
+                    const tangentY = Math.sin(angle + Math.PI / 2) * 2.4;
+                    peakPath.moveTo(centerX + cos * peakRadius - tangentX, centerY + sin * peakRadius - tangentY);
+                    peakPath.lineTo(centerX + cos * peakRadius + tangentX, centerY + sin * peakRadius + tangentY);
+                }
+
+                ctx.save();
+                ctx.lineCap = 'round';
+                ctx.globalCompositeOperation = 'lighter';
+
+                ctx.strokeStyle = 'rgba(125, 211, 252, 0.16)';
+                ctx.lineWidth = 1.6;
+                ctx.stroke(reflectionPath);
+
+                for (const bucket of buckets) {
+                    if (!bucket.count) continue;
+                    const hue = bucket.hueSum / bucket.count;
+                    ctx.strokeStyle = `hsla(${hue}, 96%, 66%, 0.82)`;
+                    ctx.lineWidth = 2.6;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = `hsl(${hue}, 96%, 62%)`;
+                    ctx.stroke(bucket.path);
+                }
+
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(240, 249, 255, 0.85)';
+                ctx.lineWidth = 1.8;
+                ctx.stroke(peakPath);
+                ctx.restore();
+            }
+
+            // Mode 2 — bars: bottom-anchored mirrored spectrum across the full width,
+            // stroked with a single cached gradient in one batched fill.
+            function drawBarsMode(width, height) {
+                const baseline = height - 6;
+                const maxBarHeight = clamp(height * 0.52, 90, 260);
+                const gap = 2;
+                const barWidth = Math.max(2, (width - gap * (BAR_COUNT + 1)) / BAR_COUNT);
+                const barsPath = new Path2D();
+                const peakPath = new Path2D();
+
+                for (let i = 0; i < BAR_COUNT; i++) {
+                    const halfPosition = i <= BAR_COUNT / 2
+                        ? i / (BAR_COUNT / 2)
+                        : (BAR_COUNT - i) / (BAR_COUNT / 2);
+                    const value = getLogFrequencyValue(halfPosition);
+                    const shaped = Math.pow(value, 1.3);
+                    const barHeight = 3 + shaped * maxBarHeight;
+                    const x = gap + i * (barWidth + gap);
+                    barsPath.rect(x, baseline - barHeight, barWidth, barHeight);
+
+                    const peak = getPeakLevel(i, shaped);
+                    const peakY = baseline - (3 + peak * maxBarHeight) - 4;
+                    peakPath.rect(x, Math.max(4, peakY), barWidth, 2);
+                }
+
+                ctx.save();
+                ctx.fillStyle = barsGradient;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = 'rgba(56, 189, 248, 0.85)';
+                ctx.fill(barsPath);
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(240, 249, 255, 0.9)';
+                ctx.fill(peakPath);
+                ctx.restore();
+            }
+
+            // Mode 3 — wave: centered oscilloscope from time-domain data, mirrored top/bottom.
+            function drawWaveMode(width, height, energy) {
+                if (!timeData) return;
+                const centerY = Math.max(110, height * 0.38);
+                const amplitude = clamp(height * 0.16, 40, 90) * (0.55 + energy * 0.75);
+
+                function buildWavePath(direction) {
+                    const path = new Path2D();
+                    const samples = 220;
+                    for (let i = 0; i <= samples; i++) {
+                        const sampleIndex = Math.floor((i / samples) * (timeData.length - 1));
+                        const wave = (timeData[sampleIndex] - 128) / 128;
+                        const x = (i / samples) * width;
+                        const y = centerY + wave * amplitude * direction;
+                        if (i === 0) path.moveTo(x, y);
+                        else path.lineTo(x, y);
+                    }
+                    return path;
+                }
+
+                ctx.save();
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.9)';
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 14;
+                ctx.shadowColor = '#38bdf8';
+                ctx.stroke(buildWavePath(1));
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(196, 181, 253, 0.42)';
+                ctx.lineWidth = 1.4;
+                ctx.stroke(buildWavePath(-1));
+                ctx.restore();
+            }
+
+            // Mode 4 — orbit: radial waveform ring plus a rotating dashed orbit ring
+            // whose rotation speed scales with treble energy.
+            function drawOrbitMode(centerX, centerY, radius, energy, treble, deltaMs) {
+                drawCircularWaveform(centerX, centerY, radius + 10, energy);
+
+                orbitRotation += (0.25 + treble * 4.2) * (deltaMs / 1000) * motionScale();
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(orbitRotation);
+                ctx.setLineDash([7, 11]);
+                ctx.strokeStyle = `rgba(165, 180, 252, ${0.35 + treble * 0.4})`;
+                ctx.lineWidth = 1.6;
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = '#818cf8';
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 1.75, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Counter-rotating inner dashed ring for depth.
+                ctx.shadowBlur = 0;
+                ctx.rotate(-orbitRotation * 2.4);
+                ctx.setLineDash([3, 9]);
+                ctx.strokeStyle = `rgba(125, 211, 252, ${0.22 + treble * 0.3})`;
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 1.45, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Adaptive beat detection: compare the current bass level against a rolling ~1s
+            // average instead of a fixed threshold, with a minimum interval between beats.
+            function detectBeat(bass, now) {
+                bassHistory.push({ time: now, value: bass });
+                while (bassHistory.length > 0 && now - bassHistory[0].time > BASS_HISTORY_WINDOW_MS) {
+                    bassHistory.shift();
+                }
+                if (bassHistory.length < 10) return false;
+
+                let sum = 0;
+                for (const sample of bassHistory) sum += sample.value;
+                const rollingAverage = sum / bassHistory.length;
+
+                if (bass > rollingAverage * 1.35 && bass > 0.35 && now - lastBeatTime >= BEAT_MIN_INTERVAL_MS) {
+                    lastBeatTime = now;
+                    return true;
+                }
+                return false;
+            }
+
+            function spawnShockwave(x, y, baseRadius, energy) {
+                shockwaves.push({
+                    x,
+                    y,
+                    radius: baseRadius * 0.9,
+                    alpha: 0.75,
+                    speed: 2.4 + energy * 4.5
+                });
+                if (shockwaves.length > 6) shockwaves.shift();
+            }
+
+            function updateAndDrawShockwaves() {
+                for (let i = shockwaves.length - 1; i >= 0; i--) {
+                    const wave = shockwaves[i];
+                    wave.radius += wave.speed;
+                    wave.speed *= 0.97;
+                    wave.alpha -= 0.022;
+                    if (wave.alpha <= 0) {
+                        shockwaves.splice(i, 1);
+                        continue;
+                    }
+                    ctx.save();
+                    ctx.globalAlpha = wave.alpha;
+                    ctx.strokeStyle = '#bae6fd';
+                    ctx.lineWidth = 1.6;
+                    ctx.beginPath();
+                    ctx.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
             async function loadAudioFile(file) {
                 if (!file) return;
                 if (!file.type.startsWith('audio/')) {
@@ -1851,7 +2134,10 @@
                 audioPlayer.pause();
                 audioPlayer.src = currentObjectUrl;
                 audioPlayer.load();
-                trackTitle.textContent = `🎵 ${file.name}`;
+
+                // Show the track name without its file extension.
+                const displayName = (file.name || '').replace(/\.[a-z0-9]{1,8}$/i, '').trim();
+                trackTitle.textContent = `🎵 ${displayName || 'Unknown audio'}`;
                 playBtn.disabled = false;
                 seekBar.disabled = false;
                 seekBar.value = 0;
@@ -1870,22 +2156,7 @@
                 }
             }
 
-            collapseBtn.addEventListener('click', () => {
-                const willCollapse = !overlay.classList.contains('collapsed');
-                overlay.classList.toggle('collapsed', willCollapse);
-                collapseBtn.setAttribute('aria-expanded', String(!willCollapse));
-                collapseBtn.setAttribute('aria-label', willCollapse ? 'Show audio controls' : 'Hide audio controls');
-            });
-
-            uploadBtn.addEventListener('click', () => fileInput.click());
-
-            fileInput.addEventListener('change', () => {
-                loadAudioFile(fileInput.files && fileInput.files[0]);
-                // Let the same file be selected again later if desired.
-                fileInput.value = '';
-            });
-
-            playBtn.addEventListener('click', async () => {
+            async function togglePlayback() {
                 if (!audioPlayer.src) return;
                 const ready = await initWebAudio();
                 if (!ready) return;
@@ -1901,6 +2172,95 @@
                     audioPlayer.pause();
                     playBtn.textContent = '▶ Play';
                 }
+            }
+
+            collapseBtn.addEventListener('click', () => {
+                const willCollapse = !overlay.classList.contains('collapsed');
+                overlay.classList.toggle('collapsed', willCollapse);
+                collapseBtn.setAttribute('aria-expanded', String(!willCollapse));
+                collapseBtn.setAttribute('aria-label', willCollapse ? 'Show audio controls' : 'Hide audio controls');
+            });
+
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            playBtn.addEventListener('click', togglePlayback);
+
+            fileInput.addEventListener('change', () => {
+                loadAudioFile(fileInput.files && fileInput.files[0]);
+                // Let the same file be selected again later if desired.
+                fileInput.value = '';
+            });
+
+            // Visualization mode cycling, persisted across visits.
+            function updateModeButton() {
+                const mode = VIS_MODES[currentModeIndex];
+                modeBtn.textContent = `${mode.icon} ${mode.label}`;
+                modeBtn.setAttribute('aria-label', `Visualization mode: ${mode.label}. Activate to switch.`);
+            }
+
+            function cycleMode() {
+                currentModeIndex = (currentModeIndex + 1) % VIS_MODES.length;
+                localStorage.setItem('viz-mode', VIS_MODES[currentModeIndex].id);
+                updateModeButton();
+            }
+
+            modeBtn.addEventListener('click', cycleMode);
+            updateModeButton();
+
+            // Volume slider, persisted across visits (default 80).
+            function applyStoredVolume() {
+                const stored = localStorage.getItem('viz-volume');
+                const parsed = stored === null ? 80 : Number(stored);
+                const volume = Number.isFinite(parsed) ? clamp(parsed, 0, 100) : 80;
+                volumeSlider.value = String(volume);
+                audioPlayer.volume = volume / 100;
+            }
+
+            volumeSlider.addEventListener('input', () => {
+                const volume = clamp(Number(volumeSlider.value) || 0, 0, 100);
+                audioPlayer.volume = volume / 100;
+                if (audioPlayer.muted && volume > 0) audioPlayer.muted = false;
+                localStorage.setItem('viz-volume', String(volume));
+            });
+
+            applyStoredVolume();
+
+            // Fullscreen toggle on the whole visualizer stage.
+            fullscreenBtn.addEventListener('click', () => {
+                if (document.fullscreenElement === stage) {
+                    document.exitFullscreen();
+                } else if (typeof stage.requestFullscreen === 'function') {
+                    // requestFullscreen returns a Promise in modern browsers, but not everywhere.
+                    const fullscreenRequest = stage.requestFullscreen();
+                    if (fullscreenRequest && typeof fullscreenRequest.catch === 'function') {
+                        fullscreenRequest.catch((error) => {
+                            console.warn('Fullscreen request failed:', error);
+                        });
+                    }
+                }
+            });
+
+            document.addEventListener('fullscreenchange', () => {
+                const isFullscreen = document.fullscreenElement === stage;
+                fullscreenBtn.textContent = isFullscreen ? '✕ Exit' : '⛶ Fullscreen';
+                resizeCanvas();
+            });
+
+            // Keyboard shortcuts: Space = play/pause, M = mute, V = cycle mode.
+            // Only active once audio is loaded and never while typing in a form field;
+            // all other keys (including arrows) are left to the navigation handler.
+            document.addEventListener('keydown', (event) => {
+                const activeTagName = document.activeElement ? document.activeElement.tagName : '';
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTagName)) return;
+                if (!audioPlayer.src) return;
+
+                if (event.key === ' ') {
+                    event.preventDefault();
+                    togglePlayback();
+                } else if (event.key === 'm' || event.key === 'M') {
+                    audioPlayer.muted = !audioPlayer.muted;
+                } else if (event.key === 'v' || event.key === 'V') {
+                    cycleMode();
+                }
             });
 
             audioPlayer.addEventListener('loadedmetadata', () => {
@@ -1913,6 +2273,14 @@
                     seekBar.value = (audioPlayer.currentTime / duration) * 100;
                     timeLabel.textContent = `${formatTime(audioPlayer.currentTime)} / ${formatTime(duration)}`;
                 }
+            });
+
+            audioPlayer.addEventListener('error', () => {
+                if (!audioPlayer.src) return;
+                trackTitle.textContent = '⚠ Could not load or decode this audio file';
+                playBtn.textContent = '▶ Play';
+                playBtn.disabled = true;
+                seekBar.disabled = true;
             });
 
             seekBar.addEventListener('input', () => {
@@ -1954,11 +2322,17 @@
             });
 
             function render(now) {
-                requestAnimationFrame(render);
+                if (!isLoopRunning) return;
+                rafId = requestAnimationFrame(render);
+
+                const deltaMs = clamp(now - lastFrameTime, 0, 100);
+                lastFrameTime = now;
 
                 const width = cssWidth;
                 const height = cssHeight;
-                const isPlaying = !audioPlayer.paused && !audioPlayer.ended && analyser;
+                const isPlaying = !audioPlayer.paused && !audioPlayer.ended && !!analyser;
+                const activeMode = VIS_MODES[currentModeIndex].id;
+                const ambientNow = now * motionScale();
 
                 let bass = 0;
                 let mids = 0;
@@ -1966,15 +2340,14 @@
                 let energy = 0;
 
                 if (analyser) {
-                    analyser.getByteFrequencyData(frequencyData);
-                    analyser.getByteTimeDomainData(timeData);
+                    updateSmoothedFrequencyData(isPlaying);
                     bass = getAverageForRange(35, 220);
                     mids = getAverageForRange(220, 2200);
                     treble = getAverageForRange(2200, 12000);
                     energy = clamp(bass * 0.46 + mids * 0.34 + treble * 0.20, 0, 1);
                 }
 
-                drawBackground(width, height, energy, now);
+                drawBackground(width, height, energy, ambientNow, activeMode === 'wave' && !!analyser);
 
                 const centerX = width / 2;
                 const centerY = Math.max(110, height * 0.38);
@@ -1983,12 +2356,20 @@
                 const maxBarLength = clamp(minDimension * 0.22, 68, 108);
 
                 if (analyser) {
-                    drawCore(centerX, centerY, radius, bass, mids, treble, now);
-                    drawCircularWaveform(centerX, centerY, radius + 2, energy);
-                    drawSpectrum(centerX, centerY, radius, maxBarLength);
+                    if (activeMode === 'circular') {
+                        drawCore(centerX, centerY, radius, bass, mids, treble, ambientNow);
+                        drawCircularMode(centerX, centerY, radius, maxBarLength);
+                    } else if (activeMode === 'bars') {
+                        drawBarsMode(width, height);
+                    } else if (activeMode === 'wave') {
+                        drawWaveMode(width, height, energy);
+                    } else if (activeMode === 'orbit') {
+                        drawCore(centerX, centerY, radius * 0.8, bass, mids, treble, ambientNow);
+                        drawOrbitMode(centerX, centerY, radius, energy, treble, deltaMs);
+                    }
                 } else {
                     // Animated idle state before a track is chosen.
-                    const idlePulse = (Math.sin(now * 0.0026) + 1) * 0.5;
+                    const idlePulse = (Math.sin(ambientNow * 0.0026) + 1) * 0.5;
                     const idleRadius = radius + idlePulse * 5;
                     const idle = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, idleRadius * 1.45);
                     idle.addColorStop(0, 'rgba(224, 242, 254, 0.42)');
@@ -2005,13 +2386,13 @@
                     ctx.stroke();
                 }
 
-                // Trigger a controlled burst on strong bass transients instead of on every frame.
-                if (isPlaying && bass > 0.54 && now - lastBassPulse > 125) {
+                // Adaptive beat burst: particles plus a one-shot expanding shockwave ring.
+                if (isPlaying && detectBeat(bass, now) && !prefersReducedMotion) {
                     const burstCount = Math.round(3 + bass * 7);
                     for (let i = 0; i < burstCount && particles.length < MAX_PARTICLES; i++) {
                         particles.push(new BurstParticle(centerX, centerY, bass));
                     }
-                    lastBassPulse = now;
+                    spawnShockwave(centerX, centerY, radius, bass);
                 }
 
                 for (let i = particles.length - 1; i >= 0; i--) {
@@ -2019,13 +2400,37 @@
                     particles[i].draw();
                     if (particles[i].alpha <= 0) particles.splice(i, 1);
                 }
+
+                updateAndDrawShockwaves();
             }
 
-            requestAnimationFrame(render);
+            // Pause the render loop when the tab is hidden or the stage is scrolled off-screen.
+            function syncRenderLoopState() {
+                const shouldRun = !document.hidden && isStageVisible;
+                if (shouldRun && !isLoopRunning) {
+                    isLoopRunning = true;
+                    lastFrameTime = performance.now();
+                    rafId = requestAnimationFrame(render);
+                } else if (!shouldRun && isLoopRunning) {
+                    isLoopRunning = false;
+                    if (rafId !== null) cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+            }
+
+            const visibilityObserver = new IntersectionObserver((entries) => {
+                isStageVisible = entries[0] ? entries[0].isIntersecting : true;
+                syncRenderLoopState();
+            });
+            visibilityObserver.observe(stage);
+            document.addEventListener('visibilitychange', syncRenderLoopState);
+            syncRenderLoopState();
 
             window.addEventListener('beforeunload', () => {
                 if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+                if (rafId !== null) cancelAnimationFrame(rafId);
                 resizeObserver.disconnect();
+                visibilityObserver.disconnect();
             });
         })();
 
