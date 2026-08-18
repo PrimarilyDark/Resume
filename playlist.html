@@ -191,7 +191,42 @@
       color: #111;
     }
 
-    /* Video Player Embed */
+    /* Video Player & Selector Styles */
+    .video-selector-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .video-toggle-btn {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(218, 165, 32, 0.3);
+      border-radius: 10px;
+      color: #cfcfcf;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+
+    .video-toggle-btn:hover {
+      background: rgba(218, 165, 32, 0.15);
+      border-color: rgba(218, 165, 32, 0.7);
+      color: #fff4d2;
+    }
+
+    .video-toggle-btn.active {
+      background: rgba(218, 165, 32, 0.25);
+      border-color: #d9aa3c;
+      color: #fff4d2;
+      box-shadow: 0 0 12px rgba(218, 165, 32, 0.3);
+    }
+
     .video-container {
       position: relative;
       padding-bottom: 56.25%;
@@ -199,6 +234,7 @@
       overflow: hidden;
       border-radius: 12px;
       border: 1px solid rgba(218, 165, 32, 0.3);
+      background: #000;
     }
 
     .video-container iframe {
@@ -227,18 +263,6 @@
       font-size: 14px;
       font-weight: bold;
     }
-
-    .username-badge {
-      font-family: monospace;
-      font-size: 18px;
-      color: #d9aa3c;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 10px 16px;
-      border-radius: 8px;
-      border-left: 4px solid #d9aa3c;
-      width: fit-content;
-      margin-top: 8px;
-    }
   </style>
 </head>
 <body>
@@ -255,29 +279,41 @@
       <div class="grid-container" id="imagesGrid"></div>
     </section>
 
-    <!-- SECTION 2: VIDEOS -->
+    <!-- SECTION 2: VIDEOS (CHINESE CARS) -->
     <section class="section-card">
-      <h2>2. Videos Repository</h2>
-      <div class="repo-item" style="margin-bottom: 15px;">
-        <h4>Playlist: Games</h4>
-        <div class="file-path">Link: https://youtu.be/RkC0l4iekYo</div>
+      <h2>2. Videos Repository &mdash; Chinese Cars</h2>
+      
+      <div class="video-selector-group">
+        <button class="video-toggle-btn active" onclick="switchVideo('X8V20bs2eHM', this)">
+          ▶ Video 1: Feature Preview (X8V20bs2eHM)
+        </button>
+        <button class="video-toggle-btn" onclick="switchVideo('4X4hdnqGEng', this)">
+          ▶ Video 2: Model Showcase (4X4hdnqGEng)
+        </button>
       </div>
+
+      <div class="repo-item" style="margin-bottom: 15px;">
+        <h4 id="currentVideoTitle">Playing: Video 1</h4>
+        <div class="file-path" id="currentVideoLink">Link: https://youtu.be/X8V20bs2eHM</div>
+      </div>
+
       <div class="video-container">
         <iframe 
-          src="https://www.youtube.com/embed/RkC0l4iekYo" 
-          title="Games Video" 
+          id="mainVideoPlayer"
+          src="https://www.youtube.com/embed/X8V20bs2eHM" 
+          title="Chinese Cars Video Player" 
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
           allowfullscreen>
         </iframe>
       </div>
     </section>
 
-    <!-- SECTION 3: USERNAMES -->
+    <!-- SECTION 3: USERNAMES & ACCOUNTS -->
     <section class="section-card">
-      <h2>3. Usernames & Accounts Repository</h2>
+      <h2>3. Accounts Repository</h2>
       
       <!-- Banking File -->
-      <div class="repo-item" style="margin-bottom: 20px;">
+      <div class="repo-item">
         <h4>File: Banking</h4>
         <div class="bubble-list">
           <span class="bubble">CIBC</span>
@@ -285,12 +321,6 @@
           <span class="bubble">Questrade</span>
           <span class="bubble">Interactive Brokers</span>
         </div>
-      </div>
-
-      <!-- Roblox File -->
-      <div class="repo-item">
-        <h4>File: Roblox</h4>
-        <div class="username-badge">VisionaryAngel</div>
       </div>
     </section>
   </div>
@@ -345,6 +375,23 @@
       bannerImages.forEach(img => {
         imagesGrid.appendChild(createCard(img, "tag-banner", "Banner Image"));
       });
+    }
+
+    function switchVideo(videoId, btnElement) {
+      const player = document.getElementById("mainVideoPlayer");
+      const title = document.getElementById("currentVideoTitle");
+      const link = document.getElementById("currentVideoLink");
+
+      // Update iframe source
+      player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+
+      // Update display text
+      title.textContent = `Playing: ${btnElement.textContent.trim().replace(/^▶\s*/, '')}`;
+      link.textContent = `Link: https://youtu.be/${videoId}`;
+
+      // Update active button state
+      document.querySelectorAll('.video-toggle-btn').forEach(btn => btn.classList.remove('active'));
+      btnElement.classList.add('active');
     }
 
     renderImages();
