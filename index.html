@@ -629,6 +629,15 @@
         #vizPlayBtn {
             flex: 0 0 68px;
         }
+        #vizMicBtn,
+        #vizDemoBtn {
+            flex: 0 0 auto;
+        }
+        /* Active state for the mic / demo toggle buttons. */
+        .viz-btn.viz-btn-active {
+            background: linear-gradient(135deg, #16a34a, #4ade80);
+            box-shadow: 0 4px 16px rgba(74, 222, 128, 0.42);
+        }
         @media (max-width: 560px) {
             .visualizer-controls-row {
                 gap: 6px;
@@ -1312,6 +1321,8 @@
                                 <button class="viz-btn" id="vizUploadBtn" type="button">📁 Choose Audio</button>
                                 <button class="viz-btn" id="vizPlayBtn" type="button" disabled>▶ Play</button>
                                 <button class="viz-btn" id="vizModeBtn" type="button" aria-label="Cycle visualization mode">◎ Circular</button>
+                                <button class="viz-btn" id="vizMicBtn" type="button" aria-label="Toggle microphone input">🎤 Mic</button>
+                                <button class="viz-btn" id="vizDemoBtn" type="button" aria-label="Toggle built-in demo signal">✨ Demo</button>
                                 <label class="viz-volume-wrap" for="vizVolume" title="Volume">🔊
                                     <input type="range" class="viz-volume-slider" id="vizVolume" value="80" min="0" max="100" step="1" aria-label="Volume" />
                                 </label>
@@ -1319,7 +1330,7 @@
                                 <input type="range" class="viz-seek-bar" id="vizSeekBar" value="0" min="0" max="100" step="0.1" aria-label="Seek through audio" disabled />
                                 <span class="viz-time" id="vizTimeLabel">0:00 / 0:00</span>
                             </div>
-                            <div class="viz-hint">MP3, WAV, M4A, OGG and other browser-supported audio • drag & drop supported • Space play/pause • M mute • V mode</div>
+                            <div class="viz-hint">MP3, WAV, M4A, OGG and other browser-supported audio • drag & drop supported • Space play/pause • M mute • V mode (6 visuals) • 🎤 live mic • ✨ built-in demo</div>
                         </div>
                     </div>
                 </div>
@@ -1589,6 +1600,8 @@
             const uploadBtn = document.getElementById('vizUploadBtn');
             const playBtn = document.getElementById('vizPlayBtn');
             const modeBtn = document.getElementById('vizModeBtn');
+            const micBtn = document.getElementById('vizMicBtn');
+            const demoBtn = document.getElementById('vizDemoBtn');
             const volumeSlider = document.getElementById('vizVolume');
             const fullscreenBtn = document.getElementById('vizFullscreenBtn');
             const seekBar = document.getElementById('vizSeekBar');
@@ -1602,12 +1615,16 @@
             let source = null;
             let frequencyData = null;
             let smoothedData = null;
+            let prevSpectrum = null;
             let timeData = null;
             let currentObjectUrl = null;
+            let lastFileTitle = '🎵 Choose an audio file';
             let particles = [];
             let shockwaves = [];
-            let bassHistory = [];
+            let fluxHistory = [];
             let lastBeatTime = 0;
+            let beatPulse = 0;
+            let baseHue = 198;
             let cssWidth = 1;
             let cssHeight = 1;
             let dpr = 1;
@@ -1616,22 +1633,63 @@
             let isStageVisible = true;
             let lastFrameTime = 0;
             let orbitRotation = 0;
+            let spiralRotation = 0;
             let barsGradient = null;
+            let barsGradientKey = '';
+            let bgGlowGradient = null;
+            let bgGlowKey = '';
+            let coreGradient = null;
+            let coreKey = '';
+            let vignetteGradient = null;
+            let nebulaParticles = null;
+            let micStream = null;
+            let micSource = null;
+            let micActive = false;
+            let analyserFeedsOutput = true;
+            let demo = null;
 
             const BAR_COUNT = 84;
             const MAX_PARTICLES = 140;
             const HUE_BUCKETS = 6;
             const BEAT_MIN_INTERVAL_MS = 140;
-            const BASS_HISTORY_WINDOW_MS = 1000;
+            const FLUX_HISTORY_WINDOW_MS = 1000;
+            const NEBULA_COUNT = 130;
+            const SPIRAL_POINTS = 160;
+            const SPIRAL_TURNS = 3.25;
+            const SPIRAL_BUCKETS = 8;
             const barPeaks = new Float32Array(BAR_COUNT);
+
+            // Precomputed unit-circle lookup tables so the circular and spiral
+            // layouts never call Math.sin/Math.cos inside the render loop.
+            const circleCos = new Float32Array(BAR_COUNT);
+            const circleSin = new Float32Array(BAR_COUNT);
+            for (let i = 0; i < BAR_COUNT; i++) {
+                const angle = (i / BAR_COUNT) * Math.PI * 2 - Math.PI / 2;
+                circleCos[i] = Math.cos(angle);
+                circleSin[i] = Math.sin(angle);
+            }
+            const spiralCos = new Float32Array(SPIRAL_POINTS);
+            const spiralSin = new Float32Array(SPIRAL_POINTS);
+            const spiralT = new Float32Array(SPIRAL_POINTS);
+            for (let i = 0; i < SPIRAL_POINTS; i++) {
+                const t = i / (SPIRAL_POINTS - 1);
+                const angle = t * SPIRAL_TURNS * Math.PI * 2 - Math.PI / 2;
+                spiralT[i] = t;
+                spiralCos[i] = Math.cos(angle);
+                spiralSin[i] = Math.sin(angle);
+            }
 
             const VIS_MODES = [
                 { id: 'circular', icon: '◎', label: 'Circular' },
                 { id: 'bars', icon: '▮', label: 'Bars' },
                 { id: 'wave', icon: '〜', label: 'Wave' },
-                { id: 'orbit', icon: '◍', label: 'Orbit' }
+                { id: 'orbit', icon: '◍', label: 'Orbit' },
+                { id: 'nebula', icon: '✦', label: 'Nebula' },
+                { id: 'spiral', icon: '🌀', label: 'Spiral' }
             ];
 
+            // Unknown/stale saved ids (e.g. from older versions of this page)
+            // fall back gracefully to the first mode.
             let currentModeIndex = (() => {
                 const savedMode = localStorage.getItem('viz-mode');
                 const savedIndex = VIS_MODES.findIndex((mode) => mode.id === savedMode);
@@ -1662,12 +1720,52 @@
                 return `${mins}:${secs}`;
             }
 
-            // Gradients that only depend on canvas size are rebuilt here, not per frame.
-            function rebuildCachedGradients() {
+            // Slowly rotating base hue shared by every mode (~4°/s, sped up by live energy).
+            function advanceBaseHue(deltaMs, energy) {
+                baseHue = (baseHue + deltaMs * 0.004 * (0.35 + energy * 1.8)) % 360;
+            }
+
+            // Key for the hue-driven bars gradient: changes only when the hue bucket,
+            // energy bucket or canvas size changes, so the gradient is never rebuilt per frame.
+            function barsKey(energy) {
+                return `${cssWidth}x${cssHeight}:${Math.floor(baseHue / 10)}:${Math.round(energy * 6)}`;
+            }
+
+            function rebuildBarsGradient(energy) {
+                const light = 55 + Math.round(energy * 6) * 2.5;
                 barsGradient = ctx.createLinearGradient(0, cssHeight, 0, cssHeight * 0.22);
-                barsGradient.addColorStop(0, '#38bdf8');
-                barsGradient.addColorStop(0.55, '#818cf8');
-                barsGradient.addColorStop(1, '#c084fc');
+                barsGradient.addColorStop(0, `hsl(${baseHue}, 92%, ${light}%)`);
+                barsGradient.addColorStop(0.55, `hsl(${(baseHue + 42) % 360}, 88%, ${light + 4}%)`);
+                barsGradient.addColorStop(1, `hsl(${(baseHue + 84) % 360}, 84%, ${light + 8}%)`);
+                barsGradientKey = barsKey(energy);
+            }
+
+            // Energy-reactive radial background glow, cached on a coarse alpha/hue key.
+            function syncBackgroundGlow(energy) {
+                const alphaInner = 0.08 + energy * 0.14 + beatPulse * 0.1;
+                const key = `${cssWidth}x${cssHeight}:${Math.round(alphaInner * 40)}:${Math.floor(baseHue / 20)}`;
+                if (key === bgGlowKey && bgGlowGradient) return bgGlowGradient;
+                bgGlowKey = key;
+                bgGlowGradient = ctx.createRadialGradient(
+                    cssWidth * 0.5, cssHeight * 0.38, 0,
+                    cssWidth * 0.5, cssHeight * 0.38, Math.max(cssWidth, cssHeight) * 0.65
+                );
+                bgGlowGradient.addColorStop(0, `hsla(${baseHue}, 85%, 55%, ${alphaInner})`);
+                bgGlowGradient.addColorStop(0.42, `hsla(${(baseHue + 50) % 360}, 80%, 45%, ${0.035 + energy * 0.08 + beatPulse * 0.05})`);
+                bgGlowGradient.addColorStop(1, 'rgba(2, 6, 23, 0)');
+                return bgGlowGradient;
+            }
+
+            // Static vignette overlay, rebuilt only when the canvas resizes.
+            function rebuildVignetteGradient() {
+                const radius = Math.hypot(cssWidth, cssHeight) * 0.62;
+                vignetteGradient = ctx.createRadialGradient(
+                    cssWidth / 2, cssHeight * 0.42, Math.min(cssWidth, cssHeight) * 0.28,
+                    cssWidth / 2, cssHeight * 0.42, radius
+                );
+                vignetteGradient.addColorStop(0, 'rgba(2, 6, 23, 0)');
+                vignetteGradient.addColorStop(0.72, 'rgba(2, 6, 23, 0.08)');
+                vignetteGradient.addColorStop(1, 'rgba(2, 6, 23, 0.42)');
             }
 
             // Render at device-pixel resolution so the visualizer stays sharp on Retina/HiDPI displays.
@@ -1684,7 +1782,12 @@
 
                 // Draw using CSS-pixel coordinates even though the backing bitmap is higher resolution.
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                rebuildCachedGradients();
+
+                // Invalidate every size-dependent cache so gradients rebuild on the next frame.
+                barsGradientKey = '';
+                bgGlowKey = '';
+                coreKey = '';
+                rebuildVignetteGradient();
             }
 
             const resizeObserver = new ResizeObserver(resizeCanvas);
@@ -1701,7 +1804,7 @@
                     this.radius = 0.8 + Math.random() * 2.2;
                     this.alpha = 0.85;
                     this.decay = 0.012 + Math.random() * 0.018;
-                    this.hue = 188 + Math.random() * 100;
+                    this.hue = (baseHue + Math.random() * 100) % 360;
                 }
                 update() {
                     this.x += Math.cos(this.angle) * this.speed;
@@ -1741,9 +1844,11 @@
                     source = audioCtx.createMediaElementSource(audioPlayer);
                     source.connect(analyser);
                     analyser.connect(audioCtx.destination);
+                    analyserFeedsOutput = true;
 
                     frequencyData = new Uint8Array(analyser.frequencyBinCount);
                     smoothedData = new Float32Array(analyser.frequencyBinCount);
+                    prevSpectrum = new Float32Array(analyser.frequencyBinCount);
                     timeData = new Uint8Array(analyser.fftSize);
                 }
 
@@ -1755,6 +1860,19 @@
                     }
                 }
                 return true;
+            }
+
+            // The analyser normally feeds the speakers; while the mic is live we disconnect
+            // that path so microphone input can never cause speaker feedback.
+            function setAnalyserOutput(shouldFeed) {
+                if (!analyser || shouldFeed === analyserFeedsOutput) return;
+                try {
+                    analyser.disconnect();
+                } catch (error) {
+                    console.warn('Analyser disconnect failed:', error);
+                }
+                if (shouldFeed) analyser.connect(audioCtx.destination);
+                analyserFeedsOutput = shouldFeed;
             }
 
             // Envelope smoothing: fast attack (~0.5), slow release (~0.08) per frame so bars
@@ -1810,34 +1928,30 @@
                 return barPeaks[index];
             }
 
-            function drawBackground(width, height, energy, now, useTrailFade) {
-                if (useTrailFade) {
-                    // Wave mode: fade the previous frame instead of clearing so the
-                    // oscilloscope leaves a soft glow trail behind it.
-                    ctx.fillStyle = 'rgba(5, 7, 13, 0.3)';
+            function drawBackground(width, height, energy, treble, now, trailFadeAlpha) {
+                if (trailFadeAlpha > 0) {
+                    // Wave/spiral modes: fade the previous frame instead of clearing so the
+                    // trace leaves a soft glow trail behind it.
+                    ctx.fillStyle = `rgba(5, 7, 13, ${trailFadeAlpha})`;
                     ctx.fillRect(0, 0, width, height);
                     return;
                 }
 
                 ctx.clearRect(0, 0, width, height);
 
-                const glow = ctx.createRadialGradient(
-                    width * 0.5, height * 0.38, 0,
-                    width * 0.5, height * 0.38, Math.max(width, height) * 0.65
-                );
-                glow.addColorStop(0, `rgba(14, 165, 233, ${0.08 + energy * 0.14})`);
-                glow.addColorStop(0.42, `rgba(79, 70, 229, ${0.035 + energy * 0.08})`);
-                glow.addColorStop(1, 'rgba(2, 6, 23, 0)');
-                ctx.fillStyle = glow;
+                ctx.fillStyle = syncBackgroundGlow(energy);
                 ctx.fillRect(0, 0, width, height);
 
-                // Very subtle moving stars/noise for depth, even when paused.
+                // Very subtle moving stars for depth, even when paused; twinkle brightness
+                // and size follow the treble band.
                 ctx.save();
-                ctx.globalAlpha = 0.22;
+                const twinkleBase = 0.14 + treble * 0.55;
                 for (let i = 0; i < 22; i++) {
                     const x = ((i * 97.13 + now * 0.008 * (1 + (i % 3))) % (width + 40)) - 20;
                     const y = ((i * 53.71) % Math.max(1, height - 95)) + 10;
-                    const r = 0.55 + (i % 4) * 0.22;
+                    const r = 0.55 + (i % 4) * 0.22 + treble * 0.5;
+                    const twinkle = 0.5 + 0.5 * Math.sin(now * 0.004 + i * 1.7);
+                    ctx.globalAlpha = clamp(twinkleBase * (0.35 + twinkle * 0.65), 0, 1);
                     ctx.fillStyle = i % 2 ? '#7dd3fc' : '#c4b5fd';
                     ctx.beginPath();
                     ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -1856,32 +1970,40 @@
                     const sampleIndex = Math.floor((i / samples) * (timeData.length - 1));
                     const wave = (timeData[sampleIndex] - 128) / 128;
                     const angle = (i / samples) * Math.PI * 2 - Math.PI / 2;
-                    const radius = baseRadius + wave * (7 + energy * 11);
+                    const radius = baseRadius + wave * (7 + energy * 11 + beatPulse * 6);
                     const x = centerX + Math.cos(angle) * radius;
                     const y = centerY + Math.sin(angle) * radius;
                     if (i === 0) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
                 }
                 ctx.closePath();
-                ctx.strokeStyle = `rgba(186, 230, 253, ${0.28 + energy * 0.45})`;
+                ctx.strokeStyle = `hsla(${(baseHue + 150) % 360}, 90%, 84%, ${0.28 + energy * 0.45})`;
                 ctx.lineWidth = 1.2;
                 ctx.shadowBlur = 8;
-                ctx.shadowColor = '#38bdf8';
+                ctx.shadowColor = `hsl(${baseHue}, 95%, 62%)`;
                 ctx.stroke();
                 ctx.restore();
             }
 
             function drawCore(centerX, centerY, radius, bass, mids, treble, now) {
-                const pulse = radius * (0.04 + bass * 0.14);
+                const pulse = radius * (0.04 + bass * 0.14 + beatPulse * 0.22);
                 const coreRadius = radius + pulse;
-                const hueShift = 198 + treble * 38;
+                const hueShift = (baseHue + treble * 38) % 360;
 
-                const core = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, coreRadius * 1.25);
-                core.addColorStop(0, `rgba(255, 255, 255, ${0.82 + bass * 0.12})`);
-                core.addColorStop(0.16, `hsla(${hueShift}, 95%, 68%, ${0.78 + mids * 0.16})`);
-                core.addColorStop(0.48, `rgba(59, 130, 246, ${0.28 + bass * 0.34})`);
-                core.addColorStop(1, 'rgba(37, 99, 235, 0)');
-                ctx.fillStyle = core;
+                // Cache the radial gradient on a coarse key so quiet frames reuse the same object.
+                const key = [
+                    centerX | 0, centerY | 0, Math.round(coreRadius),
+                    Math.round(hueShift / 12), Math.round(bass * 8), Math.round(mids * 8)
+                ].join(':');
+                if (key !== coreKey || !coreGradient) {
+                    coreKey = key;
+                    coreGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, coreRadius * 1.25);
+                    coreGradient.addColorStop(0, `rgba(255, 255, 255, ${0.82 + bass * 0.12})`);
+                    coreGradient.addColorStop(0.16, `hsla(${hueShift}, 95%, 68%, ${0.78 + mids * 0.16})`);
+                    coreGradient.addColorStop(0.48, `hsla(${(hueShift + 30) % 360}, 90%, 58%, ${0.28 + bass * 0.34})`);
+                    coreGradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+                }
+                ctx.fillStyle = coreGradient;
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, coreRadius * 1.25, 0, Math.PI * 2);
                 ctx.fill();
@@ -1900,7 +2022,7 @@
 
             // Mode 1 — circular: radial spectrum with peak-hold caps and a mirrored inner reflection.
             // Bars are batched into a handful of hue buckets so glow (shadowBlur) is applied per bucket,
-            // not per bar.
+            // not per bar, and all angles come from the precomputed lookup tables.
             function drawCircularMode(centerX, centerY, radius, maxBarLength) {
                 const buckets = [];
                 for (let b = 0; b < HUE_BUCKETS; b++) buckets.push({ path: new Path2D(), hueSum: 0, count: 0 });
@@ -1913,17 +2035,16 @@
                         : (BAR_COUNT - i) / (BAR_COUNT / 2);
                     const value = getLogFrequencyValue(halfPosition);
                     const shaped = Math.pow(value, 1.38);
-                    const barLength = 4 + shaped * maxBarLength;
-                    const angle = (i / BAR_COUNT) * Math.PI * 2 - Math.PI / 2;
-                    const cos = Math.cos(angle);
-                    const sin = Math.sin(angle);
+                    const barLength = (4 + shaped * maxBarLength) * (1 + beatPulse * 0.15);
+                    const cos = circleCos[i];
+                    const sin = circleSin[i];
                     const inner = radius + 7;
                     const outer = inner + barLength;
 
                     const bucket = buckets[Math.min(HUE_BUCKETS - 1, Math.floor(halfPosition * HUE_BUCKETS))];
                     bucket.path.moveTo(centerX + cos * inner, centerY + sin * inner);
                     bucket.path.lineTo(centerX + cos * outer, centerY + sin * outer);
-                    bucket.hueSum += 195 + halfPosition * 86;
+                    bucket.hueSum += (baseHue + halfPosition * 86) % 360;
                     bucket.count++;
 
                     // Mirrored inner reflection of each bar, drawn much softer.
@@ -1932,11 +2053,12 @@
                     reflectionPath.moveTo(centerX + cos * reflectionOuter, centerY + sin * reflectionOuter);
                     reflectionPath.lineTo(centerX + cos * reflectionInner, centerY + sin * reflectionInner);
 
-                    // Peak-hold cap: a short tick perpendicular to the bar at its decaying high-water mark.
+                    // Peak-hold cap: a short tick perpendicular to the bar at its decaying
+                    // high-water mark. The tangent of angle + 90° is (-sin, cos).
                     const peak = getPeakLevel(i, shaped);
                     const peakRadius = inner + 4 + peak * maxBarLength;
-                    const tangentX = Math.cos(angle + Math.PI / 2) * 2.4;
-                    const tangentY = Math.sin(angle + Math.PI / 2) * 2.4;
+                    const tangentX = -sin * 2.4;
+                    const tangentY = cos * 2.4;
                     peakPath.moveTo(centerX + cos * peakRadius - tangentX, centerY + sin * peakRadius - tangentY);
                     peakPath.lineTo(centerX + cos * peakRadius + tangentX, centerY + sin * peakRadius + tangentY);
                 }
@@ -1952,9 +2074,9 @@
                 for (const bucket of buckets) {
                     if (!bucket.count) continue;
                     const hue = bucket.hueSum / bucket.count;
-                    ctx.strokeStyle = `hsla(${hue}, 96%, 66%, 0.82)`;
+                    ctx.strokeStyle = `hsla(${hue}, 96%, 66%, ${Math.min(1, 0.82 + beatPulse * 0.18)})`;
                     ctx.lineWidth = 2.6;
-                    ctx.shadowBlur = 8;
+                    ctx.shadowBlur = 8 + beatPulse * 8;
                     ctx.shadowColor = `hsl(${hue}, 96%, 62%)`;
                     ctx.stroke(bucket.path);
                 }
@@ -1982,7 +2104,7 @@
                         : (BAR_COUNT - i) / (BAR_COUNT / 2);
                     const value = getLogFrequencyValue(halfPosition);
                     const shaped = Math.pow(value, 1.3);
-                    const barHeight = 3 + shaped * maxBarHeight;
+                    const barHeight = (3 + shaped * maxBarHeight) * (1 + beatPulse * 0.1);
                     const x = gap + i * (barWidth + gap);
                     barsPath.rect(x, baseline - barHeight, barWidth, barHeight);
 
@@ -1992,9 +2114,10 @@
                 }
 
                 ctx.save();
+                ctx.globalAlpha = Math.min(1, 0.88 + beatPulse * 0.12);
                 ctx.fillStyle = barsGradient;
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = 'rgba(56, 189, 248, 0.85)';
+                ctx.shadowBlur = 12 + beatPulse * 10;
+                ctx.shadowColor = `hsla(${baseHue}, 92%, 60%, 0.85)`;
                 ctx.fill(barsPath);
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = 'rgba(240, 249, 255, 0.9)';
@@ -2002,11 +2125,12 @@
                 ctx.restore();
             }
 
-            // Mode 3 — wave: centered oscilloscope from time-domain data, mirrored top/bottom.
+            // Mode 3 — wave: centered oscilloscope from time-domain data, mirrored top/bottom,
+            // drawn additively over a fading canvas so it leaves a glow trail.
             function drawWaveMode(width, height, energy) {
                 if (!timeData) return;
                 const centerY = Math.max(110, height * 0.38);
-                const amplitude = clamp(height * 0.16, 40, 90) * (0.55 + energy * 0.75);
+                const amplitude = clamp(height * 0.16, 40, 90) * (0.55 + energy * 0.75 + beatPulse * 0.2);
 
                 function buildWavePath(direction) {
                     const path = new Path2D();
@@ -2023,15 +2147,16 @@
                 }
 
                 ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
                 ctx.lineJoin = 'round';
                 ctx.lineCap = 'round';
-                ctx.strokeStyle = 'rgba(56, 189, 248, 0.9)';
-                ctx.lineWidth = 2;
-                ctx.shadowBlur = 14;
-                ctx.shadowColor = '#38bdf8';
+                ctx.strokeStyle = `hsla(${baseHue}, 95%, 65%, 0.9)`;
+                ctx.lineWidth = 2 + beatPulse * 1.2;
+                ctx.shadowBlur = 14 + beatPulse * 8;
+                ctx.shadowColor = `hsl(${baseHue}, 95%, 60%)`;
                 ctx.stroke(buildWavePath(1));
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = 'rgba(196, 181, 253, 0.42)';
+                ctx.strokeStyle = `hsla(${(baseHue + 70) % 360}, 85%, 78%, 0.42)`;
                 ctx.lineWidth = 1.4;
                 ctx.stroke(buildWavePath(-1));
                 ctx.restore();
@@ -2048,10 +2173,10 @@
                 ctx.translate(centerX, centerY);
                 ctx.rotate(orbitRotation);
                 ctx.setLineDash([7, 11]);
-                ctx.strokeStyle = `rgba(165, 180, 252, ${0.35 + treble * 0.4})`;
+                ctx.strokeStyle = `hsla(${(baseHue + 60) % 360}, 85%, 75%, ${0.35 + treble * 0.4})`;
                 ctx.lineWidth = 1.6;
                 ctx.shadowBlur = 6;
-                ctx.shadowColor = '#818cf8';
+                ctx.shadowColor = `hsl(${(baseHue + 60) % 360}, 90%, 65%)`;
                 ctx.beginPath();
                 ctx.arc(0, 0, radius * 1.75, 0, Math.PI * 2);
                 ctx.stroke();
@@ -2060,27 +2185,162 @@
                 ctx.shadowBlur = 0;
                 ctx.rotate(-orbitRotation * 2.4);
                 ctx.setLineDash([3, 9]);
-                ctx.strokeStyle = `rgba(125, 211, 252, ${0.22 + treble * 0.3})`;
+                ctx.strokeStyle = `hsla(${(baseHue + 170) % 360}, 90%, 80%, ${0.22 + treble * 0.3})`;
                 ctx.beginPath();
                 ctx.arc(0, 0, radius * 1.45, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.restore();
             }
 
-            // Adaptive beat detection: compare the current bass level against a rolling ~1s
-            // average instead of a fixed threshold, with a minimum interval between beats.
-            function detectBeat(bass, now) {
-                bassHistory.push({ time: now, value: bass });
-                while (bassHistory.length > 0 && now - bassHistory[0].time > BASS_HISTORY_WINDOW_MS) {
-                    bassHistory.shift();
+            // Mode 5 — nebula: a drifting particle starfield where each mote is bound to a
+            // spectrum band. Size, speed, brightness and hue follow the band's energy; bass
+            // swirls particles outward from the center, treble adds sparkle. All additive.
+            function initNebulaParticles() {
+                nebulaParticles = [];
+                for (let i = 0; i < NEBULA_COUNT; i++) {
+                    nebulaParticles.push({
+                        nx: Math.random(),
+                        ny: Math.random(),
+                        vx: (Math.random() - 0.5) * 0.0006,
+                        vy: (Math.random() - 0.5) * 0.0006,
+                        band: i % 3, // 0 = bass, 1 = mids, 2 = treble
+                        size: 0.7 + Math.random() * 1.9,
+                        phase: Math.random() * Math.PI * 2,
+                        hueOffset: (Math.random() - 0.5) * 70
+                    });
                 }
-                if (bassHistory.length < 10) return false;
+            }
+
+            function drawNebulaMode(width, height, bass, mids, treble, deltaMs, now) {
+                if (!nebulaParticles) initNebulaParticles();
+                const dt = clamp(deltaMs / 16.7, 0.25, 3); // per-60fps-frame normalized step
+                const swirl = bass * 0.0016 * (1 + beatPulse * 1.4);
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                for (const p of nebulaParticles) {
+                    // Radial + tangential push away from the center, driven by the bass band.
+                    const dx = p.nx - 0.5;
+                    const dy = p.ny - 0.44;
+                    const dist = Math.max(0.04, Math.hypot(dx, dy));
+                    const push = (swirl * dt) / dist;
+                    p.vx += dx * push + -dy * push * 0.8;
+                    p.vy += dy * push + dx * push * 0.8;
+
+                    const bandLevel = p.band === 0 ? bass : p.band === 1 ? mids : treble;
+                    const drift = 1 + bandLevel * 2.2;
+                    p.nx += p.vx * dt * drift;
+                    p.ny += p.vy * dt * drift;
+                    p.vx *= 0.985;
+                    p.vy *= 0.985;
+
+                    // Wrap around the edges so the field never thins out.
+                    if (p.nx < -0.02) p.nx += 1.04; else if (p.nx > 1.02) p.nx -= 1.04;
+                    if (p.ny < -0.02) p.ny += 1.04; else if (p.ny > 1.02) p.ny -= 1.04;
+
+                    const sparkle = p.band === 2 ? 0.5 + 0.5 * Math.sin(now * 0.012 + p.phase) : 0.5;
+                    const alpha = clamp(0.1 + bandLevel * 0.55 + sparkle * treble * 0.5 + beatPulse * 0.15, 0.04, 0.9);
+                    const size = p.size * (0.7 + bandLevel * 1.8 + beatPulse * 0.5);
+                    const x = p.nx * width;
+                    const y = p.ny * height;
+                    const hue = (baseHue + p.hueOffset + p.band * 36 + 360) % 360;
+
+                    // Soft outer halo, then a bright core; both composite additively.
+                    ctx.fillStyle = `hsla(${hue}, 90%, 62%, ${alpha * 0.28})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = `hsla(${hue}, 95%, 74%, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // Mode 6 — spiral: log-frequency bins plotted along an Archimedean spiral from the
+            // center outward, stroked as a hue-rotating ribbon. Trail fade gives ribbon-like motion.
+            function drawSpiralMode(centerX, centerY, maxRadius, deltaMs) {
+                spiralRotation += (0.12 + beatPulse * 0.9) * (deltaMs / 1000) * motionScale();
+                const rotCos = Math.cos(spiralRotation);
+                const rotSin = Math.sin(spiralRotation);
+
+                const bucketPaths = [];
+                for (let b = 0; b < SPIRAL_BUCKETS; b++) bucketPaths.push(new Path2D());
+                const bucketHueSum = new Float32Array(SPIRAL_BUCKETS);
+                const bucketValSum = new Float32Array(SPIRAL_BUCKETS);
+                const bucketCount = new Float32Array(SPIRAL_BUCKETS);
+                const sparkPath = new Path2D();
+
+                for (let i = 0; i < SPIRAL_POINTS; i++) {
+                    const t = spiralT[i];
+                    const value = getLogFrequencyValue(t);
+                    // Radius breathes outward with bin energy; beats push the whole ribbon out.
+                    const r = (6 + t * maxRadius) * (0.55 + value * 0.75 + beatPulse * 0.12);
+                    // Rotate the precomputed unit vector by the current spiral rotation.
+                    const cos = spiralCos[i] * rotCos - spiralSin[i] * rotSin;
+                    const sin = spiralSin[i] * rotCos + spiralCos[i] * rotSin;
+                    const x = centerX + cos * r;
+                    const y = centerY + sin * r;
+
+                    const bucketIndex = Math.min(SPIRAL_BUCKETS - 1, Math.floor(t * SPIRAL_BUCKETS));
+                    const path = bucketPaths[bucketIndex];
+                    if (bucketCount[bucketIndex] === 0) path.moveTo(x, y);
+                    else path.lineTo(x, y);
+                    bucketHueSum[bucketIndex] += (baseHue + t * 160 + spiralRotation * 40) % 360;
+                    bucketValSum[bucketIndex] += value;
+                    bucketCount[bucketIndex]++;
+
+                    // Hot bins pop a sparkle node onto the ribbon.
+                    if (value > 0.6) {
+                        sparkPath.moveTo(x + 2.2, y);
+                        sparkPath.arc(x, y, 1.2 + (value - 0.6) * 6, 0, Math.PI * 2);
+                    }
+                }
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                for (let b = 0; b < SPIRAL_BUCKETS; b++) {
+                    if (!bucketCount[b]) continue;
+                    const hue = bucketHueSum[b] / bucketCount[b];
+                    const avgValue = bucketValSum[b] / bucketCount[b];
+                    ctx.strokeStyle = `hsla(${hue}, 92%, ${58 + avgValue * 20}%, ${0.55 + avgValue * 0.4})`;
+                    ctx.lineWidth = 1.4 + avgValue * 5 + beatPulse * 1.6;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = `hsl(${hue}, 95%, 60%)`;
+                    ctx.stroke(bucketPaths[b]);
+                }
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = `rgba(240, 249, 255, ${0.5 + beatPulse * 0.3})`;
+                ctx.fill(sparkPath);
+                ctx.restore();
+            }
+
+            // Spectral-flux beat detection: sum the positive per-bin spectrum deltas, then
+            // trigger when the flux clears an adaptive rolling-average threshold, gated by a
+            // minimum interval so rapid-fire false positives are impossible.
+            function detectBeat(now) {
+                let flux = 0;
+                for (let i = 0; i < smoothedData.length; i++) {
+                    const delta = smoothedData[i] - prevSpectrum[i];
+                    if (delta > 0) flux += delta;
+                    prevSpectrum[i] = smoothedData[i];
+                }
+                flux /= smoothedData.length * 255;
+
+                fluxHistory.push({ time: now, value: flux });
+                while (fluxHistory.length > 0 && now - fluxHistory[0].time > FLUX_HISTORY_WINDOW_MS) {
+                    fluxHistory.shift();
+                }
+                if (fluxHistory.length < 10) return false;
 
                 let sum = 0;
-                for (const sample of bassHistory) sum += sample.value;
-                const rollingAverage = sum / bassHistory.length;
+                for (const sample of fluxHistory) sum += sample.value;
+                const rollingAverage = sum / fluxHistory.length;
 
-                if (bass > rollingAverage * 1.35 && bass > 0.35 && now - lastBeatTime >= BEAT_MIN_INTERVAL_MS) {
+                if (flux > rollingAverage * 1.45 + 0.002 && flux > 0.004 && now - lastBeatTime >= BEAT_MIN_INTERVAL_MS) {
                     lastBeatTime = now;
                     return true;
                 }
@@ -2119,12 +2379,251 @@
                 }
             }
 
+            /* --- Microphone input --- */
+
+            async function toggleMic() {
+                if (micActive) {
+                    stopMic();
+                    trackTitle.textContent = lastFileTitle;
+                    return;
+                }
+
+                const ready = await initWebAudio();
+                if (!ready) return;
+
+                if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+                    trackTitle.textContent = '⚠ Microphone input is not available in this browser';
+                    return;
+                }
+
+                let stream = null;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (error) {
+                    console.warn('Microphone access failed:', error);
+                    trackTitle.textContent = '⚠ Microphone access was denied';
+                    return;
+                }
+
+                // Mic takes over: pause file playback and stop the demo signal.
+                stopDemo();
+                audioPlayer.pause();
+                setAnalyserOutput(false);
+
+                micStream = stream;
+                micSource = audioCtx.createMediaStreamSource(stream);
+                micSource.connect(analyser);
+                micActive = true;
+
+                micBtn.textContent = '🎤 Stop';
+                micBtn.classList.add('viz-btn-active');
+                trackTitle.textContent = '🎤 Listening to microphone input';
+            }
+
+            function stopMic() {
+                if (micSource) {
+                    try {
+                        micSource.disconnect();
+                    } catch (error) {
+                        console.warn('Mic source disconnect failed:', error);
+                    }
+                    micSource = null;
+                }
+                if (micStream) {
+                    micStream.getTracks().forEach((track) => track.stop());
+                    micStream = null;
+                }
+                if (micActive) {
+                    micActive = false;
+                    setAnalyserOutput(true);
+                    micBtn.textContent = '🎤 Mic';
+                    micBtn.classList.remove('viz-btn-active');
+                }
+            }
+
+            /* --- Generative demo signal --- */
+
+            // A–F–G–E style ambient progression (Hz), voiced as soft pad triads.
+            const DEMO_CHORDS = [
+                [220.00, 261.63, 329.63],
+                [174.61, 220.00, 261.63],
+                [196.00, 246.94, 293.66],
+                [164.81, 220.00, 329.63]
+            ];
+
+            function demoTargetGain() {
+                return (clamp(Number(volumeSlider.value) || 0, 0, 100) / 100) * 0.3;
+            }
+
+            // Short sine "kick" with a falling pitch envelope — this is what the
+            // spectral-flux beat detector locks onto during demo mode.
+            function demoKick() {
+                if (!demo || !audioCtx) return;
+                const t = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(150, t);
+                osc.frequency.exponentialRampToValueAtTime(46, t + 0.12);
+                gain.gain.setValueAtTime(0.9, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+                osc.connect(gain);
+                gain.connect(demo.master);
+                osc.start(t);
+                osc.stop(t + 0.28);
+            }
+
+            function advanceDemoChord() {
+                if (!demo || !audioCtx) return;
+                demo.step = (demo.step + 1) % DEMO_CHORDS.length;
+                const chord = DEMO_CHORDS[demo.step];
+                const t = audioCtx.currentTime;
+                demo.padOscs.forEach((osc, i) => {
+                    osc.frequency.setTargetAtTime(chord[i], t, 0.45);
+                });
+                demo.bassOsc.frequency.setTargetAtTime(chord[0] / 2, t, 0.3);
+                demo.sparkleOsc.frequency.setTargetAtTime(chord[2] * 4, t, 0.6);
+            }
+
+            async function toggleDemo() {
+                if (demo) {
+                    stopDemo();
+                    trackTitle.textContent = lastFileTitle;
+                    return;
+                }
+
+                const ready = await initWebAudio();
+                if (!ready) return;
+
+                // Demo takes over: stop the mic and pause file playback.
+                stopMic();
+                audioPlayer.pause();
+                setAnalyserOutput(true);
+
+                const t = audioCtx.currentTime;
+                const master = audioCtx.createGain();
+                master.gain.setValueAtTime(0.0001, t);
+                master.gain.exponentialRampToValueAtTime(Math.max(0.001, demoTargetGain()), t + 0.8);
+                master.connect(analyser);
+
+                // Pad: three soft voices per chord with a slow swell LFO.
+                const padGain = audioCtx.createGain();
+                padGain.gain.value = 0.14;
+                const swellLfo = audioCtx.createOscillator();
+                swellLfo.type = 'sine';
+                swellLfo.frequency.value = 0.09;
+                const swellDepth = audioCtx.createGain();
+                swellDepth.gain.value = 0.06;
+                swellLfo.connect(swellDepth);
+                swellDepth.connect(padGain.gain);
+                const padOscs = DEMO_CHORDS[0].map((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    osc.type = i === 0 ? 'sine' : 'triangle';
+                    osc.frequency.value = freq;
+                    osc.detune.value = (i - 1) * 5;
+                    osc.connect(padGain);
+                    osc.start();
+                    return osc;
+                });
+                padGain.connect(master);
+
+                // Bass pulse: low triangle gated by a slow square LFO for a heartbeat throb.
+                const bassOsc = audioCtx.createOscillator();
+                bassOsc.type = 'triangle';
+                bassOsc.frequency.value = DEMO_CHORDS[0][0] / 2;
+                const bassGain = audioCtx.createGain();
+                bassGain.gain.value = 0.02;
+                const bassLfo = audioCtx.createOscillator();
+                bassLfo.type = 'square';
+                bassLfo.frequency.value = 0.8;
+                const bassDepth = audioCtx.createGain();
+                bassDepth.gain.value = 0.14;
+                bassLfo.connect(bassDepth);
+                bassDepth.connect(bassGain.gain);
+                bassOsc.connect(bassGain);
+                bassGain.connect(master);
+
+                // Sparkle: a high sine with slow tremolo, two octaves above the chord top.
+                const sparkleOsc = audioCtx.createOscillator();
+                sparkleOsc.type = 'sine';
+                sparkleOsc.frequency.value = DEMO_CHORDS[0][2] * 4;
+                const sparkleGain = audioCtx.createGain();
+                sparkleGain.gain.value = 0.035;
+                const sparkleLfo = audioCtx.createOscillator();
+                sparkleLfo.type = 'sine';
+                sparkleLfo.frequency.value = 0.23;
+                const sparkleDepth = audioCtx.createGain();
+                sparkleDepth.gain.value = 0.025;
+                sparkleLfo.connect(sparkleDepth);
+                sparkleDepth.connect(sparkleGain.gain);
+                sparkleOsc.connect(sparkleGain);
+                sparkleGain.connect(master);
+
+                bassOsc.start();
+                bassLfo.start();
+                sparkleOsc.start();
+                sparkleLfo.start();
+                swellLfo.start();
+
+                demo = {
+                    master,
+                    padOscs,
+                    bassOsc,
+                    sparkleOsc,
+                    step: 0,
+                    nodes: [master, padGain, swellLfo, swellDepth, bassOsc, bassGain, bassLfo, bassDepth, sparkleOsc, sparkleGain, sparkleLfo, sparkleDepth].concat(padOscs),
+                    chordTimer: setInterval(advanceDemoChord, 2400),
+                    kickTimer: setInterval(demoKick, 620)
+                };
+
+                demoBtn.textContent = '✨ Stop';
+                demoBtn.classList.add('viz-btn-active');
+                trackTitle.textContent = '✨ Demo signal — generative ambience';
+            }
+
+            function stopDemo() {
+                if (!demo) return;
+                clearInterval(demo.chordTimer);
+                clearInterval(demo.kickTimer);
+                const nodes = demo.nodes;
+                const master = demo.master;
+                if (audioCtx) {
+                    const t = audioCtx.currentTime;
+                    master.gain.cancelScheduledValues(t);
+                    master.gain.setTargetAtTime(0.0001, t, 0.1);
+                }
+                // Let the fade-out finish before tearing the graph down.
+                setTimeout(() => {
+                    nodes.forEach((node) => {
+                        if (typeof node.stop === 'function') {
+                            try {
+                                node.stop();
+                            } catch (error) {
+                                console.warn('Demo node stop failed:', error);
+                            }
+                        }
+                        try {
+                            node.disconnect();
+                        } catch (error) {
+                            console.warn('Demo node disconnect failed:', error);
+                        }
+                    });
+                }, 350);
+                demo = null;
+                demoBtn.textContent = '✨ Demo';
+                demoBtn.classList.remove('viz-btn-active');
+            }
+
             async function loadAudioFile(file) {
                 if (!file) return;
                 if (!file.type.startsWith('audio/')) {
                     trackTitle.textContent = '⚠ Please choose an audio file';
                     return;
                 }
+
+                // A file takes over: release the mic and stop the demo signal.
+                stopMic();
+                stopDemo();
 
                 if (currentObjectUrl) {
                     URL.revokeObjectURL(currentObjectUrl);
@@ -2137,7 +2636,8 @@
 
                 // Show the track name without its file extension.
                 const displayName = (file.name || '').replace(/\.[a-z0-9]{1,8}$/i, '').trim();
-                trackTitle.textContent = `🎵 ${displayName || 'Unknown audio'}`;
+                lastFileTitle = `🎵 ${displayName || 'Unknown audio'}`;
+                trackTitle.textContent = lastFileTitle;
                 playBtn.disabled = false;
                 seekBar.disabled = false;
                 seekBar.value = 0;
@@ -2162,6 +2662,9 @@
                 if (!ready) return;
 
                 if (audioPlayer.paused) {
+                    // Resuming a file takes over from the mic / demo signal.
+                    stopMic();
+                    stopDemo();
                     try {
                         await audioPlayer.play();
                         playBtn.textContent = '⏸ Pause';
@@ -2183,6 +2686,8 @@
 
             uploadBtn.addEventListener('click', () => fileInput.click());
             playBtn.addEventListener('click', togglePlayback);
+            micBtn.addEventListener('click', toggleMic);
+            demoBtn.addEventListener('click', toggleDemo);
 
             fileInput.addEventListener('change', () => {
                 loadAudioFile(fileInput.files && fileInput.files[0]);
@@ -2206,7 +2711,7 @@
             modeBtn.addEventListener('click', cycleMode);
             updateModeButton();
 
-            // Volume slider, persisted across visits (default 80).
+            // Volume slider, persisted across visits (default 80). Also drives the demo level.
             function applyStoredVolume() {
                 const stored = localStorage.getItem('viz-volume');
                 const parsed = stored === null ? 80 : Number(stored);
@@ -2219,6 +2724,9 @@
                 const volume = clamp(Number(volumeSlider.value) || 0, 0, 100);
                 audioPlayer.volume = volume / 100;
                 if (audioPlayer.muted && volume > 0) audioPlayer.muted = false;
+                if (demo && audioCtx) {
+                    demo.master.gain.setTargetAtTime(Math.max(0.0001, demoTargetGain()), audioCtx.currentTime, 0.05);
+                }
                 localStorage.setItem('viz-volume', String(volume));
             });
 
@@ -2330,7 +2838,9 @@
 
                 const width = cssWidth;
                 const height = cssHeight;
-                const isPlaying = !audioPlayer.paused && !audioPlayer.ended && !!analyser;
+                const filePlaying = !audioPlayer.paused && !audioPlayer.ended;
+                // The analyser is shared by file, mic and demo sources alike.
+                const sourceActive = !!analyser && (filePlaying || micActive || demo !== null);
                 const activeMode = VIS_MODES[currentModeIndex].id;
                 const ambientNow = now * motionScale();
 
@@ -2340,14 +2850,27 @@
                 let energy = 0;
 
                 if (analyser) {
-                    updateSmoothedFrequencyData(isPlaying);
+                    updateSmoothedFrequencyData(sourceActive);
                     bass = getAverageForRange(35, 220);
                     mids = getAverageForRange(220, 2200);
                     treble = getAverageForRange(2200, 12000);
                     energy = clamp(bass * 0.46 + mids * 0.34 + treble * 0.20, 0, 1);
                 }
 
-                drawBackground(width, height, energy, ambientNow, activeMode === 'wave' && !!analyser);
+                advanceBaseHue(deltaMs, energy);
+
+                // Global beat pulse: jumps to 1 on a detected beat, then decays exponentially.
+                beatPulse *= Math.exp(-deltaMs / 200);
+                if (beatPulse < 0.002) beatPulse = 0;
+
+                // Rebuild the hue-driven bars gradient only when the hue/energy bucket changes.
+                if (barsKey(energy) !== barsGradientKey) rebuildBarsGradient(energy);
+
+                const trailFade = !analyser ? 0
+                    : activeMode === 'wave' ? 0.3
+                    : activeMode === 'spiral' ? 0.22
+                    : 0;
+                drawBackground(width, height, energy, treble, ambientNow, trailFade);
 
                 const centerX = width / 2;
                 const centerY = Math.max(110, height * 0.38);
@@ -2366,6 +2889,12 @@
                     } else if (activeMode === 'orbit') {
                         drawCore(centerX, centerY, radius * 0.8, bass, mids, treble, ambientNow);
                         drawOrbitMode(centerX, centerY, radius, energy, treble, deltaMs);
+                    } else if (activeMode === 'nebula') {
+                        drawCore(centerX, centerY, radius * 0.7, bass, mids, treble, ambientNow);
+                        drawNebulaMode(width, height, bass, mids, treble, deltaMs, ambientNow);
+                    } else if (activeMode === 'spiral') {
+                        drawCore(centerX, centerY, radius * 0.55, bass, mids, treble, ambientNow);
+                        drawSpiralMode(centerX, centerY, minDimension * 0.42, deltaMs);
                     }
                 } else {
                     // Animated idle state before a track is chosen.
@@ -2386,13 +2915,20 @@
                     ctx.stroke();
                 }
 
-                // Adaptive beat burst: particles plus a one-shot expanding shockwave ring.
-                if (isPlaying && detectBeat(bass, now) && !prefersReducedMotion) {
-                    const burstCount = Math.round(3 + bass * 7);
-                    for (let i = 0; i < burstCount && particles.length < MAX_PARTICLES; i++) {
-                        particles.push(new BurstParticle(centerX, centerY, bass));
+                // Adaptive beat burst: global pulse plus particles and an expanding shockwave ring.
+                if (sourceActive && detectBeat(now)) {
+                    beatPulse = 1;
+                    if (!prefersReducedMotion) {
+                        const burstCount = Math.round(3 + bass * 7);
+                        for (let i = 0; i < burstCount && particles.length < MAX_PARTICLES; i++) {
+                            particles.push(new BurstParticle(centerX, centerY, bass));
+                        }
+                        spawnShockwave(centerX, centerY, radius, bass);
                     }
-                    spawnShockwave(centerX, centerY, radius, bass);
+                } else if (!sourceActive && prevSpectrum && smoothedData) {
+                    // Keep the previous spectrum in sync while idle so resuming any source
+                    // does not fire a stale-flux phantom beat.
+                    prevSpectrum.set(smoothedData);
                 }
 
                 for (let i = particles.length - 1; i >= 0; i--) {
@@ -2402,6 +2938,12 @@
                 }
 
                 updateAndDrawShockwaves();
+
+                // Subtle vignette on top of everything for depth (rebuilt only on resize).
+                if (vignetteGradient) {
+                    ctx.fillStyle = vignetteGradient;
+                    ctx.fillRect(0, 0, width, height);
+                }
             }
 
             // Pause the render loop when the tab is hidden or the stage is scrolled off-screen.
@@ -2428,6 +2970,11 @@
 
             window.addEventListener('beforeunload', () => {
                 if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+                if (micStream) micStream.getTracks().forEach((track) => track.stop());
+                if (demo) {
+                    clearInterval(demo.chordTimer);
+                    clearInterval(demo.kickTimer);
+                }
                 if (rafId !== null) cancelAnimationFrame(rafId);
                 resizeObserver.disconnect();
                 visibilityObserver.disconnect();
