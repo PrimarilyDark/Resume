@@ -1,0 +1,3008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dave Persaud - Portfolio</title>
+    <style>
+        /* Unified Global CSS Variables mapped across all sections */
+        :root {
+            --bg: #f5f6f8;
+            --card: #ffffff;
+            --ink: #0f172a;
+            --muted: #64748b;
+            --line: #e7eaf0;
+            --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            --radius: 18px;
+            --radius2: 14px;
+            --green: #16a34a;
+            --green-muted: #2e7d32;
+            --accent: #0070f3;
+            --nav-bg: rgba(255, 255, 255, 0.95);
+            --nav-border: rgba(0, 0, 0, 0.08);
+            --button-bg: #f0f2f5;
+            --button-text: #555;
+            --global-font: Arial, sans-serif; /* Dynamic Font Context Variable */
+
+            /* Project Specific Visual Accents */
+            --btn-blue: #2563eb;
+            --btn-dark: #0f172a;
+            --scrap-red: #7f1d1d;
+            --current-green: #166534;
+            --orange-shop: #ea580c;
+            --soft-green: #f0fdf4;
+            --soft-red: #fff1f2;
+
+            /* Experience Specific Visual Accents */
+            --exp-card: #111827;
+            --exp-line: #243145;
+            --exp-accent: #22c55e;
+            --exp-shadow: 0 18px 50px rgba(0,0,0,0.25);
+        }
+
+        /* Dark Mode CSS Variables Override */
+        [data-theme="dark"] {
+            --bg: #0b0f19;
+            --card: #1e293b;
+            --ink: #f8fafc;
+            --muted: #94a3b8;
+            --line: #334155;
+            --shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            --nav-bg: rgba(15, 23, 42, 0.95);
+            --nav-border: rgba(255, 255, 255, 0.1);
+            --button-bg: #334155;
+            --button-text: #cbd5e1;
+            --accent: #38bdf8;
+        }
+
+        /* Base Styles and Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: var(--global-font);
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at 20% 0%, var(--card) 0%, var(--bg) 55%, var(--bg) 100%);
+            color: var(--ink);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: transparent;
+            padding: 40px 20px 20px 20px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: var(--ink);
+            letter-spacing: 1px;
+        }
+
+        /* Sticky Navigation Bar */
+        nav {
+            position: -webkit-sticky; /* Support for Safari */
+            position: sticky;
+            top: 0;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            border-bottom: 1px solid var(--nav-border);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+        }
+        nav a, nav button, .font-select-trigger {
+            text-decoration: none;
+            color: var(--button-text);
+            background-color: var(--button-bg);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--global-font);
+            display: inline-flex;
+            align-items: center;
+        }
+        nav a:hover, nav button:hover, .font-select-trigger:hover {
+            background-color: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+        nav a:focus, nav button:focus, .font-select-trigger:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* --- Custom Dropdown Menu Panel --- */
+        .font-dropdown-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .font-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius2);
+            box-shadow: var(--shadow);
+            padding: 8px;
+            min-width: 180px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .font-dropdown-menu.show-menu {
+            display: flex;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+        .font-option {
+            background: transparent;
+            color: var(--ink);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+            transition: background 0.2s ease;
+        }
+        .font-option:hover, .font-option:focus {
+            background: var(--button-bg);
+            color: var(--accent);
+            outline: none;
+        }
+
+        /* Content Container Layout */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        section {
+            background-color: var(--card);
+            padding: 60px 40px;
+            margin: 40px 0;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--line);
+            text-align: center;
+            scroll-margin-top: 90px;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        section h2 {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-top: 0;
+            display: inline-block;
+            border-bottom: 2px solid var(--line);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            transition: color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        section p {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* About Webpage Subsection Card */
+        .about-subsection {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius2);
+            background: rgba(15, 23, 42, 0.015);
+            display: inline-block;
+            width: 100%;
+            max-width: 450px;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        [data-theme="dark"] .about-subsection {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .about-subsection h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.2rem;
+            font-weight: 750;
+        }
+        .about-subsection p {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--ink);
+        }
+
+        /* --- EDUCATION SUB-STYLES --- */
+        .edu-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .edu-card-item {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .edu-header-main {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .school {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: -0.3px;
+            color: var(--ink);
+        }
+        .degree {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--ink);
+            opacity: 0.85;
+        }
+        .dates {
+            margin: 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        
+        .rows-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .row-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.02);
+        }
+        [data-theme="dark"] .row-item {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .label-text {
+            font-weight: 800;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .value-text {
+            font-size: 14px;
+            color: var(--ink);
+            word-break: break-word;
+        }
+        .value-text a {
+            color: var(--accent);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .badges-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .badge-box {
+            border-radius: 16px;
+            border: 1px solid var(--line);
+            background: var(--card);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 24px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .wes-badge {
+            background: radial-gradient(circle at 30% 20%, rgba(22, 163, 74, 0.15), rgba(22, 163, 74, 0.03) 60%), var(--card);
+            border: 1px solid rgba(22, 163, 74, 0.25);
+            flex-direction: column;
+            gap: 2px;
+        }
+        .wes-badge .small-txt {
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.4px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+        .wes-badge .big-txt {
+            font-size: 24px;
+            font-weight: 1000;
+            color: var(--green);
+            line-height: 1;
+        }
+        .flag-img {
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            border-radius: 4px;
+        }
+
+        /* --- SKILLS SUB-STYLES & AUDIO VISUALIZER --- */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 20px;
+            align-items: center;
+            margin-top: 25px;
+            text-align: center;
+        }
+        .skills-display-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 420px;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .skillsbox-container {
+            border: 2px solid var(--line);
+            border-radius: 14px;
+            padding: 18px;
+            background: var(--bg);
+            width: 100%;
+            max-width: 440px;
+            box-sizing: border-box;
+            margin-top: 15px;
+            text-align: center;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .skillsbox-container a {
+            color: var(--green-muted);
+            font-weight: 700;
+            text-decoration: none;
+            word-break: break-word;
+            font-size: 15px;
+        }
+        .skillsbox-container a:hover {
+            text-decoration: underline;
+        }
+
+        /* Audio Visualizer Stage Container */
+        .artwork-stage {
+            position: relative;
+            height: 420px;
+            width: 100%;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 35%, rgba(37, 99, 235, 0.22), transparent 34%),
+                radial-gradient(circle at 22% 18%, rgba(168, 85, 247, 0.10), transparent 28%),
+                linear-gradient(180deg, #070b13 0%, #090d16 58%, #05070d 100%);
+            border: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            isolation: isolate;
+            box-shadow: inset 0 0 80px rgba(56, 189, 248, 0.04);
+        }
+        .artwork-stage.drag-active {
+            box-shadow: inset 0 0 0 2px #38bdf8, inset 0 0 90px rgba(56, 189, 248, 0.18);
+        }
+        .artwork-stage::after {
+            content: "Drop audio here";
+            position: absolute;
+            inset: 16px;
+            z-index: 12;
+            display: grid;
+            place-items: center;
+            border: 1px dashed rgba(125, 211, 252, 0.8);
+            border-radius: 14px;
+            background: rgba(2, 6, 23, 0.72);
+            color: #e0f2fe;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease;
+        }
+        .artwork-stage.drag-active::after {
+            opacity: 1;
+        }
+        .visualizer-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: block;
+        }
+        .visualizer-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(5, 7, 13, 0.98) 0%, rgba(9, 13, 22, 0.82) 75%, rgba(9, 13, 22, 0) 100%);
+            padding: 26px 12px 12px;
+            box-sizing: border-box;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.24s ease;
+        }
+        .visualizer-overlay.collapsed {
+            padding: 4px 12px 6px;
+            background: linear-gradient(0deg, rgba(5, 7, 13, 0.92), rgba(9, 13, 22, 0.40));
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+        .viz-collapse-btn {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            z-index: 3;
+            width: 28px;
+            height: 20px;
+            padding: 0;
+            border: 1px solid rgba(125, 211, 252, 0.32);
+            border-radius: 999px;
+            background: rgba(8, 15, 29, 0.78);
+            color: #bae6fd;
+            display: grid;
+            place-items: center;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 14px rgba(2, 6, 23, 0.30);
+            transition: transform 0.22s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        .viz-collapse-btn:hover {
+            background: rgba(14, 165, 233, 0.20);
+            border-color: rgba(125, 211, 252, 0.70);
+            color: #ffffff;
+        }
+        .viz-collapse-btn:focus-visible {
+            outline: 2px solid #7dd3fc;
+            outline-offset: 2px;
+        }
+        .visualizer-overlay.collapsed .viz-collapse-btn {
+            transform: translateX(-50%) rotate(180deg);
+        }
+        .visualizer-player-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 8px;
+            opacity: 1;
+            max-height: 200px;
+            visibility: visible;
+            overflow: hidden;
+            transition: opacity 0.2s ease, max-height 0.24s ease, visibility 0.2s ease;
+        }
+        .visualizer-overlay.collapsed .visualizer-player-content {
+            opacity: 0;
+            max-height: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .visualizer-title-bar {
+            color: #f8fafc;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.35px;
+            height: 18px;
+            line-height: 18px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            text-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+            width: 100%;
+        }
+        .visualizer-controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .viz-btn {
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            min-height: 34px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.24);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            white-space: nowrap;
+            flex: 1 1 auto;
+        }
+        .viz-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(56, 189, 248, 0.4);
+        }
+        .viz-btn:focus-visible,
+        .viz-seek-bar:focus-visible {
+            outline: 2px solid #7dd3fc;
+            outline-offset: 2px;
+        }
+        .viz-btn:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .viz-seek-bar {
+            flex: 1 1 80px;
+            min-width: 60px;
+            height: 5px;
+            border-radius: 999px;
+            accent-color: #38bdf8;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.16);
+        }
+        .viz-time {
+            flex: 0 0 auto;
+            color: #cbd5e1;
+            font: 700 10px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .viz-hint {
+            line-height: 1.3;
+            color: rgba(203, 213, 225, 0.72);
+            font-size: 9.5px;
+            text-align: center;
+            letter-spacing: 0.2px;
+            word-break: break-word;
+            width: 100%;
+        }
+        #vizUploadBtn {
+            flex: 1 1 100px;
+            max-width: 130px;
+        }
+        #vizPlayBtn {
+            flex: 0 0 68px;
+        }
+        #vizMicBtn,
+        #vizDemoBtn {
+            flex: 0 0 auto;
+        }
+        /* Active state for the mic / demo toggle buttons. */
+        .viz-btn.viz-btn-active {
+            background: linear-gradient(135deg, #16a34a, #4ade80);
+            box-shadow: 0 4px 16px rgba(74, 222, 128, 0.42);
+        }
+        @media (max-width: 560px) {
+            .visualizer-controls-row {
+                gap: 6px;
+            }
+            .viz-seek-bar {
+                width: 100%;
+                flex: 1 1 100%;
+            }
+        }
+
+        #vizModeBtn,
+        #vizFullscreenBtn {
+            flex: 0 0 auto;
+        }
+        .viz-volume-wrap {
+            flex: 0 1 104px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #bae6fd;
+            font-size: 12px;
+            min-width: 72px;
+            box-sizing: border-box;
+        }
+        .viz-volume-slider {
+            width: 100%;
+            min-width: 52px;
+            height: 5px;
+            border-radius: 999px;
+            accent-color: #38bdf8;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.16);
+        }
+        .viz-volume-slider:focus-visible {
+            outline: 2px solid #7dd3fc;
+            outline-offset: 2px;
+        }
+        /* Fullscreen keeps the stage dark-themed and lets it fill the screen. */
+        .artwork-stage:fullscreen {
+            height: 100%;
+            border-radius: 0;
+            border: none;
+        }
+
+        /* --- PROJECTS SUB-STYLES --- */
+        .projects-layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px;
+            margin-top: 25px;
+        }
+        .projects-panel-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            text-align: center;  
+            width: 100%;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .projects-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            flex-direction: column;  
+            gap: 8px;
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 12px;
+        }
+        .projects-panel-header h3 {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 750;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        .status-badge.status-current {
+            background: var(--soft-green);
+            color: var(--current-green);
+            border: 1px solid #bbf7d0;
+        }
+        .status-badge.status-scrapped {
+            background: var(--soft-red);
+            color: var(--scrap-red);
+            border: 1px solid #fecdd3;
+        }
+        .projects-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            max-width: 450px;
+        }
+        .project-row-link {
+            display: flex;
+            flex-direction: column; 
+            align-items: center;    
+            justify-content: center;
+            gap: 12px;
+            padding: 18px;
+            border-radius: var(--radius2);
+            border: 1px solid var(--line);
+            background: var(--card);
+            text-decoration: none;
+            color: var(--ink);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.3s ease;
+            text-align: center;     
+        }
+        .project-row-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(15,23,42,0.05);
+            border-color: var(--accent);
+        }
+        .project-meta-info {
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .project-vector-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 14px;
+            box-shadow: 0 6px 12px rgba(15,23,42,0.1);
+        }
+        .project-vector-icon.color-blue { background: linear-gradient(135deg, #2563eb, #38bdf8); }
+        .project-vector-icon.color-purple { background: linear-gradient(135deg, #6d28d9, #a855f7); }
+        .project-vector-icon.color-orange { background: linear-gradient(135deg, #ea580c, #f59e0b); }
+        .project-vector-icon.color-dark { background: linear-gradient(135deg, #111827, #475569); }
+        .project-vector-icon.color-red { background: linear-gradient(135deg, #7f1d1d, #ef4444); }
+        
+        .project-headline-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+        .project-sub-label {
+            margin: 2px 0 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        .project-action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 24px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 13px;
+            color: #ffffff;
+            background: var(--btn-blue);
+            box-shadow: 0 6px 12px rgba(37,99,235,0.15);
+            white-space: nowrap;
+            width: 100%;
+            max-width: 120px; 
+            box-sizing: border-box;
+        }
+        .project-action-button.type-shop { background: var(--orange-shop); box-shadow: 0 6px 12px rgba(234,88,12,0.15); }
+        .project-action-button.type-scrap { background: var(--scrap-red); box-shadow: 0 6px 12px rgba(127,29,29,0.15); }
+        .project-action-button.type-alt { background: var(--btn-dark); box-shadow: 0 6px 12px rgba(15, 23, 42, 0.15); }
+
+        /* --- WORK EXPERIENCE SUB-STYLES --- */
+        .exp-card-wrapper {
+            background: linear-gradient(180deg, rgba(17,24,39,0.95), rgba(17,24,39,0.85));
+            border: 1px solid var(--exp-line);
+            border-radius: var(--radius);
+            box-shadow: var(--exp-shadow);
+            padding: 40px 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+            margin: 25px auto 0 auto;
+            box-sizing: border-box;
+        }
+        .exp-card-wrapper h3 {
+            margin: 0 0 24px 0;
+            font-size: 22px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .exp-link-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 32px;
+            border-radius: 12px;
+            border: 1px solid rgba(34,197,94,0.4);
+            background: rgba(34,197,94,0.12);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.18s ease;
+            box-shadow: 0 10px 24px rgba(34,197,94,0.15);
+        }
+        .exp-link-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(34,197,94,0.22);
+            border-color: rgba(34,197,94,0.6);
+            box-shadow: 0 14px 32px rgba(34,197,94,0.22);
+        }
+        .exp-link-btn::after {
+            content: "↗";
+            font-size: 18px;
+        }
+        .exp-glow-box {
+            margin-top: 25px;
+            background: linear-gradient(135deg, rgba(17,24,39,0.95), rgba(17,24,39,0.85));
+            border: 1px solid var(--exp-line);
+            border-radius: var(--radius);
+            box-shadow: var(--exp-shadow), 0 0 40px rgba(34,197,94,0.15);
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px; 
+            margin-left: auto;   
+            margin-right: auto;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .exp-glow-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--exp-shadow), 0 0 60px rgba(34,197,94,0.25);
+            border-color: rgba(34,197,94,0.35);
+        }
+        .exp-glow-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 20px rgba(34,197,94,0.4);
+        }
+        .exp-glow-flag {
+            width: 75px;
+            height: 38px;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+        }
+
+        /* --- SHARED FILES SUB-STYLES --- */
+        .files-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+            margin-top: 25px;
+            text-align: center;
+        }
+        .files-panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .files-panel-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(15, 23, 42, 0.015);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .files-panel-header h3 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            font-weight: 750;
+        }
+        .files-panel-subtitle {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .file-list-container {
+            padding: 25px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .file-card-box {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius2);
+            padding: 20px;
+            width: 100%;
+            max-width: 420px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.3s ease;
+        }
+        .file-card-box:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+        .file-info-centered {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .file-icon-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: rgba(0, 112, 243, 0.08);
+            border: 1px solid rgba(0, 112, 243, 0.2);
+            font-size: 22px;
+        }
+        .file-name-txt {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+        .file-desc-txt {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            max-width: 320px;
+        }
+        .file-type-pill {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent);
+            background: rgba(0, 112, 243, 0.08);
+            border: 1px solid rgba(0, 112, 243, 0.15);
+            padding: 4px 12px;
+            border-radius: 999px;
+            text-transform: uppercase;
+        }
+        .meta-container-centered {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+        .meta-mini-box {
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.015);
+            border: 1px solid var(--line);
+        }
+        .meta-mini-label {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .meta-mini-value {
+            display: block;
+            color: var(--ink);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .file-actions-layout {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+            margin-top: 5px;
+        }
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 40px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: var(--card);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            color: var(--ink);
+            text-decoration: none;
+        }
+        .action-btn:hover {
+            transform: translateY(-1px);
+            background: var(--button-bg);
+        }
+        .action-btn.primary-style {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+        .action-btn.primary-style:hover {
+            opacity: 0.9;
+        }
+        .preview-pane-content {
+            padding: 25px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .frame-browser-container {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius2);
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+            width: 100%;
+            max-width: 450px;
+        }
+        .frame-top-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            height: 34px;
+            padding: 0 12px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(15, 23, 42, 0.02);
+        }
+        .window-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #cbd5e1;
+        }
+        .window-dot:nth-child(1) { background: #ff5f56; }
+        .window-dot:nth-child(2) { background: #ffbd2e; }
+        .window-dot:nth-child(3) { background: #27c93f; }
+        .responsive-aspect-ratio {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+        }
+        .responsive-aspect-ratio iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #f8f9fa;
+        }
+        .helper-info-card {
+            margin-top: 15px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: rgba(15, 23, 42, 0.01);
+            color: var(--muted);
+            font-size: 12px;
+            max-width: 420px;
+            line-height: 1.5;
+        }
+
+        /* Responsive Layout Optimization Filters */
+        @media (max-width: 850px) {
+            .skills-grid, .files-grid, .projects-layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Empty State Styling Placeholder */
+        .empty-state-notice {
+            padding: 40px 20px;
+            color: var(--muted);
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+
+        /* Footer Styling */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+    </style>
+
+</head>
+<body>
+
+    <header>
+        <h1>Dave Persaud</h1>
+    </header>
+
+    <nav>
+        <div class="nav-container" id="mainNav">
+            <a href="#about">About</a>
+            <a href="#education">Education</a>
+            <a href="#skills">Skills</a>
+            <a href="#experience">Experience</a>
+            <a href="#projects">Projects</a>
+            <a href="#licenses">Licenses</a>
+            <a href="#files">Files</a>
+            <button id="themeToggleBtn" type="button">Dark Mode</button>
+            
+            <!-- Font Changer Dropdown Container -->
+            <div class="font-dropdown-wrapper">
+                <button class="font-select-trigger" id="fontDropdownTrigger" type="button">Fonts ▾</button>
+                <div class="font-dropdown-menu" id="fontDropdownMenu">
+                    <button class="font-option" style="font-family: Arial, sans-serif;" onclick="changeGlobalFont('Arial, sans-serif')">Default (Arial)</button>
+                    <button class="font-option" style="font-family: 'Times New Roman', serif;" onclick="changeGlobalFont('\'Times New Roman\', serif')">Times New Roman</button>
+                    <button class="font-option" style="font-family: 'Courier New', monospace;" onclick="changeGlobalFont('\'Courier New\', monospace')">Courier New</button>
+                    <button class="font-option" style="font-family: Georgia, serif;" onclick="changeGlobalFont('Georgia, serif')">Georgia</button>
+                    <button class="font-option" style="font-family: Verdana, sans-serif;" onclick="changeGlobalFont('Verdana, sans-serif')">Verdana</button>
+                    <button class="font-option" style="font-family: Impact, charcoal, sans-serif;" onclick="changeGlobalFont('Impact, charcoal, sans-serif')">Impact</button>
+                    <button class="font-option" style="font-family: 'Trebuchet MS', sans-serif;" onclick="changeGlobalFont('\'Trebuchet MS\', sans-serif')">Trebuchet MS</button>
+                    <button class="font-option" style="font-family: 'Comic Sans MS', cursive;" onclick="changeGlobalFont('\'Comic Sans MS\', cursive')">Comic Sans</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <section id="about">
+            <h2>About</h2>
+            <p>Hello, my name is Dave Persaud. I consider myself to be a working-class person though I would love to do nothing for the rest of my life if that was an option. I am currently obtaining an education, and learning my capabilities.</p>
+            
+            <div class="about-subsection">
+                <h3>About Webpage</h3>
+                <p>Website rebuilt by Gemini, ChatGPT and Kimi</p>
+            </div>
+        </section>
+
+        <section id="education">
+            <h2>Education</h2>
+            <div class="edu-stack">
+
+                <div class="edu-card-item">
+                    <div class="edu-header-main">
+                        <h3 class="school">H. Lavity Stoutt Community College</h3>
+                        <div class="degree">Associate of Science (AS), Accounting</div>
+                        <div class="dates">Aug 2022 – May 2024</div>
+                    </div>
+
+                    <div class="rows-layout">
+                        <div class="row-item">
+                            <div class="label-text">Location</div>
+                            <div class="value-text">Tortola, British Virgin Islands</div>
+                        </div>
+                        <div class="row-item">
+                            <div class="label-text">Status</div>
+                            <div class="value-text">Alumni</div>
+                        </div>
+                        <div class="row-item">
+                            <div class="label-text">Societies</div>
+                            <div class="value-text">National Technical Honor Society</div>
+                        </div>
+                        <div class="row-item">
+                            <div class="label-text">Credential link</div>
+                            <div class="value-text">
+                                <a href="https://www.parchment.com/u/award/103781b801587623112d5f47f03b75c7" target="_blank" rel="noopener noreferrer">
+                                    View credential on Parchment
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="badges-container">
+                        <div class="badge-box wes-badge" aria-label="Verified by WES">
+                            <span class="small-txt">Verified by</span>
+                            <span class="big-txt">WES</span>
+                        </div>
+                        <div class="badge-box" aria-label="British Virgin Islands flag">
+                            <img class="flag-img" src="BVI.png" alt="British Virgin Islands flag" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="edu-card-item">
+                    <div class="edu-header-main">
+                        <h3 class="school">Seneca Polytechnic</h3>
+                        <div class="degree">Advanced Diploma of Electromechanical Engineering Technology (Automation)</div>
+                        <div class="dates">Expected: May 2027</div>
+                    </div>
+
+                    <div class="rows-layout">
+                        <div class="row-item">
+                            <div class="label-text">Location</div>
+                            <div class="value-text">Toronto, Canada</div>
+                        </div>
+                        <div class="row-item">
+                            <div class="label-text">Status</div>
+                            <div class="value-text">Update information</div>
+                        </div>
+                        <div class="row-item">
+                            <div class="label-text">Societies</div>
+                            <div class="value-text">None</div>
+                        </div>
+                        <div class="row-item">
+                            <div class="label-text">Credential link</div>
+                            <div class="value-text">None</div>
+                        </div>
+                        <div class="row-item">
+                            <div class="label-text">Certification link</div>
+                            <div class="value-text">
+                                <a href="https://www.linkedin.com/in/%F0%9F%92%A0-dave-c-persaud-b4b374355/details/certifications/" target="_blank" rel="noopener noreferrer">
+                                    View certifications on LinkedIn
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="badges-container">
+                        <div class="badge-box" aria-label="Canada flag">
+                            <img class="flag-img" src="Canada.png" alt="Canada flag" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="skills">
+            <h2>Skills</h2>
+            
+            <div class="skills-grid">
+                <div class="skills-display-card">
+                    <h3 style="margin:0 0 10px; font-size:22px;">Skills found here:</h3>
+                    <div class="skillsbox-container">
+                        <a href="https://www.linkedin.com/in/%F0%9F%92%A0-dave-c-persaud-b4b374355/details/skills/" target="_blank" rel="noopener noreferrer">
+                            www.linkedin.com/in/dave-c-persaud-b4b374355
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Interactive Audio Visualizer Stage -->
+                <div class="artwork-stage" id="vizStage">
+                    <canvas class="visualizer-canvas" id="vizCanvas" aria-hidden="true"></canvas>
+                    <audio id="hiddenAudioPlayer" preload="metadata"></audio>
+                    <input type="file" id="audioFileInput" accept="audio/*" style="display: none;" />
+
+                    <div class="visualizer-overlay" id="vizOverlay">
+                        <button class="viz-collapse-btn" id="vizCollapseBtn" type="button" aria-expanded="true" aria-controls="vizPlayerContent" aria-label="Hide audio controls">⌄</button>
+                        <div class="visualizer-player-content" id="vizPlayerContent">
+                            <div class="visualizer-title-bar" id="vizTrackTitle">🎵 Choose an audio file</div>
+                            <div class="visualizer-controls-row">
+                                <button class="viz-btn" id="vizUploadBtn" type="button">📁 Choose Audio</button>
+                                <button class="viz-btn" id="vizPlayBtn" type="button" disabled>▶ Play</button>
+                                <button class="viz-btn" id="vizModeBtn" type="button" aria-label="Cycle visualization mode">◎ Circular</button>
+                                <button class="viz-btn" id="vizMicBtn" type="button" aria-label="Toggle microphone input">🎤 Mic</button>
+                                <button class="viz-btn" id="vizDemoBtn" type="button" aria-label="Toggle built-in demo signal">✨ Demo</button>
+                                <label class="viz-volume-wrap" for="vizVolume" title="Volume">🔊
+                                    <input type="range" class="viz-volume-slider" id="vizVolume" value="80" min="0" max="100" step="1" aria-label="Volume" />
+                                </label>
+                                <button class="viz-btn" id="vizFullscreenBtn" type="button" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                                <input type="range" class="viz-seek-bar" id="vizSeekBar" value="0" min="0" max="100" step="0.1" aria-label="Seek through audio" disabled />
+                                <span class="viz-time" id="vizTimeLabel">0:00 / 0:00</span>
+                            </div>
+                            <div class="viz-hint">MP3, WAV, M4A, OGG and other browser-supported audio • drag & drop supported • Space play/pause • M mute • V mode (6 visuals) • 🎤 live mic • ✨ built-in demo</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience">
+            <h2>Experience</h2>
+            
+            <div class="exp-card-wrapper">
+                <h3>View Full Resume</h3>
+                <a class="exp-link-btn" 
+                   href="https://www.linkedin.com/posts/%F0%9F%92%A0-dave-c-persaud-b4b374355_cv-resume-ugcPost-7460873508093542401-8zEE?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAFiCTGsBGLT1fOZh99mLzxV5FTulko-7460873508093542401" 
+                   target="_blank" 
+                   rel="noopener noreferrer">
+                     Open on LinkedIn
+                </a>
+            </div>
+
+            <div class="exp-glow-box">
+                <span class="exp-glow-text">Glow Finish</span>
+                <img src="BVI.png" alt="BVI Flag" class="exp-glow-flag" />
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>Projects</h2>
+            <p>Current builds and archived experiments.</p>
+            
+            <div class="projects-layout-grid">
+                
+                <div class="projects-panel-card">
+                    <div class="projects-panel-header">
+                        <h3>Current</h3>
+                        <span class="status-badge status-current">Active</span>
+                    </div>
+                    
+                    <div class="projects-list-container">
+                        <a class="project-row-link" href="shopping.html">
+                            <div class="project-meta-info">
+                                <div class="project-vector-icon color-orange">S</div>
+                                <div>
+                                    <h4 class="project-headline-title">Shopping</h4>
+                                    <p class="project-sub-label">Webpage</p>
+                                </div>
+                            </div>
+                            <span class="project-action-button type-shop">Open</span>
+                        </a>
+
+                        <a class="project-row-link" href="playlist.html">
+                            <div class="project-meta-info">
+                                <div class="project-vector-icon color-purple">P</div>
+                                <div>
+                                    <h4 class="project-headline-title">Playlists</h4>
+                                    <p class="project-sub-label">Webpage</p>
+                                </div>
+                            </div>
+                            <span class="project-action-button">Open</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="projects-panel-card">
+                    <div class="projects-panel-header">
+                        <h3>Scrapped</h3>
+                        <span class="status-badge status-scrapped">Archive</span>
+                    </div>
+                    
+                    <div class="projects-list-container">
+                        <a class="project-row-link" href="secondversion.html">
+                            <div class="project-meta-info">
+                                <div class="project-vector-icon color-blue">2</div>
+                                <div>
+                                    <h4 class="project-headline-title">2nd Version</h4>
+                                    <p class="project-sub-label">Old page</p>
+                                </div>
+                            </div>
+                            <span class="project-action-button type-alt">Open</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="licenses">
+            <h2>Licenses</h2>
+            <div class="empty-state-notice">
+                Official statutory government and regulatory board professional licenses (such as P.Eng., CPA, or CFA designations used strictly here as hypothetical examples) will be fully cataloged upon formal issuance.
+            </div>
+        </section>
+
+        <section id="files">
+            <h2>Files</h2>
+            <p>Access shared presentations, documentation modules, and quick cloud resource links directly below.</p>
+            
+            <div class="files-grid">
+                
+                <div class="files-panel">
+                    <div class="files-panel-header">
+                        <h3>Shared Items</h3>
+                        <p class="files-panel-subtitle">Available project assets with quick terminal copy actions.</p>
+                    </div>
+                    
+                    <div class="file-list-container">
+                        <div class="file-card-box">
+                            <div class="file-info-centered">
+                                <div class="file-icon-badge" aria-hidden="true">▣</div>
+                                <h4 class="file-name-txt">Google Slides Presentation</h4>
+                                <p class="file-desc-txt">Presentation deck containing detailed reference frameworks with an active visual layout viewport tracking beside it.</p>
+                                <span class="file-type-pill">Slides</span>
+                            </div>
+                            
+                            <div class="meta-container-centered">
+                                <div class="meta-mini-box">
+                                    <span class="meta-mini-label">File Type</span>
+                                    <span class="meta-mini-value">Google Slides</span>
+                                </div>
+                                <div class="meta-mini-box">
+                                    <span class="meta-mini-label">Access</span>
+                                    <span class="meta-mini-value">External Share Link</span>
+                                </div>
+                            </div>
+                            
+                            <div class="file-actions-layout">
+                                <a class="action-btn primary-style" href="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing" target="_blank" rel="noopener noreferrer">↗ Open</a>
+                                <button class="action-btn copy-asset-link-btn" type="button">📋 Copy Link</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="files-panel">
+                    <div class="files-panel-header">
+                        <h3>Live Preview</h3>
+                        <p class="files-panel-subtitle">Direct viewport stream mapped to public cloud permissions.</p>
+                    </div>
+                    
+                    <div class="preview-pane-content">
+                        <div class="frame-browser-container">
+                            <div class="frame-top-bar" aria-hidden="true">
+                                <span class="window-dot"></span>
+                                <span class="window-dot"></span>
+                                <span class="window-dot"></span>
+                            </div>
+                            <div class="responsive-aspect-ratio">
+                                <iframe 
+                                    title="Google Slides Presentation Live Canvas Frame Viewport" 
+                                    src="https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/embed?start=false&loop=false&delayms=3000" 
+                                    allowfullscreen>
+                                </iframe>
+                            </div>
+                        </div>
+                        <div class="helper-info-card">
+                            Tip: If the remote sandbox asset canvas remains unrendered, please select <strong>Open</strong>. Secure enterprise frames can intermittently filter local script configurations.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Dave Persaud. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const assetTargetUrl = "https://docs.google.com/presentation/d/1MJShCjH08Yim0wbtk4_9wiglhfPD-rpUXKmWH2OyfKM/edit?usp=sharing";
+
+        function purgeActiveWindowFocusContext() {
+            if (document.activeElement && document.activeElement !== document.body) {
+                document.activeElement.blur();
+            }
+            if (document.body) {
+                document.body.focus();
+            }
+        }
+
+        async function captureLinkToSystemClipboard(targetNodeButton) {
+            const contextualTextCache = targetNodeButton.textContent;
+
+            try {
+                await navigator.clipboard.writeText(assetTargetUrl);
+                targetNodeButton.textContent = "✅ Copied";
+            } catch (runtimeClipboardException) {
+                targetNodeButton.textContent = "⚠ Failed";
+                alert("Target system secure copy constraint caught. Resource URI:\n" + assetTargetUrl);
+            }
+
+            setTimeout(() => {
+                targetNodeButton.textContent = contextualTextCache;
+            }, 1400);
+        }
+
+        // Functional Theme Toggle Script logic block with LocalStorage caching
+        const modeToggleButton = document.getElementById("themeToggleBtn");
+        
+        function applyTheme(theme) {
+            if (theme === "dark") {
+                document.documentElement.setAttribute("data-theme", "dark");
+                modeToggleButton.textContent = "Light Mode";
+            } else {
+                document.documentElement.removeAttribute("data-theme");
+                modeToggleButton.textContent = "Dark Mode";
+            }
+        }
+
+        modeToggleButton.addEventListener("click", () => {
+            const currentTheme = document.documentElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            applyTheme(newTheme);
+            localStorage.setItem("portfolio-theme", newTheme);
+        });
+
+        // Dropdown Menu Visibility Switch Logic
+        const fontTrigger = document.getElementById("fontDropdownTrigger");
+        const fontMenu = document.getElementById("fontDropdownMenu");
+
+        fontTrigger.addEventListener("click", (e) => {
+            e.stopPropagation();
+            fontMenu.classList.toggle("show-menu");
+        });
+
+        // Global font application utility with LocalStorage caching
+        function changeGlobalFont(selectedFontFamily) {
+            document.documentElement.style.setProperty('--global-font', selectedFontFamily);
+            localStorage.setItem("portfolio-font", selectedFontFamily);
+            fontMenu.classList.remove("show-menu");
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", () => {
+            fontMenu.classList.remove("show-menu");
+        });
+
+        // Arrow Key Keyboard Navigation Event Controller
+        (function setupNavigationControls() {
+            const navigableElements = Array.from(document.querySelectorAll("#mainNav a, #mainNav button, .font-select-trigger"));
+            let selectedElementIndex = 0;
+
+            document.addEventListener("keydown", (keyboardEvent) => {
+                const activeTagName = document.activeElement ? document.activeElement.tagName : '';
+                if (["INPUT", "TEXTAREA", "SELECT"].includes(activeTagName)) return;
+
+                if (keyboardEvent.key === "ArrowRight") {
+                    keyboardEvent.preventDefault();
+                    selectedElementIndex = (selectedElementIndex + 1) % navigableElements.length;
+                    navigableElements[selectedElementIndex].focus();
+                } 
+                else if (keyboardEvent.key === "ArrowLeft") {
+                    keyboardEvent.preventDefault();
+                    selectedElementIndex = (selectedElementIndex - 1 + navigableElements.length) % navigableElements.length;
+                    navigableElements[selectedElementIndex].focus();
+                }
+            });
+        })();
+
+        /* --- IMPROVED AUDIO VISUALIZER ENGINE --- */
+        (function setupAdvancedAudioVisualizer() {
+            const stage = document.getElementById('vizStage');
+            const canvas = document.getElementById('vizCanvas');
+            const ctx = canvas.getContext('2d', { alpha: true });
+            const audioPlayer = document.getElementById('hiddenAudioPlayer');
+            const fileInput = document.getElementById('audioFileInput');
+            const uploadBtn = document.getElementById('vizUploadBtn');
+            const playBtn = document.getElementById('vizPlayBtn');
+            const modeBtn = document.getElementById('vizModeBtn');
+            const micBtn = document.getElementById('vizMicBtn');
+            const demoBtn = document.getElementById('vizDemoBtn');
+            const volumeSlider = document.getElementById('vizVolume');
+            const fullscreenBtn = document.getElementById('vizFullscreenBtn');
+            const seekBar = document.getElementById('vizSeekBar');
+            const trackTitle = document.getElementById('vizTrackTitle');
+            const timeLabel = document.getElementById('vizTimeLabel');
+            const overlay = document.getElementById('vizOverlay');
+            const collapseBtn = document.getElementById('vizCollapseBtn');
+
+            let audioCtx = null;
+            let analyser = null;
+            let source = null;
+            let frequencyData = null;
+            let smoothedData = null;
+            let prevSpectrum = null;
+            let timeData = null;
+            let currentObjectUrl = null;
+            let lastFileTitle = '🎵 Choose an audio file';
+            let particles = [];
+            let shockwaves = [];
+            let fluxHistory = [];
+            let lastBeatTime = 0;
+            let beatPulse = 0;
+            let baseHue = 198;
+            let cssWidth = 1;
+            let cssHeight = 1;
+            let dpr = 1;
+            let rafId = null;
+            let isLoopRunning = false;
+            let isStageVisible = true;
+            let lastFrameTime = 0;
+            let orbitRotation = 0;
+            let spiralRotation = 0;
+            let barsGradient = null;
+            let barsGradientKey = '';
+            let bgGlowGradient = null;
+            let bgGlowKey = '';
+            let coreGradient = null;
+            let coreKey = '';
+            let vignetteGradient = null;
+            let nebulaParticles = null;
+            let micStream = null;
+            let micSource = null;
+            let micActive = false;
+            let analyserFeedsOutput = true;
+            let demo = null;
+
+            const BAR_COUNT = 84;
+            const MAX_PARTICLES = 140;
+            const HUE_BUCKETS = 6;
+            const BEAT_MIN_INTERVAL_MS = 140;
+            const FLUX_HISTORY_WINDOW_MS = 1000;
+            const NEBULA_COUNT = 130;
+            const SPIRAL_POINTS = 160;
+            const SPIRAL_TURNS = 3.25;
+            const SPIRAL_BUCKETS = 8;
+            const barPeaks = new Float32Array(BAR_COUNT);
+
+            // Precomputed unit-circle lookup tables so the circular and spiral
+            // layouts never call Math.sin/Math.cos inside the render loop.
+            const circleCos = new Float32Array(BAR_COUNT);
+            const circleSin = new Float32Array(BAR_COUNT);
+            for (let i = 0; i < BAR_COUNT; i++) {
+                const angle = (i / BAR_COUNT) * Math.PI * 2 - Math.PI / 2;
+                circleCos[i] = Math.cos(angle);
+                circleSin[i] = Math.sin(angle);
+            }
+            const spiralCos = new Float32Array(SPIRAL_POINTS);
+            const spiralSin = new Float32Array(SPIRAL_POINTS);
+            const spiralT = new Float32Array(SPIRAL_POINTS);
+            for (let i = 0; i < SPIRAL_POINTS; i++) {
+                const t = i / (SPIRAL_POINTS - 1);
+                const angle = t * SPIRAL_TURNS * Math.PI * 2 - Math.PI / 2;
+                spiralT[i] = t;
+                spiralCos[i] = Math.cos(angle);
+                spiralSin[i] = Math.sin(angle);
+            }
+
+            const VIS_MODES = [
+                { id: 'circular', icon: '◎', label: 'Circular' },
+                { id: 'bars', icon: '▮', label: 'Bars' },
+                { id: 'wave', icon: '〜', label: 'Wave' },
+                { id: 'orbit', icon: '◍', label: 'Orbit' },
+                { id: 'nebula', icon: '✦', label: 'Nebula' },
+                { id: 'spiral', icon: '🌀', label: 'Spiral' }
+            ];
+
+            // Unknown/stale saved ids (e.g. from older versions of this page)
+            // fall back gracefully to the first mode.
+            let currentModeIndex = (() => {
+                const savedMode = localStorage.getItem('viz-mode');
+                const savedIndex = VIS_MODES.findIndex((mode) => mode.id === savedMode);
+                return savedIndex >= 0 ? savedIndex : 0;
+            })();
+
+            // Respect the user's reduced-motion preference: no particles/shockwave, slower ambient motion.
+            const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+            let prefersReducedMotion = reducedMotionQuery.matches;
+            if (typeof reducedMotionQuery.addEventListener === 'function') {
+                reducedMotionQuery.addEventListener('change', (event) => {
+                    prefersReducedMotion = event.matches;
+                });
+            }
+
+            function motionScale() {
+                return prefersReducedMotion ? 0.35 : 1;
+            }
+
+            function clamp(value, min, max) {
+                return Math.min(max, Math.max(min, value));
+            }
+
+            function formatTime(seconds) {
+                if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+                return `${mins}:${secs}`;
+            }
+
+            // Slowly rotating base hue shared by every mode (~4°/s, sped up by live energy).
+            function advanceBaseHue(deltaMs, energy) {
+                baseHue = (baseHue + deltaMs * 0.004 * (0.35 + energy * 1.8)) % 360;
+            }
+
+            // Key for the hue-driven bars gradient: changes only when the hue bucket,
+            // energy bucket or canvas size changes, so the gradient is never rebuilt per frame.
+            function barsKey(energy) {
+                return `${cssWidth}x${cssHeight}:${Math.floor(baseHue / 10)}:${Math.round(energy * 6)}`;
+            }
+
+            function rebuildBarsGradient(energy) {
+                const light = 55 + Math.round(energy * 6) * 2.5;
+                barsGradient = ctx.createLinearGradient(0, cssHeight, 0, cssHeight * 0.22);
+                barsGradient.addColorStop(0, `hsl(${baseHue}, 92%, ${light}%)`);
+                barsGradient.addColorStop(0.55, `hsl(${(baseHue + 42) % 360}, 88%, ${light + 4}%)`);
+                barsGradient.addColorStop(1, `hsl(${(baseHue + 84) % 360}, 84%, ${light + 8}%)`);
+                barsGradientKey = barsKey(energy);
+            }
+
+            // Energy-reactive radial background glow, cached on a coarse alpha/hue key.
+            function syncBackgroundGlow(energy) {
+                const alphaInner = 0.08 + energy * 0.14 + beatPulse * 0.1;
+                const key = `${cssWidth}x${cssHeight}:${Math.round(alphaInner * 40)}:${Math.floor(baseHue / 20)}`;
+                if (key === bgGlowKey && bgGlowGradient) return bgGlowGradient;
+                bgGlowKey = key;
+                bgGlowGradient = ctx.createRadialGradient(
+                    cssWidth * 0.5, cssHeight * 0.38, 0,
+                    cssWidth * 0.5, cssHeight * 0.38, Math.max(cssWidth, cssHeight) * 0.65
+                );
+                bgGlowGradient.addColorStop(0, `hsla(${baseHue}, 85%, 55%, ${alphaInner})`);
+                bgGlowGradient.addColorStop(0.42, `hsla(${(baseHue + 50) % 360}, 80%, 45%, ${0.035 + energy * 0.08 + beatPulse * 0.05})`);
+                bgGlowGradient.addColorStop(1, 'rgba(2, 6, 23, 0)');
+                return bgGlowGradient;
+            }
+
+            // Static vignette overlay, rebuilt only when the canvas resizes.
+            function rebuildVignetteGradient() {
+                const radius = Math.hypot(cssWidth, cssHeight) * 0.62;
+                vignetteGradient = ctx.createRadialGradient(
+                    cssWidth / 2, cssHeight * 0.42, Math.min(cssWidth, cssHeight) * 0.28,
+                    cssWidth / 2, cssHeight * 0.42, radius
+                );
+                vignetteGradient.addColorStop(0, 'rgba(2, 6, 23, 0)');
+                vignetteGradient.addColorStop(0.72, 'rgba(2, 6, 23, 0.08)');
+                vignetteGradient.addColorStop(1, 'rgba(2, 6, 23, 0.42)');
+            }
+
+            // Render at device-pixel resolution so the visualizer stays sharp on Retina/HiDPI displays.
+            function resizeCanvas() {
+                const rect = stage.getBoundingClientRect();
+                cssWidth = Math.max(1, Math.round(rect.width));
+                cssHeight = Math.max(1, Math.round(rect.height));
+                dpr = clamp(window.devicePixelRatio || 1, 1, 2);
+
+                canvas.width = Math.round(cssWidth * dpr);
+                canvas.height = Math.round(cssHeight * dpr);
+                canvas.style.width = `${cssWidth}px`;
+                canvas.style.height = `${cssHeight}px`;
+
+                // Draw using CSS-pixel coordinates even though the backing bitmap is higher resolution.
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                // Invalidate every size-dependent cache so gradients rebuild on the next frame.
+                barsGradientKey = '';
+                bgGlowKey = '';
+                coreKey = '';
+                rebuildVignetteGradient();
+            }
+
+            const resizeObserver = new ResizeObserver(resizeCanvas);
+            resizeObserver.observe(stage);
+            window.addEventListener('resize', resizeCanvas, { passive: true });
+            resizeCanvas();
+
+            class BurstParticle {
+                constructor(x, y, energy) {
+                    this.x = x;
+                    this.y = y;
+                    this.angle = Math.random() * Math.PI * 2;
+                    this.speed = 0.8 + Math.random() * (2.2 + energy * 3.5);
+                    this.radius = 0.8 + Math.random() * 2.2;
+                    this.alpha = 0.85;
+                    this.decay = 0.012 + Math.random() * 0.018;
+                    this.hue = (baseHue + Math.random() * 100) % 360;
+                }
+                update() {
+                    this.x += Math.cos(this.angle) * this.speed;
+                    this.y += Math.sin(this.angle) * this.speed;
+                    this.speed *= 0.985;
+                    this.alpha -= this.decay;
+                }
+                draw() {
+                    ctx.save();
+                    ctx.globalAlpha = Math.max(0, this.alpha);
+                    ctx.fillStyle = `hsl(${this.hue}, 100%, 68%)`;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = `hsl(${this.hue}, 100%, 62%)`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            async function initWebAudio() {
+                if (!audioCtx) {
+                    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContextCtor) {
+                        trackTitle.textContent = '⚠ Web Audio is not supported in this browser';
+                        return false;
+                    }
+
+                    audioCtx = new AudioContextCtor();
+                    analyser = audioCtx.createAnalyser();
+                    analyser.fftSize = 2048;
+                    analyser.smoothingTimeConstant = 0.84;
+                    analyser.minDecibels = -90;
+                    analyser.maxDecibels = -10;
+
+                    // A MediaElementSource may only be created once for this audio element.
+                    source = audioCtx.createMediaElementSource(audioPlayer);
+                    source.connect(analyser);
+                    analyser.connect(audioCtx.destination);
+                    analyserFeedsOutput = true;
+
+                    frequencyData = new Uint8Array(analyser.frequencyBinCount);
+                    smoothedData = new Float32Array(analyser.frequencyBinCount);
+                    prevSpectrum = new Float32Array(analyser.frequencyBinCount);
+                    timeData = new Uint8Array(analyser.fftSize);
+                }
+
+                if (audioCtx.state === 'suspended') {
+                    try {
+                        await audioCtx.resume();
+                    } catch (error) {
+                        console.warn('AudioContext resume failed:', error);
+                    }
+                }
+                return true;
+            }
+
+            // The analyser normally feeds the speakers; while the mic is live we disconnect
+            // that path so microphone input can never cause speaker feedback.
+            function setAnalyserOutput(shouldFeed) {
+                if (!analyser || shouldFeed === analyserFeedsOutput) return;
+                try {
+                    analyser.disconnect();
+                } catch (error) {
+                    console.warn('Analyser disconnect failed:', error);
+                }
+                if (shouldFeed) analyser.connect(audioCtx.destination);
+                analyserFeedsOutput = shouldFeed;
+            }
+
+            // Envelope smoothing: fast attack (~0.5), slow release (~0.08) per frame so bars
+            // rise instantly but decay gracefully when playback pauses or the track goes quiet.
+            function updateSmoothedFrequencyData(isPlaying) {
+                analyser.getByteFrequencyData(frequencyData);
+                analyser.getByteTimeDomainData(timeData);
+                for (let i = 0; i < frequencyData.length; i++) {
+                    const raw = isPlaying ? frequencyData[i] : 0;
+                    const current = smoothedData[i];
+                    smoothedData[i] = current + (raw - current) * (raw > current ? 0.5 : 0.08);
+                }
+            }
+
+            function getAverageForRange(minHz, maxHz) {
+                if (!analyser || !smoothedData || !audioCtx) return 0;
+                const nyquist = audioCtx.sampleRate / 2;
+                const start = clamp(Math.floor((minHz / nyquist) * smoothedData.length), 0, smoothedData.length - 1);
+                const end = clamp(Math.ceil((maxHz / nyquist) * smoothedData.length), start + 1, smoothedData.length);
+                let sum = 0;
+                for (let i = start; i < end; i++) sum += smoothedData[i];
+                return (sum / Math.max(1, end - start)) / 255;
+            }
+
+            function getLogFrequencyValue(normalizedPosition) {
+                if (!analyser || !smoothedData || !audioCtx) return 0;
+                const minHz = 35;
+                const maxHz = Math.min(16000, audioCtx.sampleRate / 2);
+                const frequency = minHz * Math.pow(maxHz / minHz, clamp(normalizedPosition, 0, 1));
+                const index = clamp(
+                    Math.round((frequency / (audioCtx.sampleRate / 2)) * smoothedData.length),
+                    0,
+                    smoothedData.length - 1
+                );
+
+                // Blend neighboring bins to reduce flicker.
+                let sum = 0;
+                let count = 0;
+                for (let offset = -2; offset <= 2; offset++) {
+                    const sampleIndex = index + offset;
+                    if (sampleIndex >= 0 && sampleIndex < smoothedData.length) {
+                        sum += smoothedData[sampleIndex];
+                        count++;
+                    }
+                }
+                return (sum / Math.max(1, count)) / 255;
+            }
+
+            // Peak-hold level per bar: jumps up instantly, then decays slowly.
+            function getPeakLevel(index, value) {
+                const decayed = barPeaks[index] - 0.0075;
+                barPeaks[index] = value >= barPeaks[index] ? value : Math.max(value, decayed);
+                return barPeaks[index];
+            }
+
+            function drawBackground(width, height, energy, treble, now, trailFadeAlpha) {
+                if (trailFadeAlpha > 0) {
+                    // Wave/spiral modes: fade the previous frame instead of clearing so the
+                    // trace leaves a soft glow trail behind it.
+                    ctx.fillStyle = `rgba(5, 7, 13, ${trailFadeAlpha})`;
+                    ctx.fillRect(0, 0, width, height);
+                    return;
+                }
+
+                ctx.clearRect(0, 0, width, height);
+
+                ctx.fillStyle = syncBackgroundGlow(energy);
+                ctx.fillRect(0, 0, width, height);
+
+                // Very subtle moving stars for depth, even when paused; twinkle brightness
+                // and size follow the treble band.
+                ctx.save();
+                const twinkleBase = 0.14 + treble * 0.55;
+                for (let i = 0; i < 22; i++) {
+                    const x = ((i * 97.13 + now * 0.008 * (1 + (i % 3))) % (width + 40)) - 20;
+                    const y = ((i * 53.71) % Math.max(1, height - 95)) + 10;
+                    const r = 0.55 + (i % 4) * 0.22 + treble * 0.5;
+                    const twinkle = 0.5 + 0.5 * Math.sin(now * 0.004 + i * 1.7);
+                    ctx.globalAlpha = clamp(twinkleBase * (0.35 + twinkle * 0.65), 0, 1);
+                    ctx.fillStyle = i % 2 ? '#7dd3fc' : '#c4b5fd';
+                    ctx.beginPath();
+                    ctx.arc(x, y, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            function drawCircularWaveform(centerX, centerY, baseRadius, energy) {
+                if (!timeData) return;
+
+                ctx.save();
+                ctx.beginPath();
+                const samples = 180;
+                for (let i = 0; i <= samples; i++) {
+                    const sampleIndex = Math.floor((i / samples) * (timeData.length - 1));
+                    const wave = (timeData[sampleIndex] - 128) / 128;
+                    const angle = (i / samples) * Math.PI * 2 - Math.PI / 2;
+                    const radius = baseRadius + wave * (7 + energy * 11 + beatPulse * 6);
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.strokeStyle = `hsla(${(baseHue + 150) % 360}, 90%, 84%, ${0.28 + energy * 0.45})`;
+                ctx.lineWidth = 1.2;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = `hsl(${baseHue}, 95%, 62%)`;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            function drawCore(centerX, centerY, radius, bass, mids, treble, now) {
+                const pulse = radius * (0.04 + bass * 0.14 + beatPulse * 0.22);
+                const coreRadius = radius + pulse;
+                const hueShift = (baseHue + treble * 38) % 360;
+
+                // Cache the radial gradient on a coarse key so quiet frames reuse the same object.
+                const key = [
+                    centerX | 0, centerY | 0, Math.round(coreRadius),
+                    Math.round(hueShift / 12), Math.round(bass * 8), Math.round(mids * 8)
+                ].join(':');
+                if (key !== coreKey || !coreGradient) {
+                    coreKey = key;
+                    coreGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, coreRadius * 1.25);
+                    coreGradient.addColorStop(0, `rgba(255, 255, 255, ${0.82 + bass * 0.12})`);
+                    coreGradient.addColorStop(0.16, `hsla(${hueShift}, 95%, 68%, ${0.78 + mids * 0.16})`);
+                    coreGradient.addColorStop(0.48, `hsla(${(hueShift + 30) % 360}, 90%, 58%, ${0.28 + bass * 0.34})`);
+                    coreGradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+                }
+                ctx.fillStyle = coreGradient;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, coreRadius * 1.25, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(now * 0.00008);
+                ctx.strokeStyle = `rgba(125, 211, 252, ${0.14 + treble * 0.25})`;
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 10]);
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.82, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Mode 1 — circular: radial spectrum with peak-hold caps and a mirrored inner reflection.
+            // Bars are batched into a handful of hue buckets so glow (shadowBlur) is applied per bucket,
+            // not per bar, and all angles come from the precomputed lookup tables.
+            function drawCircularMode(centerX, centerY, radius, maxBarLength) {
+                const buckets = [];
+                for (let b = 0; b < HUE_BUCKETS; b++) buckets.push({ path: new Path2D(), hueSum: 0, count: 0 });
+                const reflectionPath = new Path2D();
+                const peakPath = new Path2D();
+
+                for (let i = 0; i < BAR_COUNT; i++) {
+                    const halfPosition = i <= BAR_COUNT / 2
+                        ? i / (BAR_COUNT / 2)
+                        : (BAR_COUNT - i) / (BAR_COUNT / 2);
+                    const value = getLogFrequencyValue(halfPosition);
+                    const shaped = Math.pow(value, 1.38);
+                    const barLength = (4 + shaped * maxBarLength) * (1 + beatPulse * 0.15);
+                    const cos = circleCos[i];
+                    const sin = circleSin[i];
+                    const inner = radius + 7;
+                    const outer = inner + barLength;
+
+                    const bucket = buckets[Math.min(HUE_BUCKETS - 1, Math.floor(halfPosition * HUE_BUCKETS))];
+                    bucket.path.moveTo(centerX + cos * inner, centerY + sin * inner);
+                    bucket.path.lineTo(centerX + cos * outer, centerY + sin * outer);
+                    bucket.hueSum += (baseHue + halfPosition * 86) % 360;
+                    bucket.count++;
+
+                    // Mirrored inner reflection of each bar, drawn much softer.
+                    const reflectionOuter = radius - 5;
+                    const reflectionInner = reflectionOuter - barLength * 0.42;
+                    reflectionPath.moveTo(centerX + cos * reflectionOuter, centerY + sin * reflectionOuter);
+                    reflectionPath.lineTo(centerX + cos * reflectionInner, centerY + sin * reflectionInner);
+
+                    // Peak-hold cap: a short tick perpendicular to the bar at its decaying
+                    // high-water mark. The tangent of angle + 90° is (-sin, cos).
+                    const peak = getPeakLevel(i, shaped);
+                    const peakRadius = inner + 4 + peak * maxBarLength;
+                    const tangentX = -sin * 2.4;
+                    const tangentY = cos * 2.4;
+                    peakPath.moveTo(centerX + cos * peakRadius - tangentX, centerY + sin * peakRadius - tangentY);
+                    peakPath.lineTo(centerX + cos * peakRadius + tangentX, centerY + sin * peakRadius + tangentY);
+                }
+
+                ctx.save();
+                ctx.lineCap = 'round';
+                ctx.globalCompositeOperation = 'lighter';
+
+                ctx.strokeStyle = 'rgba(125, 211, 252, 0.16)';
+                ctx.lineWidth = 1.6;
+                ctx.stroke(reflectionPath);
+
+                for (const bucket of buckets) {
+                    if (!bucket.count) continue;
+                    const hue = bucket.hueSum / bucket.count;
+                    ctx.strokeStyle = `hsla(${hue}, 96%, 66%, ${Math.min(1, 0.82 + beatPulse * 0.18)})`;
+                    ctx.lineWidth = 2.6;
+                    ctx.shadowBlur = 8 + beatPulse * 8;
+                    ctx.shadowColor = `hsl(${hue}, 96%, 62%)`;
+                    ctx.stroke(bucket.path);
+                }
+
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(240, 249, 255, 0.85)';
+                ctx.lineWidth = 1.8;
+                ctx.stroke(peakPath);
+                ctx.restore();
+            }
+
+            // Mode 2 — bars: bottom-anchored mirrored spectrum across the full width,
+            // stroked with a single cached gradient in one batched fill.
+            function drawBarsMode(width, height) {
+                const baseline = height - 6;
+                const maxBarHeight = clamp(height * 0.52, 90, 260);
+                const gap = 2;
+                const barWidth = Math.max(2, (width - gap * (BAR_COUNT + 1)) / BAR_COUNT);
+                const barsPath = new Path2D();
+                const peakPath = new Path2D();
+
+                for (let i = 0; i < BAR_COUNT; i++) {
+                    const halfPosition = i <= BAR_COUNT / 2
+                        ? i / (BAR_COUNT / 2)
+                        : (BAR_COUNT - i) / (BAR_COUNT / 2);
+                    const value = getLogFrequencyValue(halfPosition);
+                    const shaped = Math.pow(value, 1.3);
+                    const barHeight = (3 + shaped * maxBarHeight) * (1 + beatPulse * 0.1);
+                    const x = gap + i * (barWidth + gap);
+                    barsPath.rect(x, baseline - barHeight, barWidth, barHeight);
+
+                    const peak = getPeakLevel(i, shaped);
+                    const peakY = baseline - (3 + peak * maxBarHeight) - 4;
+                    peakPath.rect(x, Math.max(4, peakY), barWidth, 2);
+                }
+
+                ctx.save();
+                ctx.globalAlpha = Math.min(1, 0.88 + beatPulse * 0.12);
+                ctx.fillStyle = barsGradient;
+                ctx.shadowBlur = 12 + beatPulse * 10;
+                ctx.shadowColor = `hsla(${baseHue}, 92%, 60%, 0.85)`;
+                ctx.fill(barsPath);
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(240, 249, 255, 0.9)';
+                ctx.fill(peakPath);
+                ctx.restore();
+            }
+
+            // Mode 3 — wave: centered oscilloscope from time-domain data, mirrored top/bottom,
+            // drawn additively over a fading canvas so it leaves a glow trail.
+            function drawWaveMode(width, height, energy) {
+                if (!timeData) return;
+                const centerY = Math.max(110, height * 0.38);
+                const amplitude = clamp(height * 0.16, 40, 90) * (0.55 + energy * 0.75 + beatPulse * 0.2);
+
+                function buildWavePath(direction) {
+                    const path = new Path2D();
+                    const samples = 220;
+                    for (let i = 0; i <= samples; i++) {
+                        const sampleIndex = Math.floor((i / samples) * (timeData.length - 1));
+                        const wave = (timeData[sampleIndex] - 128) / 128;
+                        const x = (i / samples) * width;
+                        const y = centerY + wave * amplitude * direction;
+                        if (i === 0) path.moveTo(x, y);
+                        else path.lineTo(x, y);
+                    }
+                    return path;
+                }
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = `hsla(${baseHue}, 95%, 65%, 0.9)`;
+                ctx.lineWidth = 2 + beatPulse * 1.2;
+                ctx.shadowBlur = 14 + beatPulse * 8;
+                ctx.shadowColor = `hsl(${baseHue}, 95%, 60%)`;
+                ctx.stroke(buildWavePath(1));
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = `hsla(${(baseHue + 70) % 360}, 85%, 78%, 0.42)`;
+                ctx.lineWidth = 1.4;
+                ctx.stroke(buildWavePath(-1));
+                ctx.restore();
+            }
+
+            // Mode 4 — orbit: radial waveform ring plus a rotating dashed orbit ring
+            // whose rotation speed scales with treble energy.
+            function drawOrbitMode(centerX, centerY, radius, energy, treble, deltaMs) {
+                drawCircularWaveform(centerX, centerY, radius + 10, energy);
+
+                orbitRotation += (0.25 + treble * 4.2) * (deltaMs / 1000) * motionScale();
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(orbitRotation);
+                ctx.setLineDash([7, 11]);
+                ctx.strokeStyle = `hsla(${(baseHue + 60) % 360}, 85%, 75%, ${0.35 + treble * 0.4})`;
+                ctx.lineWidth = 1.6;
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = `hsl(${(baseHue + 60) % 360}, 90%, 65%)`;
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 1.75, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Counter-rotating inner dashed ring for depth.
+                ctx.shadowBlur = 0;
+                ctx.rotate(-orbitRotation * 2.4);
+                ctx.setLineDash([3, 9]);
+                ctx.strokeStyle = `hsla(${(baseHue + 170) % 360}, 90%, 80%, ${0.22 + treble * 0.3})`;
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 1.45, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Mode 5 — nebula: a drifting particle starfield where each mote is bound to a
+            // spectrum band. Size, speed, brightness and hue follow the band's energy; bass
+            // swirls particles outward from the center, treble adds sparkle. All additive.
+            function initNebulaParticles() {
+                nebulaParticles = [];
+                for (let i = 0; i < NEBULA_COUNT; i++) {
+                    nebulaParticles.push({
+                        nx: Math.random(),
+                        ny: Math.random(),
+                        vx: (Math.random() - 0.5) * 0.0006,
+                        vy: (Math.random() - 0.5) * 0.0006,
+                        band: i % 3, // 0 = bass, 1 = mids, 2 = treble
+                        size: 0.7 + Math.random() * 1.9,
+                        phase: Math.random() * Math.PI * 2,
+                        hueOffset: (Math.random() - 0.5) * 70
+                    });
+                }
+            }
+
+            function drawNebulaMode(width, height, bass, mids, treble, deltaMs, now) {
+                if (!nebulaParticles) initNebulaParticles();
+                const dt = clamp(deltaMs / 16.7, 0.25, 3); // per-60fps-frame normalized step
+                const swirl = bass * 0.0016 * (1 + beatPulse * 1.4);
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                for (const p of nebulaParticles) {
+                    // Radial + tangential push away from the center, driven by the bass band.
+                    const dx = p.nx - 0.5;
+                    const dy = p.ny - 0.44;
+                    const dist = Math.max(0.04, Math.hypot(dx, dy));
+                    const push = (swirl * dt) / dist;
+                    p.vx += dx * push + -dy * push * 0.8;
+                    p.vy += dy * push + dx * push * 0.8;
+
+                    const bandLevel = p.band === 0 ? bass : p.band === 1 ? mids : treble;
+                    const drift = 1 + bandLevel * 2.2;
+                    p.nx += p.vx * dt * drift;
+                    p.ny += p.vy * dt * drift;
+                    p.vx *= 0.985;
+                    p.vy *= 0.985;
+
+                    // Wrap around the edges so the field never thins out.
+                    if (p.nx < -0.02) p.nx += 1.04; else if (p.nx > 1.02) p.nx -= 1.04;
+                    if (p.ny < -0.02) p.ny += 1.04; else if (p.ny > 1.02) p.ny -= 1.04;
+
+                    const sparkle = p.band === 2 ? 0.5 + 0.5 * Math.sin(now * 0.012 + p.phase) : 0.5;
+                    const alpha = clamp(0.1 + bandLevel * 0.55 + sparkle * treble * 0.5 + beatPulse * 0.15, 0.04, 0.9);
+                    const size = p.size * (0.7 + bandLevel * 1.8 + beatPulse * 0.5);
+                    const x = p.nx * width;
+                    const y = p.ny * height;
+                    const hue = (baseHue + p.hueOffset + p.band * 36 + 360) % 360;
+
+                    // Soft outer halo, then a bright core; both composite additively.
+                    ctx.fillStyle = `hsla(${hue}, 90%, 62%, ${alpha * 0.28})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = `hsla(${hue}, 95%, 74%, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // Mode 6 — spiral: log-frequency bins plotted along an Archimedean spiral from the
+            // center outward, stroked as a hue-rotating ribbon. Trail fade gives ribbon-like motion.
+            function drawSpiralMode(centerX, centerY, maxRadius, deltaMs) {
+                spiralRotation += (0.12 + beatPulse * 0.9) * (deltaMs / 1000) * motionScale();
+                const rotCos = Math.cos(spiralRotation);
+                const rotSin = Math.sin(spiralRotation);
+
+                const bucketPaths = [];
+                for (let b = 0; b < SPIRAL_BUCKETS; b++) bucketPaths.push(new Path2D());
+                const bucketHueSum = new Float32Array(SPIRAL_BUCKETS);
+                const bucketValSum = new Float32Array(SPIRAL_BUCKETS);
+                const bucketCount = new Float32Array(SPIRAL_BUCKETS);
+                const sparkPath = new Path2D();
+
+                for (let i = 0; i < SPIRAL_POINTS; i++) {
+                    const t = spiralT[i];
+                    const value = getLogFrequencyValue(t);
+                    // Radius breathes outward with bin energy; beats push the whole ribbon out.
+                    const r = (6 + t * maxRadius) * (0.55 + value * 0.75 + beatPulse * 0.12);
+                    // Rotate the precomputed unit vector by the current spiral rotation.
+                    const cos = spiralCos[i] * rotCos - spiralSin[i] * rotSin;
+                    const sin = spiralSin[i] * rotCos + spiralCos[i] * rotSin;
+                    const x = centerX + cos * r;
+                    const y = centerY + sin * r;
+
+                    const bucketIndex = Math.min(SPIRAL_BUCKETS - 1, Math.floor(t * SPIRAL_BUCKETS));
+                    const path = bucketPaths[bucketIndex];
+                    if (bucketCount[bucketIndex] === 0) path.moveTo(x, y);
+                    else path.lineTo(x, y);
+                    bucketHueSum[bucketIndex] += (baseHue + t * 160 + spiralRotation * 40) % 360;
+                    bucketValSum[bucketIndex] += value;
+                    bucketCount[bucketIndex]++;
+
+                    // Hot bins pop a sparkle node onto the ribbon.
+                    if (value > 0.6) {
+                        sparkPath.moveTo(x + 2.2, y);
+                        sparkPath.arc(x, y, 1.2 + (value - 0.6) * 6, 0, Math.PI * 2);
+                    }
+                }
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                for (let b = 0; b < SPIRAL_BUCKETS; b++) {
+                    if (!bucketCount[b]) continue;
+                    const hue = bucketHueSum[b] / bucketCount[b];
+                    const avgValue = bucketValSum[b] / bucketCount[b];
+                    ctx.strokeStyle = `hsla(${hue}, 92%, ${58 + avgValue * 20}%, ${0.55 + avgValue * 0.4})`;
+                    ctx.lineWidth = 1.4 + avgValue * 5 + beatPulse * 1.6;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = `hsl(${hue}, 95%, 60%)`;
+                    ctx.stroke(bucketPaths[b]);
+                }
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = `rgba(240, 249, 255, ${0.5 + beatPulse * 0.3})`;
+                ctx.fill(sparkPath);
+                ctx.restore();
+            }
+
+            // Spectral-flux beat detection: sum the positive per-bin spectrum deltas, then
+            // trigger when the flux clears an adaptive rolling-average threshold, gated by a
+            // minimum interval so rapid-fire false positives are impossible.
+            function detectBeat(now) {
+                let flux = 0;
+                for (let i = 0; i < smoothedData.length; i++) {
+                    const delta = smoothedData[i] - prevSpectrum[i];
+                    if (delta > 0) flux += delta;
+                    prevSpectrum[i] = smoothedData[i];
+                }
+                flux /= smoothedData.length * 255;
+
+                fluxHistory.push({ time: now, value: flux });
+                while (fluxHistory.length > 0 && now - fluxHistory[0].time > FLUX_HISTORY_WINDOW_MS) {
+                    fluxHistory.shift();
+                }
+                if (fluxHistory.length < 10) return false;
+
+                let sum = 0;
+                for (const sample of fluxHistory) sum += sample.value;
+                const rollingAverage = sum / fluxHistory.length;
+
+                if (flux > rollingAverage * 1.45 + 0.002 && flux > 0.004 && now - lastBeatTime >= BEAT_MIN_INTERVAL_MS) {
+                    lastBeatTime = now;
+                    return true;
+                }
+                return false;
+            }
+
+            function spawnShockwave(x, y, baseRadius, energy) {
+                shockwaves.push({
+                    x,
+                    y,
+                    radius: baseRadius * 0.9,
+                    alpha: 0.75,
+                    speed: 2.4 + energy * 4.5
+                });
+                if (shockwaves.length > 6) shockwaves.shift();
+            }
+
+            function updateAndDrawShockwaves() {
+                for (let i = shockwaves.length - 1; i >= 0; i--) {
+                    const wave = shockwaves[i];
+                    wave.radius += wave.speed;
+                    wave.speed *= 0.97;
+                    wave.alpha -= 0.022;
+                    if (wave.alpha <= 0) {
+                        shockwaves.splice(i, 1);
+                        continue;
+                    }
+                    ctx.save();
+                    ctx.globalAlpha = wave.alpha;
+                    ctx.strokeStyle = '#bae6fd';
+                    ctx.lineWidth = 1.6;
+                    ctx.beginPath();
+                    ctx.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            /* --- Microphone input --- */
+
+            async function toggleMic() {
+                if (micActive) {
+                    stopMic();
+                    trackTitle.textContent = lastFileTitle;
+                    return;
+                }
+
+                const ready = await initWebAudio();
+                if (!ready) return;
+
+                if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+                    trackTitle.textContent = '⚠ Microphone input is not available in this browser';
+                    return;
+                }
+
+                let stream = null;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (error) {
+                    console.warn('Microphone access failed:', error);
+                    trackTitle.textContent = '⚠ Microphone access was denied';
+                    return;
+                }
+
+                // Mic takes over: pause file playback and stop the demo signal.
+                stopDemo();
+                audioPlayer.pause();
+                setAnalyserOutput(false);
+
+                micStream = stream;
+                micSource = audioCtx.createMediaStreamSource(stream);
+                micSource.connect(analyser);
+                micActive = true;
+
+                micBtn.textContent = '🎤 Stop';
+                micBtn.classList.add('viz-btn-active');
+                trackTitle.textContent = '🎤 Listening to microphone input';
+            }
+
+            function stopMic() {
+                if (micSource) {
+                    try {
+                        micSource.disconnect();
+                    } catch (error) {
+                        console.warn('Mic source disconnect failed:', error);
+                    }
+                    micSource = null;
+                }
+                if (micStream) {
+                    micStream.getTracks().forEach((track) => track.stop());
+                    micStream = null;
+                }
+                if (micActive) {
+                    micActive = false;
+                    setAnalyserOutput(true);
+                    micBtn.textContent = '🎤 Mic';
+                    micBtn.classList.remove('viz-btn-active');
+                }
+            }
+
+            /* --- Generative demo signal --- */
+
+            // A–F–G–E style ambient progression (Hz), voiced as soft pad triads.
+            const DEMO_CHORDS = [
+                [220.00, 261.63, 329.63],
+                [174.61, 220.00, 261.63],
+                [196.00, 246.94, 293.66],
+                [164.81, 220.00, 329.63]
+            ];
+
+            function demoTargetGain() {
+                return (clamp(Number(volumeSlider.value) || 0, 0, 100) / 100) * 0.3;
+            }
+
+            // Short sine "kick" with a falling pitch envelope — this is what the
+            // spectral-flux beat detector locks onto during demo mode.
+            function demoKick() {
+                if (!demo || !audioCtx) return;
+                const t = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(150, t);
+                osc.frequency.exponentialRampToValueAtTime(46, t + 0.12);
+                gain.gain.setValueAtTime(0.9, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+                osc.connect(gain);
+                gain.connect(demo.master);
+                osc.start(t);
+                osc.stop(t + 0.28);
+            }
+
+            function advanceDemoChord() {
+                if (!demo || !audioCtx) return;
+                demo.step = (demo.step + 1) % DEMO_CHORDS.length;
+                const chord = DEMO_CHORDS[demo.step];
+                const t = audioCtx.currentTime;
+                demo.padOscs.forEach((osc, i) => {
+                    osc.frequency.setTargetAtTime(chord[i], t, 0.45);
+                });
+                demo.bassOsc.frequency.setTargetAtTime(chord[0] / 2, t, 0.3);
+                demo.sparkleOsc.frequency.setTargetAtTime(chord[2] * 4, t, 0.6);
+            }
+
+            async function toggleDemo() {
+                if (demo) {
+                    stopDemo();
+                    trackTitle.textContent = lastFileTitle;
+                    return;
+                }
+
+                const ready = await initWebAudio();
+                if (!ready) return;
+
+                // Demo takes over: stop the mic and pause file playback.
+                stopMic();
+                audioPlayer.pause();
+                setAnalyserOutput(true);
+
+                const t = audioCtx.currentTime;
+                const master = audioCtx.createGain();
+                master.gain.setValueAtTime(0.0001, t);
+                master.gain.exponentialRampToValueAtTime(Math.max(0.001, demoTargetGain()), t + 0.8);
+                master.connect(analyser);
+
+                // Pad: three soft voices per chord with a slow swell LFO.
+                const padGain = audioCtx.createGain();
+                padGain.gain.value = 0.14;
+                const swellLfo = audioCtx.createOscillator();
+                swellLfo.type = 'sine';
+                swellLfo.frequency.value = 0.09;
+                const swellDepth = audioCtx.createGain();
+                swellDepth.gain.value = 0.06;
+                swellLfo.connect(swellDepth);
+                swellDepth.connect(padGain.gain);
+                const padOscs = DEMO_CHORDS[0].map((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    osc.type = i === 0 ? 'sine' : 'triangle';
+                    osc.frequency.value = freq;
+                    osc.detune.value = (i - 1) * 5;
+                    osc.connect(padGain);
+                    osc.start();
+                    return osc;
+                });
+                padGain.connect(master);
+
+                // Bass pulse: low triangle gated by a slow square LFO for a heartbeat throb.
+                const bassOsc = audioCtx.createOscillator();
+                bassOsc.type = 'triangle';
+                bassOsc.frequency.value = DEMO_CHORDS[0][0] / 2;
+                const bassGain = audioCtx.createGain();
+                bassGain.gain.value = 0.02;
+                const bassLfo = audioCtx.createOscillator();
+                bassLfo.type = 'square';
+                bassLfo.frequency.value = 0.8;
+                const bassDepth = audioCtx.createGain();
+                bassDepth.gain.value = 0.14;
+                bassLfo.connect(bassDepth);
+                bassDepth.connect(bassGain.gain);
+                bassOsc.connect(bassGain);
+                bassGain.connect(master);
+
+                // Sparkle: a high sine with slow tremolo, two octaves above the chord top.
+                const sparkleOsc = audioCtx.createOscillator();
+                sparkleOsc.type = 'sine';
+                sparkleOsc.frequency.value = DEMO_CHORDS[0][2] * 4;
+                const sparkleGain = audioCtx.createGain();
+                sparkleGain.gain.value = 0.035;
+                const sparkleLfo = audioCtx.createOscillator();
+                sparkleLfo.type = 'sine';
+                sparkleLfo.frequency.value = 0.23;
+                const sparkleDepth = audioCtx.createGain();
+                sparkleDepth.gain.value = 0.025;
+                sparkleLfo.connect(sparkleDepth);
+                sparkleDepth.connect(sparkleGain.gain);
+                sparkleOsc.connect(sparkleGain);
+                sparkleGain.connect(master);
+
+                bassOsc.start();
+                bassLfo.start();
+                sparkleOsc.start();
+                sparkleLfo.start();
+                swellLfo.start();
+
+                demo = {
+                    master,
+                    padOscs,
+                    bassOsc,
+                    sparkleOsc,
+                    step: 0,
+                    nodes: [master, padGain, swellLfo, swellDepth, bassOsc, bassGain, bassLfo, bassDepth, sparkleOsc, sparkleGain, sparkleLfo, sparkleDepth].concat(padOscs),
+                    chordTimer: setInterval(advanceDemoChord, 2400),
+                    kickTimer: setInterval(demoKick, 620)
+                };
+
+                demoBtn.textContent = '✨ Stop';
+                demoBtn.classList.add('viz-btn-active');
+                trackTitle.textContent = '✨ Demo signal — generative ambience';
+            }
+
+            function stopDemo() {
+                if (!demo) return;
+                clearInterval(demo.chordTimer);
+                clearInterval(demo.kickTimer);
+                const nodes = demo.nodes;
+                const master = demo.master;
+                if (audioCtx) {
+                    const t = audioCtx.currentTime;
+                    master.gain.cancelScheduledValues(t);
+                    master.gain.setTargetAtTime(0.0001, t, 0.1);
+                }
+                // Let the fade-out finish before tearing the graph down.
+                setTimeout(() => {
+                    nodes.forEach((node) => {
+                        if (typeof node.stop === 'function') {
+                            try {
+                                node.stop();
+                            } catch (error) {
+                                console.warn('Demo node stop failed:', error);
+                            }
+                        }
+                        try {
+                            node.disconnect();
+                        } catch (error) {
+                            console.warn('Demo node disconnect failed:', error);
+                        }
+                    });
+                }, 350);
+                demo = null;
+                demoBtn.textContent = '✨ Demo';
+                demoBtn.classList.remove('viz-btn-active');
+            }
+
+            async function loadAudioFile(file) {
+                if (!file) return;
+                if (!file.type.startsWith('audio/')) {
+                    trackTitle.textContent = '⚠ Please choose an audio file';
+                    return;
+                }
+
+                // A file takes over: release the mic and stop the demo signal.
+                stopMic();
+                stopDemo();
+
+                if (currentObjectUrl) {
+                    URL.revokeObjectURL(currentObjectUrl);
+                }
+                currentObjectUrl = URL.createObjectURL(file);
+
+                audioPlayer.pause();
+                audioPlayer.src = currentObjectUrl;
+                audioPlayer.load();
+
+                // Show the track name without its file extension.
+                const displayName = (file.name || '').replace(/\.[a-z0-9]{1,8}$/i, '').trim();
+                lastFileTitle = `🎵 ${displayName || 'Unknown audio'}`;
+                trackTitle.textContent = lastFileTitle;
+                playBtn.disabled = false;
+                seekBar.disabled = false;
+                seekBar.value = 0;
+                timeLabel.textContent = '0:00 / 0:00';
+
+                const ready = await initWebAudio();
+                if (!ready) return;
+
+                try {
+                    await audioPlayer.play();
+                    playBtn.textContent = '⏸ Pause';
+                } catch (error) {
+                    // Some browsers still require a second explicit click to begin playback.
+                    playBtn.textContent = '▶ Play';
+                    console.warn('Automatic playback was blocked:', error);
+                }
+            }
+
+            async function togglePlayback() {
+                if (!audioPlayer.src) return;
+                const ready = await initWebAudio();
+                if (!ready) return;
+
+                if (audioPlayer.paused) {
+                    // Resuming a file takes over from the mic / demo signal.
+                    stopMic();
+                    stopDemo();
+                    try {
+                        await audioPlayer.play();
+                        playBtn.textContent = '⏸ Pause';
+                    } catch (error) {
+                        console.warn('Playback failed:', error);
+                    }
+                } else {
+                    audioPlayer.pause();
+                    playBtn.textContent = '▶ Play';
+                }
+            }
+
+            collapseBtn.addEventListener('click', () => {
+                const willCollapse = !overlay.classList.contains('collapsed');
+                overlay.classList.toggle('collapsed', willCollapse);
+                collapseBtn.setAttribute('aria-expanded', String(!willCollapse));
+                collapseBtn.setAttribute('aria-label', willCollapse ? 'Show audio controls' : 'Hide audio controls');
+            });
+
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            playBtn.addEventListener('click', togglePlayback);
+            micBtn.addEventListener('click', toggleMic);
+            demoBtn.addEventListener('click', toggleDemo);
+
+            fileInput.addEventListener('change', () => {
+                loadAudioFile(fileInput.files && fileInput.files[0]);
+                // Let the same file be selected again later if desired.
+                fileInput.value = '';
+            });
+
+            // Visualization mode cycling, persisted across visits.
+            function updateModeButton() {
+                const mode = VIS_MODES[currentModeIndex];
+                modeBtn.textContent = `${mode.icon} ${mode.label}`;
+                modeBtn.setAttribute('aria-label', `Visualization mode: ${mode.label}. Activate to switch.`);
+            }
+
+            function cycleMode() {
+                currentModeIndex = (currentModeIndex + 1) % VIS_MODES.length;
+                localStorage.setItem('viz-mode', VIS_MODES[currentModeIndex].id);
+                updateModeButton();
+            }
+
+            modeBtn.addEventListener('click', cycleMode);
+            updateModeButton();
+
+            // Volume slider, persisted across visits (default 80). Also drives the demo level.
+            function applyStoredVolume() {
+                const stored = localStorage.getItem('viz-volume');
+                const parsed = stored === null ? 80 : Number(stored);
+                const volume = Number.isFinite(parsed) ? clamp(parsed, 0, 100) : 80;
+                volumeSlider.value = String(volume);
+                audioPlayer.volume = volume / 100;
+            }
+
+            volumeSlider.addEventListener('input', () => {
+                const volume = clamp(Number(volumeSlider.value) || 0, 0, 100);
+                audioPlayer.volume = volume / 100;
+                if (audioPlayer.muted && volume > 0) audioPlayer.muted = false;
+                if (demo && audioCtx) {
+                    demo.master.gain.setTargetAtTime(Math.max(0.0001, demoTargetGain()), audioCtx.currentTime, 0.05);
+                }
+                localStorage.setItem('viz-volume', String(volume));
+            });
+
+            applyStoredVolume();
+
+            // Fullscreen toggle on the whole visualizer stage.
+            fullscreenBtn.addEventListener('click', () => {
+                if (document.fullscreenElement === stage) {
+                    document.exitFullscreen();
+                } else if (typeof stage.requestFullscreen === 'function') {
+                    // requestFullscreen returns a Promise in modern browsers, but not everywhere.
+                    const fullscreenRequest = stage.requestFullscreen();
+                    if (fullscreenRequest && typeof fullscreenRequest.catch === 'function') {
+                        fullscreenRequest.catch((error) => {
+                            console.warn('Fullscreen request failed:', error);
+                        });
+                    }
+                }
+            });
+
+            document.addEventListener('fullscreenchange', () => {
+                const isFullscreen = document.fullscreenElement === stage;
+                fullscreenBtn.textContent = isFullscreen ? '✕ Exit' : '⛶ Fullscreen';
+                resizeCanvas();
+            });
+
+            // Keyboard shortcuts: Space = play/pause, M = mute, V = cycle mode.
+            // Only active once audio is loaded and never while typing in a form field;
+            // all other keys (including arrows) are left to the navigation handler.
+            document.addEventListener('keydown', (event) => {
+                const activeTagName = document.activeElement ? document.activeElement.tagName : '';
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTagName)) return;
+                if (!audioPlayer.src) return;
+
+                if (event.key === ' ') {
+                    event.preventDefault();
+                    togglePlayback();
+                } else if (event.key === 'm' || event.key === 'M') {
+                    audioPlayer.muted = !audioPlayer.muted;
+                } else if (event.key === 'v' || event.key === 'V') {
+                    cycleMode();
+                }
+            });
+
+            audioPlayer.addEventListener('loadedmetadata', () => {
+                timeLabel.textContent = `0:00 / ${formatTime(audioPlayer.duration)}`;
+            });
+
+            audioPlayer.addEventListener('timeupdate', () => {
+                const duration = audioPlayer.duration;
+                if (Number.isFinite(duration) && duration > 0) {
+                    seekBar.value = (audioPlayer.currentTime / duration) * 100;
+                    timeLabel.textContent = `${formatTime(audioPlayer.currentTime)} / ${formatTime(duration)}`;
+                }
+            });
+
+            audioPlayer.addEventListener('error', () => {
+                if (!audioPlayer.src) return;
+                trackTitle.textContent = '⚠ Could not load or decode this audio file';
+                playBtn.textContent = '▶ Play';
+                playBtn.disabled = true;
+                seekBar.disabled = true;
+            });
+
+            seekBar.addEventListener('input', () => {
+                const duration = audioPlayer.duration;
+                if (Number.isFinite(duration) && duration > 0) {
+                    audioPlayer.currentTime = (Number(seekBar.value) / 100) * duration;
+                }
+            });
+
+            audioPlayer.addEventListener('play', () => {
+                playBtn.textContent = '⏸ Pause';
+            });
+
+            audioPlayer.addEventListener('pause', () => {
+                if (!audioPlayer.ended) playBtn.textContent = '▶ Play';
+            });
+
+            audioPlayer.addEventListener('ended', () => {
+                playBtn.textContent = '▶ Play';
+                seekBar.value = 0;
+            });
+
+            // Drag-and-drop support.
+            ['dragenter', 'dragover'].forEach((eventName) => {
+                stage.addEventListener(eventName, (event) => {
+                    event.preventDefault();
+                    stage.classList.add('drag-active');
+                });
+            });
+            ['dragleave', 'drop'].forEach((eventName) => {
+                stage.addEventListener(eventName, (event) => {
+                    event.preventDefault();
+                    stage.classList.remove('drag-active');
+                });
+            });
+            stage.addEventListener('drop', (event) => {
+                const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+                loadAudioFile(file);
+            });
+
+            function render(now) {
+                if (!isLoopRunning) return;
+                rafId = requestAnimationFrame(render);
+
+                const deltaMs = clamp(now - lastFrameTime, 0, 100);
+                lastFrameTime = now;
+
+                const width = cssWidth;
+                const height = cssHeight;
+                const filePlaying = !audioPlayer.paused && !audioPlayer.ended;
+                // The analyser is shared by file, mic and demo sources alike.
+                const sourceActive = !!analyser && (filePlaying || micActive || demo !== null);
+                const activeMode = VIS_MODES[currentModeIndex].id;
+                const ambientNow = now * motionScale();
+
+                let bass = 0;
+                let mids = 0;
+                let treble = 0;
+                let energy = 0;
+
+                if (analyser) {
+                    updateSmoothedFrequencyData(sourceActive);
+                    bass = getAverageForRange(35, 220);
+                    mids = getAverageForRange(220, 2200);
+                    treble = getAverageForRange(2200, 12000);
+                    energy = clamp(bass * 0.46 + mids * 0.34 + treble * 0.20, 0, 1);
+                }
+
+                advanceBaseHue(deltaMs, energy);
+
+                // Global beat pulse: jumps to 1 on a detected beat, then decays exponentially.
+                beatPulse *= Math.exp(-deltaMs / 200);
+                if (beatPulse < 0.002) beatPulse = 0;
+
+                // Rebuild the hue-driven bars gradient only when the hue/energy bucket changes.
+                if (barsKey(energy) !== barsGradientKey) rebuildBarsGradient(energy);
+
+                const trailFade = !analyser ? 0
+                    : activeMode === 'wave' ? 0.3
+                    : activeMode === 'spiral' ? 0.22
+                    : 0;
+                drawBackground(width, height, energy, treble, ambientNow, trailFade);
+
+                const centerX = width / 2;
+                const centerY = Math.max(110, height * 0.38);
+                const minDimension = Math.min(width, height);
+                const radius = clamp(minDimension * 0.14, 42, 68);
+                const maxBarLength = clamp(minDimension * 0.22, 68, 108);
+
+                if (analyser) {
+                    if (activeMode === 'circular') {
+                        drawCore(centerX, centerY, radius, bass, mids, treble, ambientNow);
+                        drawCircularMode(centerX, centerY, radius, maxBarLength);
+                    } else if (activeMode === 'bars') {
+                        drawBarsMode(width, height);
+                    } else if (activeMode === 'wave') {
+                        drawWaveMode(width, height, energy);
+                    } else if (activeMode === 'orbit') {
+                        drawCore(centerX, centerY, radius * 0.8, bass, mids, treble, ambientNow);
+                        drawOrbitMode(centerX, centerY, radius, energy, treble, deltaMs);
+                    } else if (activeMode === 'nebula') {
+                        drawCore(centerX, centerY, radius * 0.7, bass, mids, treble, ambientNow);
+                        drawNebulaMode(width, height, bass, mids, treble, deltaMs, ambientNow);
+                    } else if (activeMode === 'spiral') {
+                        drawCore(centerX, centerY, radius * 0.55, bass, mids, treble, ambientNow);
+                        drawSpiralMode(centerX, centerY, minDimension * 0.42, deltaMs);
+                    }
+                } else {
+                    // Animated idle state before a track is chosen.
+                    const idlePulse = (Math.sin(ambientNow * 0.0026) + 1) * 0.5;
+                    const idleRadius = radius + idlePulse * 5;
+                    const idle = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, idleRadius * 1.45);
+                    idle.addColorStop(0, 'rgba(224, 242, 254, 0.42)');
+                    idle.addColorStop(0.36, 'rgba(56, 189, 248, 0.22)');
+                    idle.addColorStop(1, 'rgba(37, 99, 235, 0)');
+                    ctx.fillStyle = idle;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, idleRadius * 1.45, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = `rgba(125, 211, 252, ${0.18 + idlePulse * 0.18})`;
+                    ctx.lineWidth = 1.3;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, idleRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // Adaptive beat burst: global pulse plus particles and an expanding shockwave ring.
+                if (sourceActive && detectBeat(now)) {
+                    beatPulse = 1;
+                    if (!prefersReducedMotion) {
+                        const burstCount = Math.round(3 + bass * 7);
+                        for (let i = 0; i < burstCount && particles.length < MAX_PARTICLES; i++) {
+                            particles.push(new BurstParticle(centerX, centerY, bass));
+                        }
+                        spawnShockwave(centerX, centerY, radius, bass);
+                    }
+                } else if (!sourceActive && prevSpectrum && smoothedData) {
+                    // Keep the previous spectrum in sync while idle so resuming any source
+                    // does not fire a stale-flux phantom beat.
+                    prevSpectrum.set(smoothedData);
+                }
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    particles[i].update();
+                    particles[i].draw();
+                    if (particles[i].alpha <= 0) particles.splice(i, 1);
+                }
+
+                updateAndDrawShockwaves();
+
+                // Subtle vignette on top of everything for depth (rebuilt only on resize).
+                if (vignetteGradient) {
+                    ctx.fillStyle = vignetteGradient;
+                    ctx.fillRect(0, 0, width, height);
+                }
+            }
+
+            // Pause the render loop when the tab is hidden or the stage is scrolled off-screen.
+            function syncRenderLoopState() {
+                const shouldRun = !document.hidden && isStageVisible;
+                if (shouldRun && !isLoopRunning) {
+                    isLoopRunning = true;
+                    lastFrameTime = performance.now();
+                    rafId = requestAnimationFrame(render);
+                } else if (!shouldRun && isLoopRunning) {
+                    isLoopRunning = false;
+                    if (rafId !== null) cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+            }
+
+            const visibilityObserver = new IntersectionObserver((entries) => {
+                isStageVisible = entries[0] ? entries[0].isIntersecting : true;
+                syncRenderLoopState();
+            });
+            visibilityObserver.observe(stage);
+            document.addEventListener('visibilitychange', syncRenderLoopState);
+            syncRenderLoopState();
+
+            window.addEventListener('beforeunload', () => {
+                if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+                if (micStream) micStream.getTracks().forEach((track) => track.stop());
+                if (demo) {
+                    clearInterval(demo.chordTimer);
+                    clearInterval(demo.kickTimer);
+                }
+                if (rafId !== null) cancelAnimationFrame(rafId);
+                resizeObserver.disconnect();
+                visibilityObserver.disconnect();
+            });
+        })();
+
+        // Restore saved settings on DOM load lifecycle
+        document.addEventListener("DOMContentLoaded", () => {
+            purgeActiveWindowFocusContext();
+            
+            // Check and enforce saved dark/light theme context
+            const savedTheme = localStorage.getItem("portfolio-theme");
+            if (savedTheme) {
+                applyTheme(savedTheme);
+            }
+
+            // Check and enforce saved global typography state
+            const savedFont = localStorage.getItem("portfolio-font");
+            if (savedFont) {
+                document.documentElement.style.setProperty('--global-font', savedFont);
+            }
+            
+            document.querySelectorAll(".copy-asset-link-btn").forEach((interfaceButtonNode) => {
+                interfaceButtonNode.addEventListener("click", () => captureLinkToSystemClipboard(interfaceButtonNode));
+            });
+        });
+
+        window.addEventListener("pageshow", purgeActiveWindowFocusContext);
+    </script>
+</body>
+</html>
