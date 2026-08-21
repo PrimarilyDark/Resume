@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Old Versions - Dave Persaud</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>Old Versions</h1>
+    </header>
+
+    <nav>
+        <div class="nav-container" id="mainNav">
+            <a href="index.html#about">About</a>
+            <a href="index.html#education">Education</a>
+            <a href="index.html#skills">Skills</a>
+            <a href="index.html#experience">Experience</a>
+            <a href="index.html#projects">Projects</a>
+            <a href="index.html#licenses">Licenses</a>
+            <a href="index.html#files">Files</a>
+            <button id="themeToggleBtn" type="button">Dark Mode</button>
+
+            <div class="font-dropdown-wrapper">
+                <button class="font-select-trigger" id="fontDropdownTrigger" type="button">Fonts ▾</button>
+                <div class="font-dropdown-menu" id="fontDropdownMenu">
+                    <button class="font-option" style="font-family: Arial, sans-serif;" onclick="changeGlobalFont('Arial, sans-serif')">Default (Arial)</button>
+                    <button class="font-option" style="font-family: 'Times New Roman', serif;" onclick="changeGlobalFont('\'Times New Roman\', serif')">Times New Roman</button>
+                    <button class="font-option" style="font-family: 'Courier New', monospace;" onclick="changeGlobalFont('\'Courier New\', monospace')">Courier New</button>
+                    <button class="font-option" style="font-family: Georgia, serif;" onclick="changeGlobalFont('Georgia, serif')">Georgia</button>
+                    <button class="font-option" style="font-family: Verdana, sans-serif;" onclick="changeGlobalFont('Verdana, sans-serif')">Verdana</button>
+                    <button class="font-option" style="font-family: Impact, charcoal, sans-serif;" onclick="changeGlobalFont('Impact, charcoal, sans-serif')">Impact</button>
+                    <button class="font-option" style="font-family: 'Trebuchet MS', sans-serif;" onclick="changeGlobalFont('\'Trebuchet MS\', sans-serif')">Trebuchet MS</button>
+                    <button class="font-option" style="font-family: 'Comic Sans MS', cursive;" onclick="changeGlobalFont('\'Comic Sans MS\', cursive')">Comic Sans</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <section>
+            <a class="back-link" href="index.html#projects">← Back to Portfolio</a>
+            <h2>Archived Portfolio Pages</h2>
+            <p>Previous iterations of this website, preserved for reference.</p>
+
+            <div class="projects-list-container" style="max-width: 480px; margin: 14px auto 0;">
+                <a class="project-row-link" href="secondversion.html">
+                    <div class="project-meta-info">
+                        <div class="project-vector-icon color-blue">2</div>
+                        <div>
+                            <h4 class="project-headline-title">2nd Version</h4>
+                            <p class="project-sub-label">Old page</p>
+                        </div>
+                    </div>
+                    <span class="project-action-button type-alt">Open</span>
+                </a>
+
+                <a class="project-row-link" href="thirdversion.html">
+                    <div class="project-meta-info">
+                        <div class="project-vector-icon color-dark">3</div>
+                        <div>
+                            <h4 class="project-headline-title">3rd Version</h4>
+                            <p class="project-sub-label">Old page</p>
+                        </div>
+                    </div>
+                    <span class="project-action-button type-alt">Open</span>
+                </a>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Dave Persaud. All rights reserved.</p>
+    </footer>
+
+    <script src="ui.js"></script>
+
+</body>
+</html>
