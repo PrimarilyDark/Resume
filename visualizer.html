@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Visualizer - Dave Persaud</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>Audio Visualizer</h1>
+        <p class="tagline">Interactive Web Audio canvas &middot; 6 visual modes &middot; mic &amp; demo input</p>
+    </header>
+
+    <nav>
+        <div class="nav-container" id="mainNav">
+            <a href="index.html#about">About</a>
+            <a href="index.html#education">Education</a>
+            <a href="index.html#skills">Skills</a>
+            <a href="index.html#experience">Experience</a>
+            <a href="index.html#projects">Projects</a>
+            <a href="index.html#licenses">Licenses</a>
+            <a href="index.html#files">Files</a>
+            <button id="themeToggleBtn" type="button">Dark Mode</button>
+
+            <div class="font-dropdown-wrapper">
+                <button class="font-select-trigger" id="fontDropdownTrigger" type="button">Fonts ▾</button>
+                <div class="font-dropdown-menu" id="fontDropdownMenu">
+                    <button class="font-option" style="font-family: Arial, sans-serif;" onclick="changeGlobalFont('Arial, sans-serif')">Default (Arial)</button>
+                    <button class="font-option" style="font-family: 'Times New Roman', serif;" onclick="changeGlobalFont('\'Times New Roman\', serif')">Times New Roman</button>
+                    <button class="font-option" style="font-family: 'Courier New', monospace;" onclick="changeGlobalFont('\'Courier New\', monospace')">Courier New</button>
+                    <button class="font-option" style="font-family: Georgia, serif;" onclick="changeGlobalFont('Georgia, serif')">Georgia</button>
+                    <button class="font-option" style="font-family: Verdana, sans-serif;" onclick="changeGlobalFont('Verdana, sans-serif')">Verdana</button>
+                    <button class="font-option" style="font-family: Impact, charcoal, sans-serif;" onclick="changeGlobalFont('Impact, charcoal, sans-serif')">Impact</button>
+                    <button class="font-option" style="font-family: 'Trebuchet MS', sans-serif;" onclick="changeGlobalFont('\'Trebuchet MS\', sans-serif')">Trebuchet MS</button>
+                    <button class="font-option" style="font-family: 'Comic Sans MS', cursive;" onclick="changeGlobalFont('\'Comic Sans MS\', cursive')">Comic Sans</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <section>
+            <a class="back-link" href="index.html#projects">← Back to Portfolio</a>
+
+            <!-- Interactive Audio Visualizer Stage -->
+            <div class="artwork-stage" id="vizStage">
+                <canvas class="visualizer-canvas" id="vizCanvas" aria-hidden="true"></canvas>
+                <audio id="hiddenAudioPlayer" preload="metadata"></audio>
+                <input type="file" id="audioFileInput" accept="audio/*" style="display: none;" />
+
+                <div class="visualizer-overlay" id="vizOverlay">
+                    <button class="viz-collapse-btn" id="vizCollapseBtn" type="button" aria-expanded="true" aria-controls="vizPlayerContent" aria-label="Hide audio controls">⌄</button>
+                    <div class="visualizer-player-content" id="vizPlayerContent">
+                        <div class="visualizer-title-bar" id="vizTrackTitle">🎵 Choose an audio file</div>
+                        <div class="visualizer-controls-row">
+                            <button class="viz-btn" id="vizUploadBtn" type="button">📁 Choose Audio</button>
+                            <button class="viz-btn" id="vizPlayBtn" type="button" disabled>▶ Play</button>
+                            <button class="viz-btn" id="vizModeBtn" type="button" aria-label="Cycle visualization mode">◎ Circular</button>
+                            <button class="viz-btn" id="vizMicBtn" type="button" aria-label="Toggle microphone input">🎤 Mic</button>
+                            <button class="viz-btn" id="vizDemoBtn" type="button" aria-label="Toggle built-in demo signal">✨ Demo</button>
+                            <label class="viz-volume-wrap" for="vizVolume" title="Volume">🔊
+                                <input type="range" class="viz-volume-slider" id="vizVolume" value="80" min="0" max="100" step="1" aria-label="Volume" />
+                            </label>
+                            <button class="viz-btn" id="vizFullscreenBtn" type="button" aria-label="Toggle fullscreen">⛶ Fullscreen</button>
+                            <input type="range" class="viz-seek-bar" id="vizSeekBar" value="0" min="0" max="100" step="0.1" aria-label="Seek through audio" disabled />
+                            <span class="viz-time" id="vizTimeLabel">0:00 / 0:00</span>
+                        </div>
+                        <div class="viz-hint">MP3, WAV, M4A, OGG and other browser-supported audio • drag & drop supported • Space play/pause • M mute • V mode (6 visuals) • 🎤 live mic • ✨ built-in demo</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Dave Persaud. All rights reserved.</p>
+    </footer>
+
+    <script src="ui.js"></script>
+    <script src="visualizer.js"></script>
+
+</body>
+</html>
