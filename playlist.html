@@ -26,6 +26,36 @@
       margin: 0 auto;
     }
 
+    /* Navigation / Back Button */
+    .nav-bar {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 25px;
+    }
+
+    .back-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(218, 165, 32, 0.15);
+      border: 1px solid rgba(218, 165, 32, 0.6);
+      color: #fff4d2;
+      padding: 10px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .back-home-btn:hover {
+      background: #d9aa3c;
+      color: #111;
+      box-shadow: 0 0 14px rgba(218, 165, 32, 0.5);
+      transform: translateY(-2px);
+    }
+
     header {
       text-align: center;
       margin-bottom: 40px;
@@ -74,10 +104,15 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 12px;
-      padding: 14px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .repo-item:last-child {
+      margin-bottom: 0;
     }
 
     /* Clickable Image Wrapper */
@@ -246,7 +281,7 @@
       border: 0;
     }
 
-    /* Bubbles Style for Usernames/Banking */
+    /* Bubbles Style for Usernames/Banking/Games */
     .bubble-list {
       display: flex;
       flex-wrap: wrap;
@@ -255,19 +290,60 @@
     }
 
     .bubble {
-      background: rgba(218, 165, 32, 0.15);
-      border: 1px solid rgba(218, 165, 32, 0.5);
+      background: rgba(218, 165, 32, 0.12);
+      border: 1px solid rgba(218, 165, 32, 0.45);
       color: #fff4d2;
       padding: 8px 16px;
       border-radius: 20px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sub-item {
+      color: #d9aa3c;
+      font-size: 12px;
+      font-weight: normal;
+      opacity: 0.9;
+    }
+
+    /* Alphabetical Group Layout */
+    .alpha-group-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .alpha-group {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px 14px;
+      border-radius: 8px;
+      border-left: 3px solid #d9aa3c;
+    }
+
+    .alpha-letter {
+      font-size: 11px;
+      font-weight: bold;
+      color: #d9aa3c;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
+    <!-- Back to Home Button -->
+    <div class="nav-bar">
+      <a href="index.html" class="back-home-btn">
+        &#8592; Back to Home
+      </a>
+    </div>
+
     <header>
       <h1>Content Repository</h1>
       <p>Asset, media, and profile index</p>
@@ -322,6 +398,101 @@
           <span class="bubble">Interactive Brokers</span>
         </div>
       </div>
+
+      <!-- Games File (Grouped Alphabetically) -->
+      <div class="repo-item">
+        <h4>File: Games</h4>
+        <div class="alpha-group-wrapper">
+          
+          <div class="alpha-group">
+            <div class="alpha-letter">E</div>
+            <div class="bubble-list">
+              <span class="bubble">Epic Games <span class="sub-item">(Fortnite)</span></span>
+              <span class="bubble">Exophase</span>
+            </div>
+          </div>
+
+          <div class="alpha-group">
+            <div class="alpha-letter">G</div>
+            <div class="bubble-list">
+              <span class="bubble">GOG</span>
+              <span class="bubble">GOG</span>
+            </div>
+          </div>
+
+          <div class="alpha-group">
+            <div class="alpha-letter">N</div>
+            <div class="bubble-list">
+              <span class="bubble">Nintendo</span>
+              <span class="bubble">Nintendo</span>
+            </div>
+          </div>
+
+          <div class="alpha-group">
+            <div class="alpha-letter">P</div>
+            <div class="bubble-list">
+              <span class="bubble">PlayStation <span class="sub-item">(Until Then, Deltarune, Undertale, South Park: The Stick of Truth)</span></span>
+              <span class="bubble">PlayStation</span>
+              <span class="bubble">PlayStation</span>
+            </div>
+          </div>
+
+          <div class="alpha-group">
+            <div class="alpha-letter">R</div>
+            <div class="bubble-list">
+              <span class="bubble">Roblox <span class="sub-item">(Jailbreak)</span></span>
+              <span class="bubble">Roblox</span>
+              <span class="bubble">Roblox</span>
+              <span class="bubble">Roblox</span>
+            </div>
+          </div>
+
+          <div class="alpha-group">
+            <div class="alpha-letter">S</div>
+            <div class="bubble-list">
+              <span class="bubble">Steam <span class="sub-item">(Omori)</span></span>
+              <span class="bubble">Steam</span>
+              <span class="bubble">Steam</span>
+              <span class="bubble">Steam <span class="sub-item">(Emergency Account)</span></span>
+            </div>
+          </div>
+
+          <div class="alpha-group">
+            <div class="alpha-letter">X</div>
+            <div class="bubble-list">
+              <span class="bubble">XBOX</span>
+              <span class="bubble">XBOX</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Vehicles File -->
+      <div class="repo-item">
+        <h4>File: Vehicles</h4>
+        <div class="bubble-list">
+          <span class="bubble">Zeekr 009</span>
+          <span class="bubble">Xpeng X9</span>
+          <span class="bubble">Li Auto Mega</span>
+          <span class="bubble">Maxus Eterron 9</span>
+          <span class="bubble">Mhero 817</span>
+          <span class="bubble">Nio ES9</span>
+          <span class="bubble">IM LS9</span>
+          <span class="bubble">Stelato G9</span>
+        </div>
+      </div>
+
+      <!-- Smart People File -->
+      <div class="repo-item">
+        <h4>File: Smart People</h4>
+        <div class="bubble-list">
+          <span class="bubble">Rick Sanchez <span class="sub-item">(Rick and Morty)</span></span>
+          <span class="bubble">Princess Bonnibel Bubblegum <span class="sub-item">(Adventure Time)</span></span>
+          <span class="bubble">Louise Ordunia <span class="sub-item">(Until Then videogame)</span></span>
+        </div>
+      </div>
+
     </section>
   </div>
 
