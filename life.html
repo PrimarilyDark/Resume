@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milestone Timeline — 2026 → 2029</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0B0D;
+    --panel: #121316;
+    --border: #262A31;
+    --signal: #FF9E40;
+    --signal-soft: #D9A24A;
+    --text: #FBFBFB;
+    --muted: #B8BCC4;
+    --faint: #69707A;
+    --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ambient panning grid overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(38, 42, 49, .35) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(38, 42, 49, .35) 1px, transparent 1px);
+    background-size: 64px 64px;
+    animation: grid-pan 38s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes grid-pan { to { background-position: 64px 64px; } }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 72px 40px 56px;
+  }
+
+  /* ---------- header ---------- */
+  .kicker {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--signal);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .kicker::before {
+    content: "";
+    width: 8px; height: 8px;
+    background: var(--signal);
+    transform: rotate(45deg);
+    box-shadow: 0 0 12px rgba(255,158,64,.6);
+    animation: dial-pulse 3s ease-in-out infinite;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h1 {
+    font-size: clamp(44px, 7vw, 88px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: .95;
+    margin-top: 18px;
+  }
+  h1 .arrow { color: var(--signal); }
+
+  .sub {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 300;
+    max-width: 46ch;
+  }
+
+  .stats {
+    display: flex;
+    gap: 40px;
+    font-family: 'Space Mono', monospace;
+  }
+  .stat .num {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .num em {
+    font-style: normal;
+    color: var(--faint);
+    font-size: 18px;
+  }
+  .stat .lbl {
+    margin-top: 4px;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  /* ---------- legend ---------- */
+  .legend {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin: 28px 0 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .legend span { display: flex; align-items: center; gap: 9px; }
+  .swatch { width: 12px; height: 12px; border-radius: 2px; }
+  .sw-past { background: linear-gradient(180deg, #FFB56B, var(--signal)); box-shadow: 0 0 10px rgba(255,158,64,.5); }
+  .sw-now {
+    border: 1px solid var(--signal);
+    background: rgba(255,158,64,.25);
+    animation: now-breathe 2.2s ease-in-out infinite;
+  }
+  .sw-future { border: 1px solid var(--border); background: transparent; }
+  .sw-mile {
+    width: 9px; height: 9px;
+    background: var(--signal);
+    transform: rotate(45deg);
+    border-radius: 0;
+    box-shadow: 0 0 10px rgba(255,158,64,.6);
+  }
+
+  /* ---------- timeline ---------- */
+  .timeline-scroll { overflow-x: auto; padding-bottom: 8px; }
+  .timeline { min-width: 900px; }
+
+  .year-block {
+    padding: 34px 0 30px;
+    border-bottom: 1px solid var(--border);
+  }
+  .year-block:last-child { border-bottom: none; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 96px repeat(12, 1fr);
+    column-gap: 10px;
+    align-items: end;
+  }
+
+  .year-label {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--text);
+    align-self: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .year-label small {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: .2em;
+    color: var(--faint);
+    margin-top: 4px;
+  }
+
+  /* marker track sits above the bars, shares the same grid */
+  .markers { height: 86px; align-items: stretch; }
+  .marker-cell { position: relative; }
+
+  .marker-line {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    height: 34px;
+    background: linear-gradient(180deg, transparent, var(--signal));
+  }
+  .marker-dot {
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    width: 9px; height: 9px;
+    background: var(--signal);
+    transform: translateX(-50%) rotate(45deg);
+    box-shadow: 0 0 10px rgba(255,158,64,.7), 0 0 22px rgba(255,158,64,.35);
+  }
+  .marker-label {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .marker-label .t {
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--signal);
+    text-shadow: 0 0 14px rgba(255,158,64,.45);
+  }
+  .marker-label .d {
+    margin-top: 3px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    color: var(--muted);
+  }
+
+  /* span marker (bracket across several months) */
+  .marker-span .bracket {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    border-top: 1px solid var(--signal);
+    border-left: 1px solid var(--signal);
+    border-right: 1px solid var(--signal);
+    opacity: .85;
+    filter: drop-shadow(0 0 6px rgba(255,158,64,.4));
+  }
+  .marker-span .marker-label { bottom: 22px; }
+  .marker-cell.right .marker-label {
+    left: auto;
+    right: 0;
+    transform: none;
+    text-align: right;
+  }
+
+  /* bars */
+  .bars { height: 96px; }
+  .month { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+  .bar {
+    width: 100%;
+    max-width: 22px;
+    height: 72px;
+    border-radius: 4px 4px 2px 2px;
+    border: 1px solid #3A404A;
+    background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.008));
+    transition: opacity .8s var(--ease-reveal);
+  }
+
+  .bar.past {
+    border-color: transparent;
+    background: linear-gradient(180deg, #FFB56B 0%, var(--signal) 55%, #C96F1E 100%);
+    box-shadow:
+      0 0 14px rgba(255,158,64,.45),
+      0 0 34px rgba(255,158,64,.18),
+      inset 0 1px 0 rgba(255,255,255,.25);
+    animation: bar-in .7s var(--ease-reveal) both;
+    animation-delay: var(--d, 0ms);
+  }
+  @keyframes bar-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .bar.now {
+    border-color: var(--signal);
+    background: linear-gradient(180deg, rgba(255,158,64,.55), rgba(255,158,64,.12));
+    animation: now-breathe 2.2s ease-in-out infinite;
+  }
+  @keyframes now-breathe {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,158,64,0), 0 0 12px rgba(255,158,64,.25); }
+    50%      { box-shadow: 0 0 0 5px rgba(255,158,64,.16), 0 0 26px rgba(255,158,64,.55); }
+  }
+
+  .mon {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .1em;
+    color: var(--faint);
+    text-transform: uppercase;
+  }
+  .month.done .mon { color: var(--signal-soft); }
+  .month.current .mon { color: var(--signal); font-weight: 700; }
+
+  .now-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .2em;
+    color: var(--signal);
+    text-transform: uppercase;
+    height: 12px;
+  }
+
+  /* ---------- milestone index ---------- */
+  .index {
+    margin-top: 56px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+  .index h2 {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 6px;
+  }
+  .index-row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: baseline;
+  }
+  .index-row:last-child { border-bottom: none; }
+  .index-row .when {
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    color: var(--signal);
+    letter-spacing: .06em;
+  }
+  .index-row .what { font-size: 17px; font-weight: 500; color: var(--text); }
+  .index-row .what span { color: var(--faint); font-weight: 300; font-size: 14px; margin-left: 10px; }
+
+  /* ---------- disclosure ---------- */
+  .disclosure {
+    margin-top: 52px;
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--signal);
+    background: var(--panel);
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.75;
+    color: var(--muted);
+    letter-spacing: .02em;
+  }
+  .disclosure strong {
+    color: var(--signal-soft);
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    font-size: 10.5px;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  footer {
+    margin-top: 40px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* entrance reveals */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .8s var(--ease-reveal), transform .8s var(--ease-reveal); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 720px) {
+    .page { padding: 48px 20px 40px; }
+    .index-row { grid-template-columns: 1fr; gap: 4px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="reveal">
+    <div>
+      <div class="kicker">Personal Milestone Timeline</div>
+      <h1>2026 <span class="arrow">→</span> 2029</h1>
+      <p class="sub">Four years. Forty-eight months. Four milestones. Each bar lights up as a month goes by.</p>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="num" id="elapsedNum">–<em> / 48</em></div>
+        <div class="lbl">Months elapsed</div>
+      </div>
+      <div class="stat">
+        <div class="num" id="todayNum">–</div>
+        <div class="lbl">Today</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="legend reveal">
+    <span><i class="swatch sw-past"></i>Month passed</span>
+    <span><i class="swatch sw-now"></i>Current month</span>
+    <span><i class="swatch sw-future"></i>Upcoming</span>
+    <span><i class="swatch sw-mile"></i>Milestone</span>
+  </div>
+
+  <div class="timeline-scroll reveal">
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div class="index reveal">
+    <h2>Milestone Index</h2>
+    <div class="index-row">
+      <div class="when">OCT – NOV 2026</div>
+      <div class="what">G License <span>expected</span></div>
+    </div>
+    <div class="index-row">
+      <div class="when">AUG 2027</div>
+      <div class="what">CFA Level 1 <span>expected exam date</span></div>
+    </div>
+    <div class="index-row">
+      <div class="when">MAY 2028</div>
+      <div class="what">Bachelor's Degree — Management Studies <span>expected graduation</span></div>
+    </div>
+    <div class="index-row">
+      <div class="when">2029</div>
+      <div class="what">CPA Candidate <span>expected — month to be determined</span></div>
+    </div>
+  </div>
+
+  <div class="disclosure reveal">
+    <strong>Disclosure</strong>
+    All dates and milestones shown are personal expectations and estimates only.
+    Everything here is subject to change — plans shift, exams get rescheduled, life happens.
+    Progress is not always guaranteed, and lighting up a bar simply means time has passed, not that a goal has been reached.
+  </div>
+
+  <footer class="reveal">
+    <span>Milestone Timeline · 2026 → 2029</span>
+    <span id="footClock">—</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var START_YEAR = 2026, END_YEAR = 2029;
+  var MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+  // milestones: { year, from (1-12), to (1-12, optional span), title, date }
+  var MILESTONES = [
+    { year: 2026, from: 10, to: 11, title: 'G License', date: 'Oct – Nov 2026 · expected', span: true },
+    { year: 2027, from: 8,  title: 'CFA Level 1', date: 'Aug 2027 · expected' },
+    { year: 2028, from: 5,  title: "Bachelor's Degree", date: 'May 2028 · Management Studies · expected' },
+    { year: 2029, from: 1,  to: 12, title: 'CPA Candidate', date: '2029 · expected · month TBD', span: true }
+  ];
+
+  var now = new Date();
+  var curY = now.getFullYear(), curM = now.getMonth() + 1; // 1-12
+  var timeline = document.getElementById('timeline');
+  var elapsed = 0, pastIndex = 0;
+
+  for (var y = START_YEAR; y <= END_YEAR; y++) {
+    var block = document.createElement('section');
+    block.className = 'year-block';
+
+    // ---- marker track ----
+    var markers = document.createElement('div');
+    markers.className = 'grid markers';
+    markers.appendChild(document.createElement('div')); // year-label spacer
+
+    for (var m = 1; m <= 12; m++) {
+      var cell = document.createElement('div');
+      cell.className = 'marker-cell';
+      var ms = MILESTONES.filter(function (x) { return x.year === y && x.from === m; })[0];
+      if (ms) {
+        if (ms.span) {
+          cell.classList.add('marker-span');
+          var spanLen = (ms.to - ms.from);
+          cell.style.gridColumn = 'span ' + (spanLen + 1);
+          // right-align labels for spans near the right edge so they don't clip
+          if (ms.to >= 11 && spanLen < 11) { cell.classList.add('right'); }
+          cell.innerHTML =
+            '<div class="marker-label"><div class="t">' + ms.title + '</div><div class="d">' + ms.date + '</div></div>' +
+            '<div class="bracket"></div>';
+          m = ms.to; // skip covered months
+        } else {
+          cell.innerHTML =
+            '<div class="marker-label"><div class="t">' + ms.title + '</div><div class="d">' + ms.date + '</div></div>' +
+            '<div class="marker-line"></div><div class="marker-dot"></div>';
+        }
+      }
+      markers.appendChild(cell);
+      if (ms && ms.span) {
+        for (var k = ms.from + 1; k <= ms.to; k++) { /* months absorbed by span */ }
+      }
+    }
+
+    // ---- bars track ----
+    var bars = document.createElement('div');
+    bars.className = 'grid bars';
+
+    var yl = document.createElement('div');
+    yl.className = 'year-label';
+    yl.innerHTML = y + '<small>YEAR</small>';
+    bars.appendChild(yl);
+
+    for (var mm = 1; mm <= 12; mm++) {
+      var cellB = document.createElement('div');
+      cellB.className = 'month';
+      var bar = document.createElement('div');
+      bar.className = 'bar';
+      var tag = document.createElement('div');
+      tag.className = 'now-tag';
+
+      var isPast = (y < curY) || (y === curY && mm < curM);
+      var isNow  = (y === curY && mm === curM);
+
+      if (isPast) {
+        bar.classList.add('past');
+        bar.style.setProperty('--d', (pastIndex * 26) + 'ms');
+        pastIndex++;
+        elapsed++;
+        cellB.classList.add('done');
+      } else if (isNow) {
+        bar.classList.add('now');
+        cellB.classList.add('current');
+        tag.textContent = 'NOW';
+      }
+
+      var mon = document.createElement('div');
+      mon.className = 'mon';
+      mon.textContent = MONTHS[mm - 1];
+
+      cellB.appendChild(tag);
+      cellB.appendChild(bar);
+      cellB.appendChild(mon);
+      bars.appendChild(cellB);
+    }
+
+    block.appendChild(markers);
+    block.appendChild(bars);
+    timeline.appendChild(block);
+  }
+
+  // ---- header stats ----
+  document.getElementById('elapsedNum').innerHTML = elapsed + '<em> / 48</em>';
+  document.getElementById('todayNum').textContent =
+    MONTHS[curM - 1] + ' ' + String(curY).slice(2);
+
+  // ---- footer clock ----
+  var clock = document.getElementById('footClock');
+  function tick() {
+    var d = new Date();
+    clock.textContent = 'Rendered live · ' +
+      MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  }
+  tick();
+
+  // ---- staggered section reveals ----
+  var revealEls = document.querySelectorAll('.reveal');
+  revealEls.forEach(function (el, i) {
+    el.style.transitionDelay = (i * 90) + 'ms';
+  });
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      revealEls.forEach(function (el) { el.classList.add('in'); });
+    });
+  });
+})();
+</script>
+</body>
+</html>
