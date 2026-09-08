@@ -47,6 +47,7 @@
       font-weight: bold;
       transition: all 0.25s ease;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
     }
 
     .back-home-btn:hover {
@@ -352,15 +353,14 @@
       margin-bottom: 6px;
     }
   </style>
-<base target="_blank">
 </head>
 <body>
 
   <div class="container">
     <div class="nav-bar">
-      <a href="#" class="back-home-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+      <button type="button" class="back-home-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">
         &#8592; Back to Home
-      </a>
+      </button>
     </div>
 
     <header>
