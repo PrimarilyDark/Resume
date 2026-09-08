@@ -781,6 +781,23 @@ section p {
     box-shadow: 0 12px 26px rgba(34, 197, 94, 0.22);
 }
 .exp-link-btn::after { content: "↗"; font-size: 16px; }
+.exp-btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+.exp-link-btn.drive-btn {
+    border: 1px solid rgba(96, 165, 250, 0.4);
+    background: rgba(96, 165, 250, 0.12);
+    box-shadow: 0 8px 20px rgba(96, 165, 250, 0.15);
+}
+.exp-link-btn.drive-btn:hover {
+    background: rgba(96, 165, 250, 0.22);
+    border-color: rgba(96, 165, 250, 0.6);
+    box-shadow: 0 12px 26px rgba(96, 165, 250, 0.22);
+}
 .exp-glow-box {
     margin-top: 12px;
     background: linear-gradient(135deg, rgba(28, 25, 23, 0.96), rgba(28, 25, 23, 0.88));
@@ -1038,6 +1055,7 @@ footer {
 }
 
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -1189,12 +1207,20 @@ footer {
 
             <div class="exp-card-wrapper">
                 <h3>View Full Resume</h3>
-                <a class="exp-link-btn"
-                   href="https://www.linkedin.com/posts/%F0%9F%92%A0-dave-c-persaud-b4b374355_cv-resume-ugcPost-7460873508093542401-8zEE?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAFiCTGsBGLT1fOZh99mLzxV5FTulko-7460873508093542401"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                     Open on LinkedIn
-                </a>
+                <div class="exp-btn-row">
+                    <a class="exp-link-btn"
+                       href="https://www.linkedin.com/posts/%F0%9F%92%A0-dave-c-persaud-b4b374355_cv-resume-ugcPost-7460873508093542401-8zEE?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAFiCTGsBGLT1fOZh99mLzxV5FTulko-7460873508093542401"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                         Open on LinkedIn
+                    </a>
+                    <a class="exp-link-btn drive-btn"
+                       href="https://drive.google.com/file/d/1lcQID1wLmaXYD-l7GQ_2_yoHPUgA95pi/view?usp=sharing"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                         View on Google Drive
+                    </a>
+                </div>
             </div>
 
         </section>
