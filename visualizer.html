@@ -433,7 +433,7 @@ let trackTitle = 'No track loaded';
    ========================================================================== */
 let actx = null, analyser = null, masterGain = null, elementSource = null, micNode = null;
 let micStream = null;
-let freqData = null, timeData = null, prevTimeData = null;
+let freqData = null, timeData = null, prevTimeData = null, floatTime = null;
 
 function ensureAudio() {
     if (actx) return true;
@@ -452,6 +452,7 @@ function ensureAudio() {
         freqData = new Uint8Array(analyser.frequencyBinCount);
         timeData = new Uint8Array(analyser.fftSize);
         prevTimeData = new Uint8Array(analyser.fftSize);
+        floatTime = new Float32Array(analyser.fftSize);
         buildBands();
         return true;
     } catch (e) {
@@ -527,7 +528,7 @@ function analyse(now) {
     analyser.getByteFrequencyData(freqData);
     analyser.getByteTimeDomainData(timeData);
 
-    let sumAll = 0, sumBass = 0, sumMid = 0, sumTreble = 0, bassRaw = 0;
+    let sumAll = 0, sumBass = 0, sumMid = 0, sumTreble = 0, bassRaw = 0, sumVocal = 0;
     for (let i = 0; i < BAND_COUNT; i++) {
         const b = bands[i];
         let acc = 0;
@@ -535,6 +536,13 @@ function analyse(now) {
         const raw = acc / ((b.b1 - b.b0) * 255);
         if (i < BASS_BANDS) bassRaw += raw / BASS_BANDS;        // pre-normalization: keeps transient contrast
         let v = raw * bandBoost[i];                             // perceptual + vocal-presence boost
+        /* dynamic vocal emphasis: while singing is detected, temporarily lift
+           200 Hz–4 kHz (raised-cosine bump, same shape as the static boost) */
+        if (vocalLevel > 0.1 && b.freq > 200 && b.freq < 4000) {
+            const vt = Math.log(b.freq / 200) / Math.log(4000 / 200);
+            const bump = Math.sin(Math.PI * vt);
+            v *= 1 + vocalLevel * 0.35 * bump * bump;
+        }
         if (v > 1) v = 1;
 
         /* constrained adaptive window: slow peak (fast rise, very slow decay)
@@ -563,6 +571,7 @@ function analyse(now) {
         /* energy envelopes from RAW (pre-normalization) levels — transients
            and section-to-section contrast are preserved, not flattened */
         sumAll += raw;
+        if (b.freq >= 300 && b.freq <= 3400) sumVocal += raw;   // vocal-band energy (see 3.5)
         if (i < 14) sumBass += raw;
         else if (i < 64) sumMid += raw;                         // ~150 Hz–2 kHz
         if (i >= BAND_COUNT - 26) sumTreble += raw;
@@ -571,6 +580,7 @@ function analyse(now) {
     bassLevel = sumBass / 14;
     midLevel = sumMid / 50;
     trebleLevel = sumTreble / 26;
+    vocalRatio = sumAll > 1e-6 ? sumVocal / sumAll : 0;
 
     /* beat: raw 30–150 Hz energy vs adaptive rolling mean, 150 ms refractory */
     bassHist.push(bassRaw);
@@ -583,7 +593,113 @@ function analyse(now) {
         beatPulse = 1;
         beatCount++;
     }
+
+    detectVocals();
 }
+/* ==========================================================================
+   3.5 Vocal / singing detection — RMS gate, normalized-autocorrelation pitch
+       tracking (80 Hz–1.1 kHz sung fundamental), pitch-stability + vocal-band
+       energy scoring. Exposes vocalLevel / vocalPitch / vocalPitchNorm /
+       vocalNote for the Nebula comet and the global vocal overlay.
+   ========================================================================== */
+const clamp01 = v => (v < 0 ? 0 : (v > 1 ? 1 : v));
+let vocalLevel = 0, vocalPitch = 0, vocalPitchNorm = 0.5, vocalNote = '';
+let vocalRatio = 0;              // 300–3400 Hz share of total band energy (set in analyse)
+let vocalFrame = 0;              // autocorrelation runs every 2nd frame
+const PITCH_HIST = 20;
+const pitchHist = new Float32Array(PITCH_HIST);   // ring of recent pitches (0 = invalid)
+const pitchScratch = new Float32Array(PITCH_HIST);
+let pitchHistIdx = 0, pitchValidCount = 0;
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function pushPitch(f) {
+    if (pitchHist[pitchHistIdx] > 0) pitchValidCount--;
+    pitchHist[pitchHistIdx] = f;
+    if (f > 0) pitchValidCount++;
+    pitchHistIdx = (pitchHistIdx + 1) % PITCH_HIST;
+}
+/* normalized autocorrelation of the centered window at a given lag */
+function acfAt(off, n, mean, lag) {
+    let num = 0, ea = 0, eb = 0;
+    const lim = n - lag;
+    for (let i = 0; i < lim; i++) {
+        const a = floatTime[off + i] - mean;
+        const b = floatTime[off + i + lag] - mean;
+        num += a * b; ea += a * a; eb += b * b;
+    }
+    return (ea > 1e-12 && eb > 1e-12) ? num / Math.sqrt(ea * eb) : 0;
+}
+/* median of the valid pitches in the history ring (display smoothing) */
+function medianPitch() {
+    let n = 0;
+    for (let i = 0; i < PITCH_HIST; i++) if (pitchHist[i] > 0) pitchScratch[n++] = pitchHist[i];
+    if (!n) return 0;
+    pitchScratch.sort();                       // zeros sort first
+    return pitchScratch[PITCH_HIST - n + ((n - 1) >> 1)];
+}
+function detectVocals() {
+    if (!analyser || !actx || !floatTime) return;
+    if (analyser.getFloatTimeDomainData) analyser.getFloatTimeDomainData(floatTime);
+    else for (let i = 0; i < floatTime.length; i++) floatTime[i] = (timeData[i] - 128) / 128;
+
+    /* RMS gate — near-silence means nobody is singing */
+    let rms = 0;
+    for (let i = 0; i < floatTime.length; i++) rms += floatTime[i] * floatTime[i];
+    rms = Math.sqrt(rms / floatTime.length);
+    if (rms < 0.008) {
+        pushPitch(0);
+        vocalLevel += (0 - vocalLevel) * 0.06;
+        vocalPitch = 0; vocalPitchNorm = 0.5; vocalNote = '';
+        return;
+    }
+
+    vocalFrame++;
+    if ((vocalFrame & 1) === 0) {
+        /* normalized autocorrelation on a centered 2048-sample window,
+           lags covering 80 Hz–1.1 kHz (~1M ops at 30 Hz update rate) */
+        const sr = actx.sampleRate;
+        const N = 2048;
+        const off = (floatTime.length - N) >> 1;
+        let mean = 0;
+        for (let i = 0; i < N; i++) mean += floatTime[off + i];
+        mean /= N;
+        const minLag = Math.max(2, Math.floor(sr / 1100));
+        const maxLag = Math.min(N - 2, Math.ceil(sr / 80));
+        let bestLag = 0, bestCorr = 0;
+        for (let lag = minLag; lag <= maxLag; lag++) {
+            const c = acfAt(off, N, mean, lag);
+            if (c > bestCorr) { bestCorr = c; bestLag = lag; }
+        }
+        const clarity = bestCorr;
+        let freq = 0;
+        if (bestLag > 0) {
+            /* parabolic interpolation around the peak for sub-bin accuracy */
+            const c0 = acfAt(off, N, mean, bestLag - 1);
+            const c2 = acfAt(off, N, mean, bestLag + 1);
+            const denom = c0 - 2 * bestCorr + c2;
+            let shift = denom < 0 ? 0.5 * (c0 - c2) / denom : 0;
+            if (shift > 0.5) shift = 0.5; else if (shift < -0.5) shift = -0.5;
+            freq = sr / (bestLag + shift);
+        }
+        pushPitch(clarity > 0.55 && freq >= 80 && freq <= 1100 ? freq : 0);
+    }
+
+    /* score: pitch stability dominates, vocal-band energy ratio supports */
+    const stability = pitchValidCount / PITCH_HIST;
+    const vocalScore = clamp01(0.65 * stability + 0.35 * clamp01((vocalRatio - 0.25) * 2.2));
+    vocalLevel += (vocalScore - vocalLevel) * (vocalScore > vocalLevel ? 0.25 : 0.06);  // fast attack, slow release
+
+    const med = medianPitch();
+    if (med > 0) {
+        vocalPitch = med;
+        vocalPitchNorm = clamp01((med - 80) / (1100 - 80));
+        const nn = Math.round(12 * Math.log2(med / 440)) + 69;
+        vocalNote = NOTE_NAMES[((nn % 12) + 12) % 12] + (Math.floor(nn / 12) - 1);
+    } else {
+        vocalPitch = 0; vocalPitchNorm = 0.5; vocalNote = '';
+    }
+}
+
 /* ==========================================================================
    4. Renderers — every mode consumes bandEnv[] (96 log bands, bass->treble),
       timeData (oscilloscope), beatPulse and level. Warm ember palette.
@@ -591,8 +707,15 @@ function analyse(now) {
 const TAU = Math.PI * 2;
 let W = 0, H = 0;                 // canvas CSS pixels
 let rotOrbit = 0, rotSpiral = 0;  // persistent rotation state
-let particles = [];               // nebula field
-let glowSprites = null;           // pre-rendered nebula glow sprites per hue
+/* nebula state: A starfield / B gas clouds / C swarm / shockwaves / vocal comet */
+const nebStars = [], nebClouds = [], nebParticles = [], nebShocks = [];
+let glowSprites = null, cloudSprites = null, cometSprite = null;
+let spritesForLight = null;       // theme the sprites were built for (rebuild on flip)
+let nebLastBeat = 0, cometAngle = 0, cometWasActive = false;
+const COMET_TRAIL = 24;
+const cometTrail = [];
+let cometTrailIdx = 0;
+for (let i = 0; i < COMET_TRAIL; i++) cometTrail.push({ x: 0, y: 0 });
 
 const isLight = () => document.documentElement.dataset.theme === 'light';
 
@@ -819,63 +942,238 @@ function drawOrbit() {
     ctx2d.fillStyle = g;
     ctx2d.fillRect(cx - coreR * 2, cy - coreR * 2, coreR * 4, coreR * 4);
 }
-/* ---------- Mode 5: Nebula — particle field driven by per-band energy ---------- */
-const PARTICLE_COUNT = 150;
+/* ---------- Mode 5: Nebula — layered cinematic field: twinkling starfield,
+   volumetric gas clouds on a flow field, a band-mapped glow swarm, beat
+   shockwaves and a vocal comet that appears when singing is detected ------- */
+const NEB_STARS = 90, NEB_CLOUDS = 6, NEB_PARTICLES = 220;
 
 function makeGlowSprites() {
+    const light = isLight();
+    const dl = light ? 12 : 0;              // darker sprites stay visible on light bg
     glowSprites = [];
     const hues = 16;
     for (let h = 0; h < hues; h++) {
         const s = document.createElement('canvas');
         s.width = s.height = 64;
         const c = s.getContext('2d');
-        const hue = 6 + (h / (hues - 1)) * 44;
+        const hue = 6 + (h / (hues - 1)) * 44;      // ember -> amber
         const g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
-        g.addColorStop(0, `hsla(${hue}, 95%, 68%, 0.9)`);
-        g.addColorStop(0.35, `hsla(${hue}, 92%, 55%, 0.45)`);
-        g.addColorStop(1, `hsla(${hue}, 90%, 50%, 0)`);
+        g.addColorStop(0, `hsla(${hue}, 95%, ${68 - dl}%, 0.9)`);
+        g.addColorStop(0.35, `hsla(${hue}, 92%, ${55 - dl}%, 0.45)`);
+        g.addColorStop(1, `hsla(${hue}, 90%, ${50 - dl}%, 0)`);
         c.fillStyle = g;
         c.fillRect(0, 0, 64, 64);
         glowSprites.push(s);
     }
+    /* brightest sprite — white-gold comet head/trail */
+    cometSprite = document.createElement('canvas');
+    cometSprite.width = cometSprite.height = 64;
+    const cc = cometSprite.getContext('2d');
+    const cg = cc.createRadialGradient(32, 32, 0, 32, 32, 32);
+    cg.addColorStop(0, 'rgba(255, 248, 226, 0.95)');
+    cg.addColorStop(0.3, 'rgba(255, 214, 140, 0.55)');
+    cg.addColorStop(1, 'rgba(255, 190, 90, 0)');
+    cc.fillStyle = cg;
+    cc.fillRect(0, 0, 64, 64);
 }
-function initParticles() {
-    particles = [];
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-        particles.push({
-            x: Math.random() * W, y: Math.random() * H,
-            vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25,
-            band: Math.floor((i / PARTICLE_COUNT) * BAND_COUNT)
-        });
+
+function makeCloudSprites() {
+    cloudSprites = [];
+    /* deep red -> coral -> amber -> gold */
+    const cols = [
+        [255, 60, 30], [255, 90, 45], [255, 122, 60],
+        [255, 150, 70], [255, 176, 77], [255, 204, 110]
+    ];
+    for (let i = 0; i < NEB_CLOUDS; i++) {
+        const s = document.createElement('canvas');
+        s.width = s.height = 256;
+        const c = s.getContext('2d');
+        const col = cols[i];
+        const g = c.createRadialGradient(128, 128, 0, 128, 128, 128);
+        g.addColorStop(0, `rgba(${col[0]}, ${col[1]}, ${col[2]}, 0.55)`);
+        g.addColorStop(0.4, `rgba(${col[0]}, ${col[1]}, ${col[2]}, 0.22)`);
+        g.addColorStop(1, `rgba(${col[0]}, ${col[1]}, ${col[2]}, 0)`);
+        c.fillStyle = g;
+        c.fillRect(0, 0, 256, 256);
+        cloudSprites.push(s);
     }
 }
-function drawNebula() {
+
+/* re-seed the whole field (called on resize; guard against zero-size stage) */
+function initParticles() {
+    if (W <= 0 || H <= 0) return;
+    const m = Math.min(W, H);
+    nebStars.length = 0;
+    for (let i = 0; i < NEB_STARS; i++) {
+        nebStars.push({
+            x: Math.random() * W, y: Math.random() * H,
+            r: 0.5 + Math.random() * 2,              // 1–2.5 px dots
+            phase: Math.random() * TAU,
+            speed: 0.0008 + Math.random() * 0.0022   // twinkle rad/ms
+        });
+    }
+    nebClouds.length = 0;
+    for (let i = 0; i < NEB_CLOUDS; i++) {
+        nebClouds.push({
+            sprite: i,
+            x: W * (0.2 + Math.random() * 0.6),
+            y: H * (0.2 + Math.random() * 0.6),
+            vx: 0, vy: 0,
+            orbit: Math.random() * TAU,
+            orbitR: m * (0.08 + Math.random() * 0.22),
+            orbitSpeed: (Math.random() < 0.5 ? -1 : 1) * (0.0004 + Math.random() * 0.0008),
+            scale: 0.5 + Math.random() * 0.6,        // 0.5–1.1 × min(W,H)
+            breathe: Math.random() * TAU,
+            breatheSpeed: 0.0004 + Math.random() * 0.0008,
+            bandGroup: i % 3                          // 0 bass, 1 mid, 2 treble
+        });
+    }
+    nebParticles.length = 0;
+    for (let i = 0; i < NEB_PARTICLES; i++) {
+        nebParticles.push({
+            x: Math.random() * W, y: Math.random() * H,
+            vx: (Math.random() - 0.5) * 0.6,
+            vy: (Math.random() - 0.5) * 0.6,
+            spd: 0.3 + Math.random() * 0.7,          // base speed 0.3–1.0 px/frame
+            band: Math.floor(i * BAND_COUNT / NEB_PARTICLES)
+        });
+    }
+    nebShocks.length = 0;
+}
+
+function drawNebula(t) {
     clearFrame();
-    if (!glowSprites) makeGlowSprites();
-    if (!particles.length) initParticles();
+    const light = isLight();
+    if (!glowSprites || spritesForLight !== light) {
+        makeGlowSprites();
+        makeCloudSprites();
+        spritesForLight = light;
+    }
+    if (!nebParticles.length) initParticles();
     const cx = W / 2, cy = H / 2;
+    const m = Math.min(W, H);
+    const motionScale = reduceMotion ? 0.4 : 1;
+
+    /* --- Layer A: starfield (normal composite, treble lifts brightness) --- */
+    ctx2d.globalCompositeOperation = 'source-over';
+    for (let i = 0; i < nebStars.length; i++) {
+        const s = nebStars[i];
+        const tw = 0.5 + 0.5 * Math.sin(t * s.speed + s.phase);
+        let a = (0.25 + tw * 0.55) * (0.7 + trebleLevel * 0.6);
+        if (a > 1) a = 1;
+        /* darker gold on light backgrounds so stars stay visible */
+        ctx2d.fillStyle = light ? `rgba(170, 110, 35, ${a * 0.7})` : `rgba(255, 236, 200, ${a})`;
+        ctx2d.beginPath();
+        ctx2d.arc(s.x, s.y, s.r, 0, TAU);
+        ctx2d.fill();
+    }
+
     ctx2d.globalCompositeOperation = 'lighter';
-    for (const p of particles) {
+
+    /* --- Layer B: volumetric gas clouds (additive, energy-band breathing) --- */
+    for (let i = 0; i < nebClouds.length; i++) {
+        const c = nebClouds[i];
+        /* slow flow-field drift */
+        const fa = (Math.sin(c.x * 0.0016 + t * 0.00021) +
+                    Math.cos(c.y * 0.0019 - t * 0.00017)) * Math.PI;
+        c.vx += (Math.cos(fa) * 0.18 - c.vx) * 0.02;
+        c.vy += (Math.sin(fa) * 0.18 - c.vy) * 0.02;
+        /* gentle rotation of position around center */
+        c.orbit += c.orbitSpeed * motionScale * (1 + beatPulse * 0.5);
+        const ox = cx + Math.cos(c.orbit) * c.orbitR;
+        const oy = cy + Math.sin(c.orbit) * c.orbitR;
+        c.x += c.vx * motionScale + (ox - c.x) * 0.004;
+        c.y += c.vy * motionScale + (oy - c.y) * 0.004;
+        c.breathe += c.breatheSpeed * motionScale;
+        const e = c.bandGroup === 0 ? bassLevel : (c.bandGroup === 1 ? midLevel : trebleLevel);
+        const size = m * c.scale * (1 + Math.sin(c.breathe) * 0.08) * (1 + e * 0.15);
+        let a = 0.05 + e * 0.11;
+        if (a > 0.16) a = 0.16;
+        if (light) a *= 0.45;
+        ctx2d.globalAlpha = a;
+        ctx2d.drawImage(cloudSprites[c.sprite], c.x - size / 2, c.y - size / 2, size, size);
+    }
+    ctx2d.globalAlpha = 1;
+
+    /* --- beat shockwaves: expanding ember rings + radial particle kick --- */
+    if (beatCount !== nebLastBeat) {
+        nebLastBeat = beatCount;
+        nebShocks.push({ r: 0, a: 0.55 });
+        for (let i = 0; i < nebParticles.length; i++) {
+            const p = nebParticles[i];
+            const dx = p.x - cx, dy = p.y - cy;
+            const d = Math.max(40, Math.sqrt(dx * dx + dy * dy));
+            p.vx += (dx / d) * 1.4;
+            p.vy += (dy / d) * 1.4;
+        }
+    }
+    for (let i = nebShocks.length - 1; i >= 0; i--) {
+        const s = nebShocks[i];
+        s.r += 6 + beatPulse * 4;
+        s.a *= 0.94;
+        if (s.a < 0.02) { nebShocks.splice(i, 1); continue; }
+        ctx2d.beginPath();
+        ctx2d.arc(cx, cy, s.r, 0, TAU);
+        ctx2d.strokeStyle = light ? `rgba(200, 90, 30, ${s.a * 0.7})` : `rgba(255, 122, 60, ${s.a})`;
+        ctx2d.lineWidth = 1.5;
+        ctx2d.stroke();
+    }
+
+    /* --- Layer C: flow-field glow swarm, one band per particle --- */
+    const speedBoost = 1 + level * 2.5;
+    for (let i = 0; i < nebParticles.length; i++) {
+        const p = nebParticles[i];
         const e = bandEnv[p.band];
-        /* drift + beat shockwave from center */
-        const kick = beatPulse * 2.2;
+        const a = (Math.sin(p.x * 0.0016 + t * 0.00021) +
+                   Math.cos(p.y * 0.0019 - t * 0.00017)) * Math.PI;
+        /* desired velocity: flow-field direction + slight swirl around center */
         const dx = p.x - cx, dy = p.y - cy;
-        const d = Math.max(40, Math.hypot(dx, dy));
-        p.vx += (dx / d) * kick * 0.14;
-        p.vy += (dy / d) * kick * 0.14;
-        p.vx *= 0.985; p.vy *= 0.985;
-        p.x += p.vx * (reduceMotion ? 0.4 : 1);
-        p.y += p.vy * (reduceMotion ? 0.4 : 1);
+        const d = Math.max(60, Math.sqrt(dx * dx + dy * dy));
+        const sp = p.spd * (0.4 + e * 1.6) * speedBoost * motionScale;
+        const dvx = Math.cos(a) * sp + (-dy / d) * sp * 0.45;
+        const dvy = Math.sin(a) * sp + (dx / d) * sp * 0.45;
+        p.vx += (dvx - p.vx) * 0.06;             // lerp steering
+        p.vy += (dvy - p.vy) * 0.06;
+        p.x += p.vx;
+        p.y += p.vy;
         if (p.x < -40) p.x = W + 40; else if (p.x > W + 40) p.x = -40;
         if (p.y < -40) p.y = H + 40; else if (p.y > H + 40) p.y = -40;
 
-        const size = 6 + e * 64 + beatPulse * 8;
-        const alpha = 0.10 + e * 0.85;
-        const sprite = glowSprites[Math.min(15, Math.floor((p.band / BAND_COUNT) * 16))];
-        ctx2d.globalAlpha = alpha;
-        ctx2d.drawImage(sprite, p.x - size / 2, p.y - size / 2, size, size);
+        const size = 2 + e * 26;
+        ctx2d.globalAlpha = 0.15 + e * 0.7;
+        ctx2d.drawImage(glowSprites[Math.min(15, (p.band * 16 / BAND_COUNT) | 0)],
+                        p.x - size / 2, p.y - size / 2, size, size);
     }
     ctx2d.globalAlpha = 1;
+
+    /* --- vocal comet: white-gold head + fading trail while singing --- */
+    if (vocalLevel > 0.15) {
+        if (!cometWasActive) {                   // reset stale trail on re-entry
+            for (let i = 0; i < COMET_TRAIL; i++) { cometTrail[i].x = 0; cometTrail[i].y = 0; }
+            cometWasActive = true;
+        }
+        cometAngle += (0.02 + vocalLevel * 0.05) * motionScale;
+        const cr = m * (0.14 + vocalPitchNorm * 0.2);
+        const hx = cx + Math.cos(cometAngle) * cr;
+        const hy = cy + Math.sin(cometAngle) * cr;
+        const tp = cometTrail[cometTrailIdx];
+        tp.x = hx; tp.y = hy;
+        cometTrailIdx = (cometTrailIdx + 1) % COMET_TRAIL;
+        const headSize = 14 + vocalLevel * 30;
+        for (let i = 0; i < COMET_TRAIL; i++) {
+            const tr = cometTrail[(cometTrailIdx - 1 - i + COMET_TRAIL * 2) % COMET_TRAIL];
+            if (tr.x === 0 && tr.y === 0) continue;
+            const f = 1 - i / COMET_TRAIL;       // newest first, fading out
+            const ts = headSize * f * 0.6;
+            ctx2d.globalAlpha = vocalLevel * f * 0.35;
+            ctx2d.drawImage(cometSprite, tr.x - ts / 2, tr.y - ts / 2, ts, ts);
+        }
+        ctx2d.globalAlpha = Math.min(1, 0.4 + vocalLevel * 0.6);
+        ctx2d.drawImage(cometSprite, hx - headSize / 2, hy - headSize / 2, headSize, headSize);
+        ctx2d.globalAlpha = 1;
+    } else {
+        cometWasActive = false;
+    }
     ctx2d.globalCompositeOperation = 'source-over';
 }
 
@@ -930,6 +1228,43 @@ function drawSpiral() {
 const RENDERERS = [drawCircular, drawBars, drawWave, drawOrbit, drawNebula, drawSpiral];
 let rafId = null, lastFrame = 0;
 
+/* golden aura + on-canvas pitch badge, drawn over every mode while singing
+   is detected (on-canvas so it also shows in fullscreen) */
+function drawVocalOverlay() {
+    const cx = W / 2, cy = H / 2;
+    const m = Math.min(W, H);
+    ctx2d.globalCompositeOperation = 'lighter';
+    const r = m * (0.3 + vocalLevel * 0.25);
+    const a = 0.10 * vocalLevel * (isLight() ? 0.6 : 1);
+    const g = ctx2d.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, `rgba(255, 226, 160, ${a})`);
+    g.addColorStop(1, 'rgba(255, 226, 160, 0)');
+    ctx2d.fillStyle = g;
+    ctx2d.fillRect(cx - r, cy - r, r * 2, r * 2);
+    ctx2d.globalCompositeOperation = 'source-over';
+
+    /* pitch badge — glassy pill, bottom-right */
+    const label = vocalPitch > 0 ? `♪ ${vocalNote}` : '♪ vocals';
+    ctx2d.font = 'bold 15px "Segoe UI", system-ui, -apple-system, sans-serif';
+    const bw = ctx2d.measureText(label).width + 20;   // 10 px padding each side
+    const bh = 34;
+    const x = W - bw - 18, y = H - bh - 18;
+    ctx2d.beginPath();
+    if (ctx2d.roundRect) ctx2d.roundRect(x, y, bw, bh, 12);
+    else ctx2d.rect(x, y, bw, bh);
+    ctx2d.fillStyle = 'rgba(20,12,8,0.55)';
+    ctx2d.fill();
+    ctx2d.strokeStyle = 'rgba(255,178,120,0.35)';
+    ctx2d.lineWidth = 1;
+    ctx2d.stroke();
+    ctx2d.fillStyle = `rgba(255,214,140,${0.4 + vocalLevel * 0.6})`;
+    ctx2d.textAlign = 'center';
+    ctx2d.textBaseline = 'middle';
+    ctx2d.fillText(label, x + bw / 2, y + bh / 2 + 0.5);
+    ctx2d.textAlign = 'start';
+    ctx2d.textBaseline = 'alphabetic';
+}
+
 function frame(t) {
     rafId = requestAnimationFrame(frame);
     const dt = t - lastFrame;
@@ -940,7 +1275,10 @@ function frame(t) {
     beatPulse *= 0.9;
 
     if (activeSource === 'none') drawIdle(t);
-    else RENDERERS[modeIndex](t);
+    else {
+        RENDERERS[modeIndex](t);
+        if (vocalLevel > 0.12) drawVocalOverlay();
+    }
 }
 function startLoop() { if (rafId === null) rafId = requestAnimationFrame(frame); }
 function stopLoop() { if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } }
@@ -1223,9 +1561,16 @@ async function toggleMic() {
         }
         if (!ensureAudio()) { chip('Web Audio is not supported in this browser', true); return; }
         resumeAudio();
-        const stream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true }
-        });
+        let stream;
+        try {
+            /* raw vocal capture: keep the sung signal unprocessed for pitch tracking */
+            stream = await navigator.mediaDevices.getUserMedia({
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true }
+            });
+        } catch (e) {
+            /* constraints unsupported — defensive fallback to a plain request */
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        }
         if (!micBusy) { stream.getTracks().forEach(t => t.stop()); return; }  // raced guard
         stopDemo();
         audio.pause(); setPlayingUI(false);
@@ -1234,7 +1579,7 @@ async function toggleMic() {
         micNode.connect(analyser);       // analysis only — never to destination
         btnMic.classList.add('active');
         activeSource = 'mic';
-        setTrack('Live microphone');
+        setTrack('Live microphone — sing!');
     } catch (err) {
         /* NotAllowedError / NotFoundError / SecurityError / NotReadableError:
            expected user/environment conditions — friendly chip, silent console. */
